@@ -51,7 +51,15 @@ dialog{border:1px solid var(--line);border-radius:12px;max-width:440px}
  .card{grid-template-columns:1fr}.kv{grid-template-columns:110px 1fr}
  .md{padding:4px 14px 14px}
 }
+#pin{position:fixed;inset:0;z-index:50;background:var(--acc);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:env(safe-area-inset-top) 20px env(safe-area-inset-bottom)}
+#pin h2{margin:0;font-weight:600;font-size:20px}#pin .dots{display:flex;gap:16px}#pin .dots i{width:16px;height:16px;border-radius:50%;border:2px solid #fff}#pin .dots i.f{background:#fff}
+#pin .kp{display:grid;grid-template-columns:repeat(3,76px);gap:14px}#pin .kp button{height:76px;border-radius:50%;border:0;background:#ffffff22;color:#fff;font:500 28px -apple-system,Roboto,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#pin .kp button:active{background:#ffffff55}#pin .kp button.x{background:transparent;font-size:16px}#pin .msg{min-height:20px;font-size:14px;opacity:.9;text-align:center}#pin a{color:#dbe4ee;font-size:14px}
+.shake{animation:sh .4s}@keyframes sh{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
 </style></head><body>
+<div id="pin" style="display:none"><h2>Реестр прав требования</h2><div class="msg" id="pinm">Введите PIN</div><div class="dots" id="pind"><i></i><i></i><i></i><i></i></div>
+<div class="kp" id="kp"><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><button class="x" data-k="key">Ключ</button><button>0</button><button class="x" data-k="del">⌫</button></div>
+<a href="#" id="pinkey">Войти по ключу GitHub</a></div>
 <header><h1>Реестр прав требования</h1>
 <nav><button data-v="reg" class="on">Реестр</button> <button data-v="met">Методика</button> <button data-v="src">Исходные файлы</button> <button id="cfg">Данные</button></nav>
 <div class="meta" id="meta"></div></header>
@@ -100,7 +108,7 @@ const IDB=(DB)=>{const ST='kv';let P=null;const db=()=>P||(P=new Promise((res,re
  return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 13:11 UTC · d9a763d';
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 13:34 UTC · 437a48f',PINBLOB={"v": 1, "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "ABtw/TNMu8zPAvvxsVqXow==", "iv": "xV4IB3UEKDM6IKnz", "ct": "G+iyeWNHMlCR7PyNsgPGOIEF/fzCs7zH+i9ZBg67gBaCWyoF0Zta9wPe7YMRzcdzTYgQs/xhbshoRbgqzjy7btQFkLyZlk6dIKtBum+NSzrLa0gPKHJwFDcA8BuqGiLZYm3LQVSh9MTkyzR6mBVDDOu0u0I="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
@@ -208,7 +216,7 @@ async function gh(path){const t=clean(TOKEN);if(!t)throw new Error('нет кл�
  if(r.status===403)throw new Error(r.headers.get('x-ratelimit-remaining')==='0'?'GitHub: превышен лимит запросов, попробуйте через час':'GitHub: у ключа нет права Contents: Read на '+REPO+' (403)');
  if(r.status===404)throw new Error('GitHub: ключ не видит '+REPO+'/'+path+' (404). При создании ключа выберите репозиторий '+REPO+' в «Only select repositories»');
  throw new Error('GitHub ответил '+r.status)}
-async function sync(manual){if(EMB||!TOKEN||LOADING)return;LOADING=true;LERR=null;if(!DATA)render();try{const j=JSON.parse(await gh('lots.json'));setData(j,'GitHub',true);try{MD=await gh('METHODOLOGY.md');ls.s(LM,MD)}catch(e){}if(manual)$('dmsg').textContent='Обновлено с GitHub: '+DATA.lots.length+' лотов'}catch(e){LERR=e.message;if(manual)$('dmsg').textContent='Синхронизация не удалась: '+e.message}finally{LOADING=false;if(DATA)opts();render()}}
+async function sync(manual){if(EMB||!TOKEN||LOADING||!PINOK)return;LOADING=true;LERR=null;if(!DATA)render();try{const j=JSON.parse(await gh('lots.json'));setData(j,'GitHub',true);try{MD=await gh('METHODOLOGY.md');ls.s(LM,MD)}catch(e){}if(manual)$('dmsg').textContent='Обновлено с GitHub: '+DATA.lots.length+' лотов'}catch(e){LERR=e.message;if(manual)$('dmsg').textContent='Синхронизация не удалась: '+e.message}finally{LOADING=false;if(DATA)opts();render()}}
 $('con').onclick=()=>{const v=clean($('tok').value);if(v==='••••••••'||/^•+$/.test(v)){sync(true);return}if(!/^(github_pat_|gh[pou]_)/.test(v)){$('dmsg').textContent='Ключ должен начинаться с github_pat_';return}saveTok(v);$('tok').value='••••••••';sync(true)};
 $('syn').onclick=()=>sync(true);$('dis').onclick=()=>{if(!confirm('Удалить ключ GitHub с этого устройства?'))return;const o=ls.g(LT);VAULT.get('shared:token').then(t=>{if(t&&t===o)VAULT.set('shared:token',null)});VAULT.set('claims:token',null);OLDV.set('claims:token',null);ls.d(LT);TOKEN=null;opts&&DATA&&opts();keyInd();$('tok').value='';$('dmsg').textContent='Ключ удалён с устройства'};
 // --- исходные файлы (закрытый репозиторий, sources/) ---
@@ -226,6 +234,25 @@ $('srcl').onclick=async e=>{const b=e.target.closest('button[data-f]');if(!b)ret
   b.textContent='Готово'}catch(x){b.textContent='Ошибка';alert('Не удалось скачать '+n+': '+x.message)}setTimeout(()=>{b.textContent=o;b.disabled=false},2500)};
 function saveTok(v){TOKEN=v;try{localStorage.setItem(LT,v)}catch(e){/* localStorage общего домена может быть переполнен — ключ всё равно в IndexedDB */}
  KEYDB.set('claims:token',v);VAULT.persist();keyInd()}
+// --- вход по PIN: токен зашифрован (PBKDF2-SHA256 + AES-GCM), расшифровка в браузере ---
+const b64=x=>Uint8Array.from(atob(x),c=>c.charCodeAt(0));
+async function unpin(pin){const k0=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveKey']);
+ const k=await crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt:b64(PINBLOB.salt),iterations:PINBLOB.iterations},k0,{name:'AES-GCM',length:256},false,['decrypt']);
+ const p=new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(PINBLOB.iv)},k,b64(PINBLOB.ct)));if(!p.startsWith('claims:'))throw 0;return p.slice(7)}
+function pinGate(){return new Promise(done=>{if(PINOK||!window.crypto||!crypto.subtle){PINOK=true;return done()}
+ const P=$('pin');P.style.display='flex';let v='',busy=false;const fk='cr.pinfail',ft='cr.pinwait';
+ const dots=()=>[...$('pind').children].forEach((i,n)=>i.classList.toggle('f',n<v.length));
+ const wait=()=>Math.max(0,(+ls.g(ft)||0)-Date.now());
+ const tick=()=>{const w=wait();if(w>0){$('pinm').textContent=`Неверный PIN. Повтор через ${Math.ceil(w/1000)} с`;setTimeout(tick,500)}else if(!busy)$('pinm').textContent='Введите PIN'};tick();
+ const ok=()=>{PINOK=true;P.style.display='none';done()};
+ const go=async()=>{busy=true;$('pinm').textContent='Проверка…';try{const t=await unpin(v);ls.d(fk);ls.d(ft);saveTok(t);ok()}catch(e){const n=(+ls.g(fk)||0)+1;ls.s(fk,n);
+   ls.s(ft,Date.now()+(n<3?0:Math.min(300,2**(n-2)*5))*1000);$('pind').classList.remove('shake');void $('pind').offsetWidth;$('pind').classList.add('shake');if(navigator.vibrate)navigator.vibrate(150);
+   v='';dots();busy=false;$('pinm').textContent='Неверный PIN';setTimeout(tick,600)}};
+ const key=()=>{PINOK=true;P.style.display='none';done();setTimeout(()=>$('cfg').click(),50)};
+ $('pinkey').onclick=e=>{e.preventDefault();key()};
+ const press=k=>{if(busy||wait()>0)return;if(k==='del'){v=v.slice(0,-1);dots();return}if(k==='key')return key();if(/^\d$/.test(k)&&v.length<4){v+=k;dots();if(v.length===4)go()}};
+ $('kp').onclick=e=>{const b=e.target.closest('button');if(b)press(b.dataset.k||b.textContent)};
+ document.addEventListener('keydown',e=>{if(P.style.display!=='none'){if(/^\d$/.test(e.key))press(e.key);else if(e.key==='Backspace')press('del')}})})}
 // старт
 $('ver').textContent=VER.startsWith('/*')?'dev':VER;
 if(EMB){BOOTED=true;setData(EMB,'встроенные данные',false)}else (async()=>{
@@ -235,6 +262,7 @@ if(EMB){BOOTED=true;setData(EMB,'встроенные данные',false)}else 
  if(!t){const sh=await OLDV.get('shared:token');if(sh)t=sh}
  if(t)saveTok(clean(t));
  BOOTED=true;render();
+ await pinGate();render();
  // 2) кэш данных (отдельная БД; перенос старых мест)
  try{const c=ls.g(LS);if(c){await CACHE.set('claims:data',JSON.parse(c))}}catch(e){}ls.d(LS);
  let c=await CACHE.get('claims:data');if(!c){c=await OLDV.get('claims:data');if(c){CACHE.set('claims:data',c);OLDV.set('claims:data',null)}}
