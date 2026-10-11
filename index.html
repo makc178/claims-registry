@@ -1,6 +1,6 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#3b4a5e"><title>Аналитическая система Эверест</title><link rel="icon" type="image/png" href="favicon.png?v=66b5abd"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=66b5abd"><link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-title" content="Эверест"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#3b4a5e"><title>Аналитическая система Эверест</title><link rel="icon" type="image/png" href="favicon.png?v=87d2f76"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=87d2f76"><link rel="manifest" href="manifest.webmanifest"><meta name="apple-mobile-web-app-title" content="Эверест"><meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 :root{--bg:#eef1f5;--pan:#fff;--ink:#1e2834;--mut:#5d6b7c;--line:#d5dce5;--acc:#3b4a5e;--acc2:#56708f;--soft:#e3e9f0}
 *{box-sizing:border-box}body{margin:0;font:15px/1.45 -apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
@@ -80,11 +80,11 @@ nav button.on .badge{background:var(--acc);color:#fff}#favbar{display:none;gap:8
 @media(max-width:900px){#vreg.fav .row{grid-template-columns:44px minmax(0,1fr) auto}#vreg.fav .row>.c-sel{grid-column:1;grid-row:1/span 8;align-self:start;margin:0}
  #vreg.fav .row>.c-d{grid-column:2}#vreg.fav .row>.c-s{grid-column:3;grid-row:1}#vreg.fav .row>.c-w,#vreg.fav .row>.c-cat{grid-column:2/-1}#vreg.fav .row>.c-sum,#vreg.fav .row>.c-p,#vreg.fav .row>.c-r,#vreg.fav .row>.c-dt{grid-column:2/-1}.mselall{display:flex!important}}
 </style></head><body>
-<div id="pin" style="display:none"><img src="logo-s.png?v=66b5abd" alt="" style="width:min(62vw,240px);height:auto"><div class="brand-n">ПЦ «Эверест»</div><div class="brand-s">на вершине успеха</div><div class="msg" id="pinm">Введите PIN</div><div class="dots" id="pind"><i></i><i></i><i></i><i></i></div>
+<div id="pin" style="display:none"><img src="logo-s.png?v=87d2f76" alt="" style="width:min(62vw,240px);height:auto"><div class="brand-n">ПЦ «Эверест»</div><div class="brand-s">на вершине успеха</div><div class="msg" id="pinm">Введите PIN</div><div class="dots" id="pind"><i></i><i></i><i></i><i></i></div>
 <div class="kp" id="kp"><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><button class="x" data-k="key">Ключ</button><button>0</button><button class="x" data-k="del">⌫</button></div>
 <a href="#" id="pinkey">Войти по ключу GitHub</a></div>
 <div id="newver" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));z-index:120;background:#1f3354;color:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 4px 18px #0005;font-size:14px">Доступна новая версия. <button class="lbtn" style="margin-left:8px;background:#fff;color:#1f3354" onclick="location.replace(location.pathname+'?v='+Date.now())">Обновить</button></div>
-<header><div class="hb"><img src="logo-white-s.png?v=66b5abd" alt="" style="height:32px;width:auto"><div><span class="brand-n">ПЦ «Эверест»</span> <span class="brand-s">· на вершине успеха</span><br><small>Аналитическая система</small></div></div>
+<header><div class="hb"><img src="logo-white-s.png?v=87d2f76" alt="" style="height:32px;width:auto"><div><span class="brand-n">ПЦ «Эверест»</span> <span class="brand-s">· на вершине успеха</span><br><small>Аналитическая система</small></div></div>
 <nav><button data-v="reg" class="on">Реестр</button> <button data-v="fav">Избранное<span class="badge" id="favn">0</span></button> <button data-v="man">Ручной анализ<span class="badge" id="mann">0</span></button> <button data-v="met">Методика</button> <button data-v="rep">Отчёты анализа</button> <button data-v="src">Исходные файлы</button> <button id="cfg">Данные</button></nav>
 <div class="meta" id="meta"></div></header>
 <div id="vreg" class="wrap">
@@ -143,7 +143,7 @@ const IDB=(DB)=>{const ST='kv';let P=null;const db=()=>P||(P=new Promise((res,re
  return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 17:03 UTC · 66b5abd',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "4NVR9S20ny/lEVDL52NKFA==", "iv": "yvPjaXhVqV5hJtU1", "ct": "cLEMDGBQWJBuEqg7zhDk1Z70T6twawESzDQZuw55jo/DdQwEv06KD5HbzOpwDhHQM7MAZdTCvBu/1q3eEt4zuKnSEEucssjWbjXkKxPryuHasOqkmuPrUb9jnIu0JS0qIftrzVEPnKGZRnMuLpF8reu8i5g="};let PINOK=!PINBLOB;
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 17:08 UTC · 87d2f76',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1791738496, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "6803BrlqDabAJx2qZ1GYDA==", "iv": "kCAQr+I8AvHftPNY", "ct": "kfaYrgbcO1V3s1Z9/frIKC2hwd4NZHBwys2susZthUBQ+PIMymeFbs2Mjrtk9xB1OQ1qm7eBbpNtKzGl1DvrWTPQZ/C5KwqsvCPBK+Rb3+xFGSkv/wQTdYT5aZdUNaY5ZCY40JfGqGfu1mwn2YJkVL/6Jbw="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
@@ -302,7 +302,7 @@ function pinGate(){return new Promise(done=>{if(PINOK||!window.crypto||!crypto.s
  const wait=()=>Math.max(0,(+ls.g(ft)||0)-Date.now());
  const tick=()=>{const w=wait();if(w>0){$('pinm').textContent=`Неверный PIN. Повтор через ${Math.ceil(w/1000)} с`;setTimeout(tick,500)}else if(!busy)$('pinm').textContent='Введите PIN'};tick();
  const ok=()=>{PINOK=true;P.style.display='none';done()};
- const go=async()=>{busy=true;$('pinm').textContent='Проверка…';try{const t=await unpin(v);ls.d(fk);ls.d(ft);saveTok(t);ok()}catch(e){const n=(+ls.g(fk)||0)+1;ls.s(fk,n);
+ const go=async()=>{busy=true;$('pinm').textContent='Проверка…';try{const t=await unpin(v);ls.d(fk);ls.d(ft);saveTok(t);FAVRO=null;ls.s('cr.pinbv',String(PINBLOB.bv||1));ok()}catch(e){const n=(+ls.g(fk)||0)+1;ls.s(fk,n);
    ls.s(ft,Date.now()+(n<3?0:Math.min(300,2**(n-2)*5))*1000);$('pind').classList.remove('shake');void $('pind').offsetWidth;$('pind').classList.add('shake');if(navigator.vibrate)navigator.vibrate(150);
    v='';dots();busy=false;$('pinm').textContent='Неверный PIN';setTimeout(tick,600)}};
  const key=()=>{PINOK=true;P.style.display='none';done();setTimeout(()=>$('cfg').click(),50)};
@@ -320,7 +320,8 @@ function favSave(){FAVUP=Date.now();CACHE.set('claims:fav',{updated:FAVUP,ids:Ob
 function favToggle(id){id=String(id);FAV.has(id)?FAV.delete(id):FAV.set(id,Date.now());favSave();
  document.querySelectorAll(`.star[data-fid="${CSS.escape(id)}"]`).forEach(b=>{const on=FAV.has(id);b.classList.toggle('on',on);b.textContent=on?'★':'☆';b.setAttribute('aria-pressed',on);b.title=on?'Убрать из избранного':'В избранное'});
  if(FAVMODE&&!FAV.has(id))render();else favUI()}
-const ghApi=(path,opt={})=>fetch(`https://api.github.com/repos/${REPO}/contents/${path}`+(opt.method?'':`?ref=${BRANCH}&_=${Date.now()}`),{...opt,headers:{Authorization:'Bearer '+clean(TOKEN),Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(opt.headers||{})},cache:'no-store'});
+const WRITE_OK=p=>p==='favorites.json'||/^requests\/[\w.\-]+\.json$/.test(p);
+const ghApi=(path,opt={})=>(opt.method&&opt.method!=='GET'&&!WRITE_OK(path))?Promise.reject(new Error('запись запрещена: '+path)):fetch(`https://api.github.com/repos/${REPO}/contents/${path}`+(opt.method?'':`?ref=${BRANCH}&_=${Date.now()}`),{...opt,headers:{Authorization:'Bearer '+clean(TOKEN),Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(opt.headers||{})},cache:'no-store'});
 const u8b64=s=>{const b=new TextEncoder().encode(s);let r='';for(let i=0;i<b.length;i+=8192)r+=String.fromCharCode(...b.subarray(i,i+8192));return btoa(r)};
 async function favPull(){if(EMB||!TOKEN)return;try{const r=await ghApi('favorites.json');if(r.status===404)return;if(!r.ok)return;const j=await r.json(),d=JSON.parse(new TextDecoder().decode(b64(j.content.replace(/\n/g,''))));
  if((d.updated||0)>FAVUP){FAV=new Map(Object.entries(d.ids||{}));FAVUP=d.updated;CACHE.set('claims:fav',{updated:FAVUP,ids:d.ids||{}});render()}else if(FAVUP>(d.updated||0))favPush()}catch(e){}}
@@ -397,7 +398,7 @@ function sendReq(req,title,btn){
  if(EMB||!TOKEN||FAVRO===true||!REPO||REPO.startsWith('/*'))return deepShow(req,'Ключ GitHub только для чтения — отправить напрямую нельзя. Скопируйте запрос или отправьте через «Поделиться» в чат с ботом.',title);
  const dlg=deepShow(req,'Пробую отправить запрос в репозиторий…',title);
  ghApi(`requests/${req.id}.json`,{method:'PUT',body:JSON.stringify({message:req.type+' '+req.id,branch:BRANCH,content:u8b64(JSON.stringify(req,null,1))})}).then(r=>{
-  if(r.ok){FAVRO=false;dlg.set('Запрос отправлен. Отчёт появится в «Отчётах анализа».')}else{if([401,403,404].includes(r.status)){FAVRO=true;favUI()}dlg.set('Отправить напрямую нельзя (GitHub '+r.status+'). Скопируйте запрос или отправьте через «Поделиться».')}}).catch(()=>dlg.set('Нет сети. Скопируйте запрос.'))}
+  if(r.ok){FAVRO=false;dlg.set('✓ Отправлено аналитику. Отчёт появится в «Отчётах анализа».');dlg.ok()}else{if([401,403,404].includes(r.status)){FAVRO=true;favUI()}dlg.set('Отправить напрямую нельзя (GitHub '+r.status+'). Скопируйте запрос или отправьте через «Поделиться».')}}).catch(()=>dlg.set('Нет сети. Скопируйте запрос.'))}
 function fcBtn(l){return FAVMODE||FAV.has(String(l.id))?`<button class="lbtn sec fcb" data-fc="${esc(l.id)}" style="padding:2px 8px;font-size:12px;margin-top:4px">Полная проверка</button>`:''}
 function repChip(l){const f=repFor(l);return f?`<span class="tag ok rchip" data-rep="${esc(f)}" title="${esc(f)}" style="cursor:pointer">отчёт готов</span>`:''}
 function deepReq(list){const t=new Date(),id=t.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z-'+Math.random().toString(36).slice(2,6);
@@ -418,12 +419,12 @@ function deepShow(req,why,title){const txt=(title||'Запрос на углуб
   if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(txt).then(()=>$('dmg').textContent='Скопировано',()=>{sel();$('dmg').textContent='Текст выделен — нажмите «Скопировать» в меню'});else{sel();$('dmg').textContent='Текст выделен — скопируйте вручную'}};
  $('dsh').onclick=()=>{if(navigator.share){navigator.share({title:req.type==='full_check'?'Запрос на полную проверку':'Запрос на углублённый анализ',text:txt}).catch(e=>{if(e&&e.name!=='AbortError')$('dmg').textContent='Поделиться не удалось: '+e.message})}
   else{$('dcp').click();$('dmg').textContent+=' (на этом устройстве «Поделиться» недоступно — вставьте текст в чат)'}};
- return {set:m=>{$('dwhy').textContent=m}}}
+ return {set:m=>{$('dwhy').textContent=m},ok:()=>{const w=$('dwhy');w.style.color='#2f6e43';w.style.fontWeight='600';const h=document.querySelector('#dreqd h3');if(h)h.textContent+=' — отправлено аналитику'}}}
 $('deep').onclick=()=>{let list=CUR.filter(l=>SEL.has(String(l.id)));if(!list.length)list=CUR.slice();if(!list.length){alert('В избранном пока нет лотов — отметьте ☆ в реестре');return}const req=deepReq(list),T='Запрос на углублённый анализ (ПЦ «Эверест»)';
  if(EMB||!TOKEN||FAVRO===true||!REPO||REPO.startsWith('/*'))return deepShow(req,FAVRO===true?'Ключ GitHub только для чтения — отправить запрос напрямую нельзя. Скопируйте запрос или отправьте его через «Поделиться» в чат с ботом.':'Нет подключения к GitHub. Скопируйте запрос и отправьте в чат с ботом.',T);
  const dlg=deepShow(req,'Пробую отправить запрос в репозиторий…',T);
  ghApi(`requests/${req.id}.json`,{method:'PUT',body:JSON.stringify({message:'deep analysis request '+req.id,branch:BRANCH,content:u8b64(JSON.stringify(req,null,1))})}).then(r=>{
-  if(r.ok){FAVRO=false;dlg.set('Запрос отправлен в репозиторий. Отчёт появится в разделе «Отчёты анализа». Копия запроса — ниже.')}
+  if(r.ok){FAVRO=false;dlg.set('✓ Отправлено аналитику. Отчёт появится в разделе «Отчёты анализа». Копия запроса — ниже (на всякий случай).');dlg.ok()}
   else{if([401,403,404].includes(r.status)){FAVRO=true;favUI()}dlg.set((FAVRO?'Ключ GitHub только для чтения — отправить напрямую нельзя.':'GitHub ответил '+r.status+'.')+' Скопируйте запрос или отправьте через «Поделиться» в чат с ботом.')}}).catch(()=>dlg.set('Нет сети. Скопируйте запрос или отправьте через «Поделиться».'))};
 // --- ручной анализ ---
 let HIDDEN=new Set(),MRSTATS=null,MR=null,MRSRC='',MRO=new Set(),FOCUS=null;
