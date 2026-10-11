@@ -1,6 +1,6 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#3b4a5e"><title>Everest</title><link rel="icon" type="image/png" sizes="32x32" href="favicon-32-v2.png?v=b261388"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64-v2.png?v=b261388"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png?v=b261388"><link rel="manifest" href="manifest.webmanifest?v=b261388"><meta name="apple-mobile-web-app-title" content="Everest"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#3b4a5e"><title>Everest</title><link rel="icon" type="image/png" sizes="32x32" href="favicon-32-v2.png?v=251853a"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64-v2.png?v=251853a"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png?v=251853a"><link rel="manifest" href="manifest.webmanifest?v=251853a"><meta name="apple-mobile-web-app-title" content="Everest"><meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 :root{--bg:#eef1f5;--pan:#fff;--ink:#1e2834;--mut:#5d6b7c;--line:#d5dce5;--acc:#3b4a5e;--acc2:#56708f;--soft:#e3e9f0}
 *{box-sizing:border-box}body{margin:0;font:15px/1.45 -apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
@@ -109,12 +109,25 @@ button:focus-visible,.lbtn:focus-visible{outline:2px solid #8fb0d8;outline-offse
 nav button.on{box-shadow:0 1px 6px #0002}
 @media(hover:none){button:active,.lbtn:active{filter:brightness(.92)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}button:active,.lbtn:active,button:hover{transform:none!important}}
+.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--soft)}.seg button{flex:1;min-width:0;font:inherit;font-size:13px;border:0;background:transparent;color:var(--ink);padding:6px 4px;cursor:pointer;white-space:nowrap}.seg button+button{border-left:1px solid var(--line)}.seg button.on{background:var(--acc2);color:#fff}.seg button i{font-style:normal;opacity:.6;font-size:11.5px}.seg button:hover{transform:none!important;box-shadow:none!important}
+
+#pin .plogo{position:relative;animation:plin .8s cubic-bezier(.2,.8,.2,1) both;will-change:transform,opacity}
+#pin .plogo img{filter:drop-shadow(0 6px 14px #1f335422)}
+#pin .shine{position:absolute;inset:0;pointer-events:none;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;background:linear-gradient(105deg,transparent 35%,#ffffffd0 50%,transparent 65%);background-size:250% 100%;background-position:150% 0;animation:pshine 5.5s ease-in-out 1.2s infinite}
+#pin>.brand-n,#pin>.brand-s{animation:pfade .7s ease .45s both}#pin>.msg,#pin>.dots,#pin>.kp,#pin>a{animation:pfade .6s ease .7s both}
+@keyframes plin{from{opacity:0;transform:translateY(18px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes pfade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pshine{0%{background-position:150% 0}35%,100%{background-position:-60% 0}}
+#pin.ok{animation:pout .5s ease .05s forwards}#pin.ok .plogo{animation:pok .5s ease forwards}#pin.ok .dots i{background:#2e8b57;border-color:#2e8b57;transition:background .15s}
+@keyframes pok{to{transform:scale(1.08);filter:brightness(1.1)}}@keyframes pout{to{opacity:0;transform:scale(1.03)}}
+#pin .dots i{transition:background .15s,transform .15s}#pin .dots i.f{transform:scale(1.12)}
+@media(prefers-reduced-motion:reduce){#pin *,#pin{animation:none!important}}
 </style></head><body>
-<div id="pin" style="display:none"><img src="logo-s.png?v=b261388" alt="" style="width:min(62vw,240px);height:auto"><div class="brand-n">ПЦ «Эверест»</div><div class="brand-s">на вершине успеха</div><div class="msg" id="pinm">Введите PIN</div><div class="dots" id="pind"><i></i><i></i><i></i><i></i></div>
+<div id="pin" style="display:none"><div class="plogo"><img src="logo-s.png?v=251853a" alt="" style="width:min(62vw,240px);height:auto;display:block"><span class="shine"></span></div><div class="brand-n">ПЦ «Эверест»</div><div class="brand-s">на вершине успеха</div><div class="msg" id="pinm">Введите PIN</div><div class="dots" id="pind"><i></i><i></i><i></i><i></i></div>
 <div class="kp" id="kp"><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><button class="x" data-k="key">Ключ</button><button>0</button><button class="x" data-k="del">⌫</button></div>
 <a href="#" id="pinkey">Войти по ключу GitHub</a></div>
 <div id="newver" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));z-index:120;background:#1f3354;color:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 4px 18px #0005;font-size:14px">Доступна новая версия. <button class="lbtn" style="margin-left:8px;background:#fff;color:#1f3354" onclick="location.replace(location.pathname+'?v='+Date.now())">Обновить</button></div>
-<header><div class="hb"><img src="logo-white-s.png?v=b261388" alt=""><div class="bt"><div class="bl"><span class="brand-n">ПЦ «Эверест»</span><span class="brand-s">на вершине успеха</span></div><small>Аналитическая система</small></div></div>
+<header><div class="hb"><img src="logo-white-s.png?v=251853a" alt=""><div class="bt"><div class="bl"><span class="brand-n">ПЦ «Эверест»</span><span class="brand-s">на вершине успеха</span></div><small>Аналитическая система</small></div></div>
 <nav><button data-v="reg" class="on">Реестр</button> <button data-v="fav">Избранное<span class="badge" id="favn">0</span></button> <button data-v="man">Ручной анализ<span class="badge" id="mann">0</span></button> <button data-v="met">Методика</button> <button data-v="rep">Отчёты анализа</button> <button data-v="src">Исходные файлы</button> <button id="cfg">Данные</button></nav>
 <div class="meta" id="meta"></div></header>
 <div id="vreg" class="wrap">
@@ -126,7 +139,8 @@ nav button.on{box-shadow:0 1px 6px #0002}
  <label>Разница (требование − цена), ₽</label><div class="two"><input id="df0" inputmode="numeric" placeholder="от"><input id="df1" inputmode="numeric" placeholder="до"></div>
  <label>Балл перспективы</label><div class="two"><input id="s0" inputmode="numeric" placeholder="от 0"><input id="s1" inputmode="numeric" placeholder="до 100"></div>
  <label>Категория</label><select id="cat"></select>
- <label>Контрагент</label><select id="fl"><option value="">ФЛ и ЮЛ</option><option>ФЛ</option><option>ЮЛ</option><option value="-">не указан</option></select>
+ <label>Должник</label><div class="seg" data-f="fdt"><button type="button" data-x="" class="on">Все</button><button type="button" data-x="ЮЛ">Юрлицо<i></i></button><button type="button" data-x="ФЛ">Физлицо<i></i></button></div><input type="hidden" id="fdt">
+ <label>Требование к</label><div class="seg" data-f="fct"><button type="button" data-x="" class="on">Все</button><button type="button" data-x="ЮЛ">Юрлицо<i></i></button><button type="button" data-x="ФЛ">Физлицо<i></i></button></div><input type="hidden" id="fct">
  <label>Этап</label><select id="stg"></select>
  <label>Регион / суд</label><select id="reg"></select>
  <label>Площадка</label><select id="pl"></select>
@@ -173,7 +187,7 @@ const IDB=(DB)=>{const ST='kv';let P=null;const db=()=>P||(P=new Promise((res,re
  return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 18:15 UTC · b261388',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1791742517, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "LxHK9sfQdQxrd1g0AqhxSw==", "iv": "AI6+j7n3yFW4WnBK", "ct": "gUta8srSCpN4lmT1v49+9MAaaoPVAqjK+W7yccpt3MBqumz5LXZsQobbDIFHHb5KyDyyDQObph+fHjOj9umrCi7UE6MaBZwoIN8g0OsTVSHEr1EHIzGFx5AhVKC6BN1ZD043mH0/voeIY6s63l49IpDYqxI="};let PINOK=!PINBLOB;
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 18:16 UTC · 251853a',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1791742610, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "8SO3e/beLcvTuS84biC6KA==", "iv": "xSg+uPQnkzTH4mw3", "ct": "Sj5BX55kxOcwagZpA3XETw6zLlMujO+54ULbEgrI7928zqkIKiDtP5d3fYHmJxaPtYfmHlsBpGQ7eNTfgMzrlRGLPfSfovY+2ubLHFvjwZ7fV/Y3jUpNmf+NNhnfcVtSTLntIvyFbLcy5q7g5exBvqrr2t0="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
@@ -221,7 +235,7 @@ function flt(SRCL){const v=id=>$(id).value.trim(),n=id=>num(v(id)),q=v('q').toLo
  const rng=(x,a,b)=>(a==null||(x!=null&&x>=a))&&(b==null||(x!=null&&x<=b));const dr=(x,a,b)=>(!a||(x&&x.slice(0,10)>=a))&&(!b||(x&&x.slice(0,10)<=b));
  return (SRCL||DATA.lots).filter(l=>q.every(w=>l._t.includes(w))&&rng(l.claim_amount,n('sum0'),n('sum1'))&&rng(l.start_price,n('p0'),n('p1'))&&rng(l.difference,n('df0'),n('df1'))&&rng(l.pct,n('pc0'),n('pc1'))&&rng(l._s,n('s0'),n('s1'))
  &&(!v('cat')||l.category===v('cat'))&&(!v('reg')||l.region===v('reg'))&&(!v('pl')||l.platform===v('pl'))&&(!v('stg')||l.stage===v('stg'))
- &&(!v('fl')||(v('fl')==='-'?!l.counterparty.type:l.counterparty.type===v('fl')))&&dr(l.auction_date,v('d0'),v('d1'))&&dr(l.application_start,v('a0'),v('a1'))
+ &&(!v('fdt')||ptype(l.debtor)===v('fdt'))&&(!v('fct')||ptype(l.counterparty)===v('fct'))&&dr(l.auction_date,v('d0'),v('d1'))&&dr(l.application_start,v('a0'),v('a1'))
  &&(!$('fsub').checked||l.flags.subsidiary)&&(!$('fdmg').checked||l.flags.third_party_damages)&&(!$('farr').checked||(l.fssp_status!=='not_checked'&&l.fssp_arrest))&&(!$('fpl').checked||l.pledges.length||(l.encumbrances_other||[]).length)&&(!$('fas').checked||(l.assets&&!l.assets._auto)))}
 function key(l){if(SK==='mstatus')return l._m&&l._m.status;if(SK==='mreason')return l._m&&l._m.reasons[0];if(SK==='mdate')return l._m&&l._m.date;return SK==='score'?l._s:SK==='debtor'?l.debtor.name:l[SK]}
 function srt(a){return a.sort((x,y)=>{const A=key(x),B=key(y);if(A==null&&B==null)return 0;if(A==null)return 1;if(B==null)return -1;return (typeof A==='number'?A-B:String(A).localeCompare(String(B),'ru'))*SD})}
@@ -267,14 +281,23 @@ function keyInd(){if(!DATA)render();else opts()}
 function render(){if(!DATA){$('cnt').textContent='';$('meta').innerHTML=metaTail().replace(/^ · /,'');
  $('L').innerHTML=TOKEN?(LERR?`<div class="empty">Не удалось загрузить данные: ${esc(LERR)}<br><br><button class="lbtn" onclick="sync(true)">Повторить</button></div>`:'<div class="empty">Загрузка данных…</div>')
  :(!BOOTED?'<div class="empty">Загрузка…</div>':'<div class="empty">Данных нет. Нажмите «Данные», чтобы загрузить lots.json или подключить GitHub.</div>');return}
- const all=FOCUS?DATA.lots.filter(l=>String(l.id)===FOCUS):MANMODE?manLots():FAVMODE?DATA.lots.filter(l=>FAV.has(String(l.id))):DATA.lots,r=srt(flt(all));$('cnt').textContent=`Найдено: ${r.length} из ${all.length}`+(MANMODE?' на ручном анализе'+(MANMISS?` (ещё ${MANMISS} записей без лота в текущих данных)`:''):'')+(FAVMODE?' в избранном':'');CUR=r;$('focbar').style.display=FOCUS?'':'none';if(FOCUS)$('focbar').innerHTML='Показан лот из «Ручного анализа». <a href="#" onclick="FOCUS=null;render();return false">Показать весь реестр</a> · <a href="#" onclick="goTab(\'man\');return false">Назад к ручному анализу</a>';
+ const all=FOCUS?DATA.lots.filter(l=>String(l.id)===FOCUS):MANMODE?manLots():FAVMODE?DATA.lots.filter(l=>FAV.has(String(l.id))):DATA.lots,r=srt(flt(all));segCounts(all);$('cnt').textContent=`Найдено: ${r.length} из ${all.length}`+(MANMODE?' на ручном анализе'+(MANMISS?` (ещё ${MANMISS} записей без лота в текущих данных)`:''):'')+(FAVMODE?' в избранном':'');CUR=r;$('focbar').style.display=FOCUS?'':'none';if(FOCUS)$('focbar').innerHTML='Показан лот из «Ручного анализа». <a href="#" onclick="FOCUS=null;render();return false">Показать весь реестр</a> · <a href="#" onclick="goTab(\'man\');return false">Назад к ручному анализу</a>';
  $('L').innerHTML=r.slice(0,SHOW).map(row).join('')||(FAVMODE&&!all.length?'<div class="empty">В избранном пока пусто.<br>Нажмите ☆ у лота в реестре или в его карточке, чтобы добавить его сюда.</div>':'<div class="empty">Ничего не найдено</div>');favUI();
  $('more').innerHTML=r.length>SHOW?`<button class="lbtn sec" style="width:100%" onclick="SHOW+=200;render()">Показать ещё (${r.length-SHOW})</button>`:'';
  $('legh').innerHTML=legend();$('legp').innerHTML=pleg();document.querySelectorAll('.th span[data-k]').forEach(s=>s.classList.toggle('on',s.dataset.k===SK));$('so').value=SK;$('dir').value=SD}
 $('L').onclick=e=>{if(e.target.closest('.c-sel')&&!e.target.closest('[data-sel]'))return;const sc=e.target.closest('[data-sel]');if(sc){e.stopPropagation();const id=sc.dataset.sel;sc.checked?SEL.add(id):SEL.delete(id);favUI();return}const fc=e.target.closest('[data-fc]');if(fc){e.stopPropagation();const l=DATA.lots.find(x=>String(x.id)===fc.dataset.fc);if(l)sendReq(fullReq(l),'Запрос на полную проверку (ПЦ «Эверест»)',fc);return}
  const rc=e.target.closest('[data-rep]');if(rc){e.stopPropagation();goTab('rep');return}const st=e.target.closest('.star');if(st){e.stopPropagation();favToggle(st.dataset.fid);return}if(e.target.closest('a')||e.target.closest('.card'))return;const el=e.target.closest('.lot');if(!el)return;const id=el.dataset.id;OPEN.has(id)?OPEN.delete(id):OPEN.add(id);const l=DATA.lots.find(x=>x.id==id);el.outerHTML=row(l)};
+
+function ptype(e){if(!e)return null;if(e._pt!==undefined)return e._pt;let t=null;const ty=String(e.type||'').toUpperCase(),inn=String(e.inn||'').replace(/\D/g,''),nm=String(e.name||'').trim();
+ if(/ЮЛ|ЮР/.test(ty))t='ЮЛ';else if(/ФЛ|ФИЗ|ИП/.test(ty))t='ФЛ';else if(inn.length===10)t='ЮЛ';else if(inn.length===12)t='ФЛ';
+ else if(/(^|[\s«"(])(ООО|ОАО|ЗАО|ПАО|АО|НАО|МУП|ГУП|ФГУП|МКУ|ГБУ|МБУ|ФГБУ|АНО|НКО|ТСЖ|СНТ|ЖСК|КПК|СПК|ПК|ТОО|ОДО|LLC|LTD)([\s»".,)]|$)|общество|предприятие|компания|корпорация|учреждение|товарищество|кооператив|фонд|банк/i.test(nm))t='ЮЛ';
+ else if(/(^|\s)ИП(\s|$)|индивидуальн/i.test(nm)||/^[А-ЯЁ][а-яё-]+\s+[А-ЯЁ][а-яё-]+\s+[А-ЯЁ][а-яё-]+(вич|вна|ична|оглы|кызы)(\s|$)/.test(nm)||/^[А-ЯЁ][а-яё-]+\s+[А-ЯЁ]\.\s?[А-ЯЁ]\.?$/.test(nm))t='ФЛ';
+ try{Object.defineProperty(e,'_pt',{value:t,enumerable:false,configurable:true})}catch(_){}return t}
+function segInit(){document.querySelectorAll('.seg').forEach(g=>{const id=g.dataset.f,sv=ls.g('cr.'+id)||'';$(id).value=sv;g.querySelectorAll('button').forEach(b=>{b.classList.toggle('on',b.dataset.x===sv);b.onclick=()=>{$(id).value=b.dataset.x;ls.s('cr.'+id,b.dataset.x);g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));SHOW=100;render()}})})}
+function segCounts(all){for(const [id,k] of [['fdt','debtor'],['fct','counterparty']]){const c={'ЮЛ':0,'ФЛ':0};all.forEach(l=>{const t=ptype(l[k]);if(t)c[t]++});document.querySelectorAll(`.seg[data-f="${id}"] button`).forEach(b=>{const i=b.querySelector('i');if(i)i.textContent=' '+c[b.dataset.x]})}}
+segInit();
 document.querySelectorAll('aside input,aside select').forEach(x=>x.addEventListener('input',()=>{SHOW=100;render()}));
-$('rst').onclick=()=>{document.querySelectorAll('aside input').forEach(x=>x.type==='checkbox'?x.checked=false:x.value='');document.querySelectorAll('aside select').forEach(x=>x.value='');render()};
+$('rst').onclick=()=>{document.querySelectorAll('aside input').forEach(x=>x.type==='checkbox'?x.checked=false:x.value='');document.querySelectorAll('aside select').forEach(x=>x.value='');['fdt','fct'].forEach(k=>ls.s('cr.'+k,''));segInit();render()};
 $('so').onchange=()=>{SK=$('so').value;render()};$('dir').onchange=()=>{SD=+$('dir').value;render()};
 document.querySelectorAll('.th span').forEach(s=>s.onclick=()=>{if(SK===s.dataset.k)SD=-SD;else{SK=s.dataset.k;SD=['debtor','category','platform','region'].includes(SK)?1:-1}render()});
 $('tog').onclick=()=>$('flt').classList.toggle('open');
@@ -336,7 +359,7 @@ function pinGate(){return new Promise(done=>{if(PINOK||!window.crypto||!crypto.s
  const dots=()=>[...$('pind').children].forEach((i,n)=>i.classList.toggle('f',n<v.length));
  const wait=()=>Math.max(0,(+ls.g(ft)||0)-Date.now());
  const tick=()=>{const w=wait();if(w>0){$('pinm').textContent=`Неверный PIN. Повтор через ${Math.ceil(w/1000)} с`;setTimeout(tick,500)}else if(!busy)$('pinm').textContent='Введите PIN'};tick();
- const ok=()=>{PINOK=true;P.style.display='none';done()};
+ const ok=()=>{PINOK=true;const rm=matchMedia('(prefers-reduced-motion: reduce)').matches;P.classList.add('ok');setTimeout(()=>{P.style.display='none';P.classList.remove('ok');done()},rm?0:520)};{const im=P.querySelector('.plogo img'),sh=P.querySelector('.shine');if(im&&sh){const u=`url("${im.src}")`;sh.style.webkitMaskImage=sh.style.maskImage=u}}
  const go=async()=>{busy=true;$('pinm').textContent='Проверка…';try{const t=await unpin(v);ls.d(fk);ls.d(ft);saveTok(t);FAVRO=null;ls.s('cr.pinbv',String(PINBLOB.bv||1));ok()}catch(e){const n=(+ls.g(fk)||0)+1;ls.s(fk,n);
    ls.s(ft,Date.now()+(n<3?0:Math.min(300,2**(n-2)*5))*1000);$('pind').classList.remove('shake');void $('pind').offsetWidth;$('pind').classList.add('shake');if(navigator.vibrate)navigator.vibrate(150);
    v='';dots();busy=false;$('pinm').textContent='Неверный PIN';setTimeout(tick,600)}};
@@ -496,7 +519,7 @@ function mrDerive(){const out=[];for(const l of DATA.lots){const r=[];if(l.manua
   for(const [k,n] of KEYF){const v=g(l,k);if(v==null||v==='')r.push('пусто: '+n)}
   if(l.pct!=null&&l.pct>100)r.push('цена выше суммы долга ('+fpct(l.pct)+')');
   if(r.length)out.push({lot_id:l.id,debtor:l.debtor.name,case:l.case,lot:l.lot_no,reasons:r,status:'новое',_derived:1})}return out}
-const isInnR=r=>/ИНН/i.test(r)&&/пуст|нет\b|отсутств|не указан|empty|missing/i.test(r);
+const isInnR=r=>(/ИНН/i.test(r)&&/пуст|нет\b|отсутств|не указан|empty|missing/i.test(r))||/долг\s*\/\s*цена|кратно|аномально\s+низк|низк\S*\s+цен|ratio/i.test(r);
 function manItems0(){const lots=new Map(DATA?DATA.lots.map(l=>[String(l.id),l]):[]);return (MR||mrDerive()).map(x=>{const l=lots.get(String(x.lot_id??x.id));
  return {...x,_id:String(x.lot_id??x.id??''),_l:l,debtor:x.debtor||(l&&l.debtor.name),case:x.case||(l&&l.case),lot:x.lot??x.lot_no??(l&&l.lot_no),reasons:(Array.isArray(x.reasons)?x.reasons:x.reasons?[String(x.reasons)]:[]).filter(r=>!isInnR(r)),_hadR:!!(x.reasons&&(x.reasons.length||typeof x.reasons==='string')),
   checked:(v=>Array.isArray(v)?v:v?[String(v)]:[])(x.checked??x.auto_checked),links:Array.isArray(x.links)?x.links:x.sources&&typeof x.sources==='object'?Object.entries(x.sources).flatMap(([k,v])=>Array.isArray(v)?v:v?[{title:{efrsb_message:'Сообщение ЕФРСБ',fedresurs_bidding:'Торги',kad_arbitr:'kad.arbitr',trade_place:'Площадка'}[k]||k,url:v}]:[]):[],status:x.status||'новое',date:x.date||x.added||x.last_seen||null,comment:x.comment||'',history:Array.isArray(x.history)?x.history:[]}})}
