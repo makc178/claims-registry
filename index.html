@@ -137,7 +137,7 @@ const IDB=(DB)=>{const ST='kv';let P=null;const db=()=>P||(P=new Promise((res,re
  return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 16:50 UTC · 7125dcf',PINBLOB={"v": 1, "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "pVI8qE/rhJfkrXixtCIItg==", "iv": "YioEA6axVRi332iP", "ct": "U+nTngqvb8sMZQYYb/HkgmlAkoe2JCcTqny7CUz8zBg82+07lChVSCPjyl9zv2VD/xgYHWzh2Ni1phKrmWfDWPIFLEYJxw38Prfd8xqJ984U7+qVutZxmxKZqhPcZ6Rqz7Stg6XOwJeqGgyXdsgv5UGk2o0="};let PINOK=!PINBLOB;
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 16:51 UTC · 628ce30',PINBLOB={"v": 1, "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "pVI8qE/rhJfkrXixtCIItg==", "iv": "YioEA6axVRi332iP", "ct": "U+nTngqvb8sMZQYYb/HkgmlAkoe2JCcTqny7CUz8zBg82+07lChVSCPjyl9zv2VD/xgYHWzh2Ni1phKrmWfDWPIFLEYJxw38Prfd8xqJ984U7+qVutZxmxKZqhPcZ6Rqz7Stg6XOwJeqGgyXdsgv5UGk2o0="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
@@ -415,7 +415,7 @@ $('deep').onclick=async()=>{const list=CUR.slice();if(!list.length)return;const 
 let HIDDEN=new Set(),MRSTATS=null,MR=null,MRSRC='',MRO=new Set(),FOCUS=null;
 const KEYF=[['claim_amount','сумма требования'],['start_price','начальная цена'],['debtor.name','должник'],['case','номер дела'],['counterparty.name','лицо по требованию'],['auction_date','дата торгов']];
 function goTab(v){const b=document.querySelector(`nav button[data-v="${v}"]`);if(b){b._keep=1;b.click()}}
-function mrMap(){const m=new Map();(MR||[]).forEach(x=>{const rs=Array.isArray(x.reasons)?x.reasons:x.reasons?[String(x.reasons)]:[];if(rs.length&&rs.every(isInnR))return;m.set(String(x.lot_id??x.id),x)});return m}
+function mrMap(){const m=new Map();(MR||[]).forEach(x=>{const rs=Array.isArray(x.reasons)?x.reasons:x.reasons?[String(x.reasons)]:[];if(!rs.length||rs.every(isInnR))return;m.set(String(x.lot_id??x.id),x)});return m}
 function dqTag(l){const q=l.data_quality||{},m=mrMap().get(String(l.id));let t='';
  if(l.manual_review||m&&!['проверено','снято автоматически'].includes(m.status))t+='<span class="tag mr">на проверке</span>';
  if(l.debt_suspect&&!l.pct_check)t+='<span class="tag mr" title="Сумма долга под сомнением">долг?</span>';
@@ -445,7 +445,7 @@ function manLots(){const it=manItems(),st=$('mst2').value,rr=$('mrs2').value;
  $('msrc2').textContent=MR?`Источник: manual_review.json${MRSRC?' '+MRSRC:''}.`:'manual_review.json не опубликован — список собран из отметок в lots.json, пустых ключевых полей и цены выше долга.';
  MANMISS=it.filter(x=>!x._l&&!HIDDEN.has(x._id)).length;
  return it.filter(x=>x._l&&(!st||x.status===st)&&(!rr||x.reasons.some(r=>r.startsWith(rr)))).map(x=>{x._l._m=x;return x._l})}
-function manItems(){return manItems0().filter(x=>!HIDDEN.has(x._id)&&!(x._hadR&&!x.reasons.length))}
+function manItems(){return manItems0().filter(x=>!HIDDEN.has(x._id)&&x.reasons.length)}
 function manBadge(){if(!DATA)return;$('mann').textContent=manItems().filter(x=>!['проверено','снято автоматически'].includes(x.status)).length}
 function manRender(){if(!DATA){$('mL').innerHTML='<div class="empty">Нет данных</div>';return}const all=manItems();
  $('msrc').textContent=MR?`Источник: manual_review.json${MRSRC?' ('+MRSRC+')':''}.`:'Файл manual_review.json пока не опубликован — список собран автоматически из лотов с отметками manual_review / debt_suspect / unverified, пустыми ключевыми полями и ценой выше долга.';
