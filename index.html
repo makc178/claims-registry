@@ -105,7 +105,7 @@ nav button.on .badge{background:var(--acc);color:#fff}#favbar{display:none;gap:8
  <button class="lbtn sec" id="rst" style="margin-top:10px;width:100%">Сбросить фильтры</button>
 </aside>
 <main>
- <div id="focbar" style="display:none;margin-bottom:10px" class="sm"></div><div id="favbar"><span class="sm" id="favnote"></span><button class="lbtn sec" id="deep">Углублённый анализ</button> <button class="lbtn" id="pdf">Экспорт в PDF</button></div>
+ <div id="focbar" style="display:none;margin-bottom:10px" class="sm"></div><div id="favbar"><label class="chk" style="margin:0"><input type="checkbox" id="selall"><span>Выбрать все</span></label><b id="selc" class="sm" style="color:var(--ink)">Выбрано: 0</b><span class="sm" id="favnote"></span><button class="lbtn sec" id="deep">Углублённый анализ</button> <button class="lbtn" id="pdf">Экспорт в PDF</button></div>
  <div class="bar"><button class="lbtn" id="tog">Фильтры</button><span class="cnt" id="cnt"></span>
   <select id="so"><option value="score">Балл</option><option value="pct">Цена, % от долга</option><option value="claim_amount">Сумма требования</option><option value="start_price">Цена</option><option value="difference">Разница</option><option value="auction_date">Дата торгов</option><option value="application_start">Начало приёма</option><option value="debtor">Должник</option><option value="region">Регион</option><option value="platform">Площадка</option><option value="category">Категория</option></select>
   <select id="dir"><option value="-1">↓ убыв.</option><option value="1">↑ возр.</option></select></div>
@@ -137,7 +137,7 @@ const IDB=(DB)=>{const ST='kv';let P=null;const db=()=>P||(P=new Promise((res,re
  return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 16:51 UTC · 628ce30',PINBLOB={"v": 1, "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "pVI8qE/rhJfkrXixtCIItg==", "iv": "YioEA6axVRi332iP", "ct": "U+nTngqvb8sMZQYYb/HkgmlAkoe2JCcTqny7CUz8zBg82+07lChVSCPjyl9zv2VD/xgYHWzh2Ni1phKrmWfDWPIFLEYJxw38Prfd8xqJ984U7+qVutZxmxKZqhPcZ6Rqz7Stg6XOwJeqGgyXdsgv5UGk2o0="};let PINOK=!PINBLOB;
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 16:54 UTC · 7d045f6',PINBLOB={"v": 1, "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "pVI8qE/rhJfkrXixtCIItg==", "iv": "YioEA6axVRi332iP", "ct": "U+nTngqvb8sMZQYYb/HkgmlAkoe2JCcTqny7CUz8zBg82+07lChVSCPjyl9zv2VD/xgYHWzh2Ni1phKrmWfDWPIFLEYJxw38Prfd8xqJ984U7+qVutZxmxKZqhPcZ6Rqz7Stg6XOwJeqGgyXdsgv5UGk2o0="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
@@ -203,7 +203,7 @@ function scSt(s){const c=scoreRGB(s);return c?`background:rgb(${c});color:${scor
 const scl=s=>'';
 function legend(){const st=[0,.25,.5,.75,1].map(t=>`rgb(${hsl2rgb(130*t,48,46)})`).join(',');return `<span class="leg" title="Цвет балла: красный — наименее перспективные, зелёный — наиболее (шкала ${SMIN}–${SMAX}, 5–95-й процентиль)"><i style="background:linear-gradient(90deg,${st})"></i><em>${SMIN}</em><em>${SMAX}</em></span>`}
 function row(l){const f=l.flags;return `<div class="lot" data-id="${esc(l.id)}"><div class="row">
-<div class="c-d"><div class="d1">${esc(l.debtor.name||'Должник не указан')}</div><div class="sm">${esc(l.case||'')}${l.lot_no!=null?' · лот '+esc(l.lot_no):''}${l.region?' · '+esc(l.region):''}</div>${FAVMODE?fcBtn(l)+' '+repChip(l):''}</div>
+<div class="c-d"><div class="d1">${FAVMODE?`<input type="checkbox" class="selc" data-sel="${esc(l.id)}" ${SEL.has(String(l.id))?"checked":""} style="width:auto;margin:0 6px 0 0;vertical-align:-2px" aria-label="Выбрать">`:''}${esc(l.debtor.name||'Должник не указан')}</div><div class="sm">${esc(l.case||'')}${l.lot_no!=null?' · лот '+esc(l.lot_no):''}${l.region?' · '+esc(l.region):''}</div>${FAVMODE?fcBtn(l)+' '+repChip(l):''}</div>
 <div class="c-w"><div>${esc(l.counterparty.name||'—')} ${l.counterparty.type?`<span class="tag">${esc(l.counterparty.type)}</span>`:''}</div><div>${l.category?`<span class="tag">${esc(l.category)}</span>`:''}${f.subsidiary?'<span class="tag f">субсидиарка</span>':''}${f.third_party_damages?'<span class="tag f">убытки</span>':''}${l.fssp_arrest?'<span class="tag ar">арест</span>':''}${dqTag(l)}${l.pledges.length?'<span class="tag f">залог</span>':''}</div></div>
 <div class="num c-sum">${rub(l.claim_amount)}</div><div class="num c-p">${rub(l.start_price)}</div><div class="c-r ctr">${pbadge(l.pct,l)}</div>
 <div class="c-dt ctr">${dd(l.auction_date)}</div><div class="c-x sm">${esc(l.platform||'')}</div><div class="c-s">${star(l.id)}<span class="sc" style="${scSt(l._s)}">${l._s??'—'}</span></div>${MANMODE?`<div class="ctr">${l._m?`<span class="mst ${mcls(l._m.status)}">${esc(l._m.status)}</span>${l._m.date?`<div class="sm">${dd(l._m.date)}</div>`:''}`:'—'}</div><div class="sm" style="overflow:hidden">${l._m?l._m.reasons.slice(0,2).map(esc).join('; ')+(l._m.reasons.length>2?` (+${l._m.reasons.length-2})`:''):''}</div>`:''}</div>${OPEN.has(l.id)?card(l):''}</div>`}
@@ -232,7 +232,7 @@ function render(){if(!DATA){$('cnt').textContent='';$('meta').innerHTML=metaTail
  $('L').innerHTML=r.slice(0,SHOW).map(row).join('')||(FAVMODE&&!all.length?'<div class="empty">В избранном пока пусто.<br>Нажмите ☆ у лота в реестре или в его карточке, чтобы добавить его сюда.</div>':'<div class="empty">Ничего не найдено</div>');favUI();
  $('more').innerHTML=r.length>SHOW?`<button class="lbtn sec" style="width:100%" onclick="SHOW+=200;render()">Показать ещё (${r.length-SHOW})</button>`:'';
  $('legh').innerHTML=legend();$('legp').innerHTML=pleg();document.querySelectorAll('.th span[data-k]').forEach(s=>s.classList.toggle('on',s.dataset.k===SK));$('so').value=SK;$('dir').value=SD}
-$('L').onclick=e=>{const fc=e.target.closest('[data-fc]');if(fc){e.stopPropagation();const l=DATA.lots.find(x=>String(x.id)===fc.dataset.fc);if(l)sendReq(fullReq(l),'Запрос на полную проверку (ПЦ «Эверест»)',fc);return}
+$('L').onclick=e=>{const sc=e.target.closest('[data-sel]');if(sc){e.stopPropagation();const id=sc.dataset.sel;sc.checked?SEL.add(id):SEL.delete(id);favUI();return}const fc=e.target.closest('[data-fc]');if(fc){e.stopPropagation();const l=DATA.lots.find(x=>String(x.id)===fc.dataset.fc);if(l)sendReq(fullReq(l),'Запрос на полную проверку (ПЦ «Эверест»)',fc);return}
  const rc=e.target.closest('[data-rep]');if(rc){e.stopPropagation();goTab('rep');return}const st=e.target.closest('.star');if(st){e.stopPropagation();favToggle(st.dataset.fid);return}if(e.target.closest('a')||e.target.closest('.card'))return;const el=e.target.closest('.lot');if(!el)return;const id=el.dataset.id;OPEN.has(id)?OPEN.delete(id):OPEN.add(id);const l=DATA.lots.find(x=>x.id==id);el.outerHTML=row(l)};
 document.querySelectorAll('aside input,aside select').forEach(x=>x.addEventListener('input',()=>{SHOW=100;render()}));
 $('rst').onclick=()=>{document.querySelectorAll('aside input').forEach(x=>x.type==='checkbox'?x.checked=false:x.value='');document.querySelectorAll('aside select').forEach(x=>x.value='');render()};
@@ -305,10 +305,11 @@ function pinGate(){return new Promise(done=>{if(PINOK||!window.crypto||!crypto.s
  $('kp').onclick=e=>{const b=e.target.closest('button');if(b)press(b.dataset.k||b.textContent)};
  document.addEventListener('keydown',e=>{if(P.style.display!=='none'){if(/^\d$/.test(e.key))press(e.key);else if(e.key==='Backspace')press('del')}})})}
 // --- избранное: IndexedDB + favorites.json в закрытом репозитории (если ключ с правом записи) ---
-let FAV=new Map(),FAVUP=0,FAVMODE=false,FAVRO=null,FAVMSG='',CUR=[],favT=null;
+let SEL=new Set(),FAV=new Map(),FAVUP=0,FAVMODE=false,FAVRO=null,FAVMSG='',CUR=[],favT=null;
 const star=(id,big)=>{const on=FAV.has(String(id));return `<button class="star${on?' on':''}" data-fid="${esc(id)}" title="${on?'Убрать из избранного':'В избранное'}" aria-pressed="${on}"${big?' style="font-size:24px;margin-right:6px"':''}>${on?'★':'☆'}</button>`};
 function favUI(){$('favn').textContent=FAV.size;$('favbar').style.display=FAVMODE?'flex':'none';
- $('favnote').textContent=FAVMODE?(FAVRO===true?'Избранное хранится только на этом устройстве: ключ GitHub только для чтения.':FAVRO===false?'Избранное синхронизируется с GitHub (favorites.json).':(TOKEN&&!EMB?'Избранное сохраняется на устройстве; синхронизация — при первом изменении.':'Избранное хранится только на этом устройстве.'))+(FAVMSG?' '+FAVMSG:''):'';manBadge();$('pdf').disabled=!CUR.length;$('deep').disabled=!CUR.length}
+ $('favnote').textContent=FAVMODE?(FAVRO===true?'Избранное хранится только на этом устройстве: ключ GitHub только для чтения.':FAVRO===false?'Избранное синхронизируется с GitHub (favorites.json).':(TOKEN&&!EMB?'Избранное сохраняется на устройстве; синхронизация — при первом изменении.':'Избранное хранится только на этом устройстве.'))+(FAVMSG?' '+FAVMSG:''):'';manBadge();for(const id of [...SEL])if(!FAV.has(id))SEL.delete(id);const ns=CUR.filter(l=>SEL.has(String(l.id))).length;$('selc').textContent='Выбрано: '+ns;$('selall').checked=CUR.length>0&&ns===CUR.length;$('selall').indeterminate=ns>0&&ns<CUR.length;
+ $('pdf').disabled=!CUR.length;$('pdf').textContent=ns?`Экспорт в PDF (${ns})`:'Экспорт в PDF';$('deep').disabled=!ns;$('deep').textContent=ns?`Углублённый анализ (${ns})`:'Углублённый анализ'}
 function favSave(){FAVUP=Date.now();CACHE.set('claims:fav',{updated:FAVUP,ids:Object.fromEntries(FAV)});clearTimeout(favT);favT=setTimeout(favPush,1500)}
 function favToggle(id){id=String(id);FAV.has(id)?FAV.delete(id):FAV.set(id,Date.now());favSave();
  document.querySelectorAll(`.star[data-fid="${CSS.escape(id)}"]`).forEach(b=>{const on=FAV.has(id);b.classList.toggle('on',on);b.textContent=on?'★':'☆';b.setAttribute('aria-pressed',on);b.title=on?'Убрать из избранного':'В избранное'});
@@ -335,7 +336,7 @@ function lotRows(l){const a=l.assets||{},s=l.subsidiary||{};return {
 const clean2=rows=>rows.filter(r=>r[1]!=null&&r[1]!==''&&r[1]!=='—').map(r=>[String(r[0]),String(r[1])]);
 const SUMH=['№','Должник / лот','Требование к','ФЛ/ЮЛ','Требование, ₽','Цена, ₽','Разница, ₽','%','Балл','Категория','Регион','Приём / торги'];
 const sumRow=(l,i)=>[i+1,(l.debtor.name||'—')+(l.case?'\n'+l.case:'')+(l.lot_no!=null?', лот '+l.lot_no:''),l.counterparty.name||'—',l.counterparty.type||'—',R0(l.claim_amount),R0(l.start_price),R0(l.difference),l.pct_check?'требует проверки':fpct(l.pct),l._s??'—',l.category||'—',l.region||'—',(l.application_start?dd(l.application_start).slice(0,10):'—')+' / '+(l.auction_date?dd(l.auction_date).slice(0,10):'—')];
-async function exportPdf(){const list=CUR.slice();if(!list.length)return;const b=$('pdf'),o=b.textContent;b.disabled=true;b.textContent='Готовлю PDF…';
+async function exportPdf(){const sl=CUR.filter(l=>SEL.has(String(l.id))),list=sl.length?sl:CUR.slice();if(!list.length)return;const b=$('pdf'),o=b.textContent;b.disabled=true;b.textContent='Готовлю PDF…';
  try{if(location.protocol==='file:')throw new Error('offline');
   if(!window.jspdf)await loadJs('vendor/jspdf.umd.min.js');if(!window.jspdf.jsPDF.API.autoTable)await loadJs('vendor/jspdf.plugin.autotable.min.js');
   const [fr,fb,lg]=await Promise.all([fetchB64('vendor/Roboto-Regular.ttf'),fetchB64('vendor/Roboto-Bold.ttf'),fetchB64('logo-s.png')]);
@@ -372,7 +373,7 @@ function printReport(list){const T=rows=>'<table>'+clean2(rows).map(r=>`<tr><td 
  $('printv').innerHTML=hd+`<h3>Избранные лоты: ${list.length}</h3><table><tr>${SUMH.map(h=>`<th>${h}</th>`).join('')}</tr>${list.map((l,i)=>'<tr>'+sumRow(l,i).map(v=>`<td>${esc(v).replace(/\n/g,'<br>')}</td>`).join('')+'</tr>').join('')}</table>`+
   list.map((l,i)=>{const x=lotRows(l);return `<div class="pg">${hd}<h3>${i+1}. ${esc(l.debtor.name||'')} — ${esc(l.counterparty.name||'')} · балл ${l._s??'—'}</h3>${T(x.det)}<h4>Балл по факторам</h4><table>${x.fac.map(f=>`<tr><td>${esc(f[0])}</td><td>${esc(f[1])}</td><td>${esc(f[2])}</td></tr>`).join('')}</table><h4>Активы</h4>${T(x.ast)}${(l.fssp.length||l.pledges.length||l.fssp_arrest)?`<h4>ФССП и залоги${l.fssp_arrest?' — АРЕСТ ИМУЩЕСТВА':''}</h4>`+fsspBlock(l):''}<h4>Субсидиарка и убытки</h4>${T(x.sub)}<h4>Источники</h4>${x.links.map(k=>`<div>${esc(k[0])}: <a href="${esc(k[1])}">${esc(k[1])}</a></div>`).join('')}</div>`}).join('');
  setTimeout(()=>window.print(),100)}
-$('pdf').onclick=exportPdf;
+$('pdf').onclick=exportPdf;$('selall').onchange=()=>{CUR.forEach(l=>$('selall').checked?SEL.add(String(l.id)):SEL.delete(String(l.id)));render()};
 // --- отчёты анализа: reports/ в закрытом репозитории ---
 async function repList(){const m=$('repm'),L=$('repl');L.innerHTML='';
  if(EMB||!REPO||REPO.startsWith('/*')){m.textContent='Доступно в онлайн-версии.';return}if(!TOKEN){m.textContent='Нужен вход (PIN или ключ GitHub).';return}
@@ -386,11 +387,11 @@ async function repLoad(){if(EMB||!TOKEN||!REPO||REPO.startsWith('/*'))return;try
 const normId=v=>String(v||'').toLowerCase().replace(/[^0-9a-zа-я]/gi,'');
 const repFor=l=>{if(!REPS)return null;const k=normId(l.id);return k?REPS.find(n=>normId(n).includes(k)):null};
 function fullReq(l){const r=deepReq([l]);r.type='full_check';r.id=r.id.replace(/-(\w+)$/,'-fc-$1');r.scope=['web','press','gov_sites','social','courts','fssp','fedresurs','pledges'];r.lot_id=l.id;return r}
-async function sendReq(req,title,btn){const o=btn&&btn.textContent;
- if(EMB||!TOKEN||FAVRO===true||!REPO||REPO.startsWith('/*'))return deepShow(req,FAVRO===true?'Ключ GitHub только для чтения — отправить запрос напрямую нельзя.':'Нет подключения к GitHub.',title);
- if(btn){btn.disabled=true;btn.textContent='Отправка…'}try{const r=await ghApi(`requests/${req.id}.json`,{method:'PUT',body:JSON.stringify({message:req.type+' '+req.id,branch:BRANCH,content:u8b64(JSON.stringify(req,null,1))})});
-  if(r.ok){FAVRO=false;alert(`Запрос отправлен. Отчёт появится в разделе «Отчёты анализа».`)}else if([401,403,404].includes(r.status)){FAVRO=true;favUI();deepShow(req,'Ключ GitHub только для чтения — отправить запрос напрямую нельзя.',title)}else deepShow(req,'GitHub ответил '+r.status+'.',title)}
- catch(e){deepShow(req,'Нет сети.',title)}finally{if(btn){btn.disabled=false;btn.textContent=o}}}
+function sendReq(req,title,btn){
+ if(EMB||!TOKEN||FAVRO===true||!REPO||REPO.startsWith('/*'))return deepShow(req,'Ключ GitHub только для чтения — отправить напрямую нельзя. Скопируйте запрос или отправьте через «Поделиться» в чат с ботом.',title);
+ const dlg=deepShow(req,'Пробую отправить запрос в репозиторий…',title);
+ ghApi(`requests/${req.id}.json`,{method:'PUT',body:JSON.stringify({message:req.type+' '+req.id,branch:BRANCH,content:u8b64(JSON.stringify(req,null,1))})}).then(r=>{
+  if(r.ok){FAVRO=false;dlg.set('Запрос отправлен. Отчёт появится в «Отчётах анализа».')}else{if([401,403,404].includes(r.status)){FAVRO=true;favUI()}dlg.set('Отправить напрямую нельзя (GitHub '+r.status+'). Скопируйте запрос или отправьте через «Поделиться».')}}).catch(()=>dlg.set('Нет сети. Скопируйте запрос.'))}
 function fcBtn(l){return FAVMODE||FAV.has(String(l.id))?`<button class="lbtn sec fcb" data-fc="${esc(l.id)}" style="padding:2px 8px;font-size:12px;margin-top:4px">Полная проверка</button>`:''}
 function repChip(l){const f=repFor(l);return f?`<span class="tag ok rchip" data-rep="${esc(f)}" title="${esc(f)}" style="cursor:pointer">отчёт готов</span>`:''}
 function deepReq(list){const t=new Date(),id=t.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z-'+Math.random().toString(36).slice(2,6);
@@ -399,18 +400,25 @@ function deepReq(list){const t=new Date(),id=t.toISOString().replace(/[-:]/g,'')
    counterparty:{name:l.counterparty.name||null,inn:l.counterparty.inn||null,ogrn:l.counterparty.ogrn||null,type:l.counterparty.type||null},
    claim_amount:l.claim_amount,start_price:l.start_price,score:l._s,links:{efrsb:l.links.efrsb||null,auction:l.links.auction||null,kad:l.links.kad||null}}))}}
 function deepShow(req,why,title){const txt=(title||'Запрос на углублённый анализ (ПЦ «Эверест»)')+'\n'+JSON.stringify(req,null,1);const D=$('dreq');
- D.innerHTML=`<dialog id="dreqd" style="max-width:640px;width:92vw"><h3 style="margin-top:0">${req.type==='full_check'?'Полная проверка лота':'Углублённый анализ: '+req.lots.length+' лот(ов)'}</h3><p class="sm">${esc(why)} Скопируйте запрос или отправьте его через «Поделиться» в чат с ботом.</p>
+ D.innerHTML=`<div id="dreqd" role="dialog" aria-modal="true" style="position:fixed;inset:0;z-index:100;background:#1e283480;display:flex;align-items:center;justify-content:center;padding:12px">
+ <div style="background:#fff;border-radius:12px;max-width:640px;width:100%;max-height:92vh;overflow:auto;padding:16px;box-shadow:0 8px 30px #0004">
+ <h3 style="margin-top:0">${req.type==='full_check'?'Полная проверка лота':'Углублённый анализ: '+req.lots.length+' лот(ов)'}</h3><p class="sm" id="dwhy">${esc(why)}</p>
  <textarea id="dreqt" readonly style="width:100%;height:220px;font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:7px;padding:6px">${esc(txt)}</textarea>
- <p style="display:flex;gap:8px;flex-wrap:wrap"><button class="lbtn" id="dcp">Скопировать</button>${navigator.share?'<button class="lbtn" id="dsh">Поделиться</button>':''}<span style="flex:1"></span><button class="lbtn sec" id="dcl">Закрыть</button></p><p class="sm" id="dmg"></p></dialog>`;
- D.style.display='';const d=$('dreqd');d.showModal();$('dcl').onclick=()=>{d.close();D.style.display='none'};
- $('dcp').onclick=async()=>{try{await navigator.clipboard.writeText(txt);$('dmg').textContent='Скопировано'}catch(e){const t=$('dreqt');t.focus();t.select();t.setSelectionRange(0,1e6);try{document.execCommand('copy');$('dmg').textContent='Скопировано'}catch(x){$('dmg').textContent='Выделено — скопируйте вручную'}}};
- if($('dsh'))$('dsh').onclick=async()=>{try{await navigator.share({title:req.type==='full_check'?'Запрос на полную проверку':'Запрос на углублённый анализ',text:txt})}catch(e){}}}
-$('deep').onclick=async()=>{const list=CUR.slice();if(!list.length)return;const req=deepReq(list),b=$('deep'),o=b.textContent;
- if(EMB||!TOKEN||FAVRO===true||!REPO||REPO.startsWith('/*'))return deepShow(req,FAVRO===true?'Ключ GitHub только для чтения — отправить запрос напрямую нельзя.':'Нет подключения к GitHub.');
- b.disabled=true;b.textContent='Отправка…';try{const r=await ghApi(`requests/${req.id}.json`,{method:'PUT',body:JSON.stringify({message:'deep analysis request '+req.id,branch:BRANCH,content:u8b64(JSON.stringify(req,null,1))})});
-  if(r.ok){FAVRO=false;alert(`Запрос отправлен (${req.lots.length} лот.). Отчёт появится в разделе «Отчёты анализа».`)}
-  else if([401,403,404].includes(r.status)){FAVRO=true;favUI();deepShow(req,'Ключ GitHub только для чтения — отправить запрос напрямую нельзя.')}
-  else deepShow(req,'GitHub ответил '+r.status+'.')}catch(e){deepShow(req,'Нет сети.')}finally{b.disabled=false;b.textContent=o}};
+ <p style="display:flex;gap:8px;flex-wrap:wrap"><button class="lbtn" id="dcp">Скопировать</button><button class="lbtn" id="dsh">Поделиться</button><span style="flex:1"></span><button class="lbtn sec" id="dcl">Закрыть</button></p><p class="sm" id="dmg"></p></div></div>`;
+ D.style.display='';const close=()=>{D.innerHTML='';D.style.display='none'};$('dcl').onclick=close;$('dreqd').onclick=e=>{if(e.target.id==='dreqd')close()};
+ const sel=()=>{const t=$('dreqt');t.removeAttribute('readonly');t.focus();t.select();t.setSelectionRange(0,t.value.length);t.setAttribute('readonly','')};
+ const legacy=()=>{sel();let ok=false;try{ok=document.execCommand('copy')}catch(e){}return ok};
+ $('dcp').onclick=()=>{if(legacy()){$('dmg').textContent='Скопировано';return}
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(txt).then(()=>$('dmg').textContent='Скопировано',()=>{sel();$('dmg').textContent='Текст выделен — нажмите «Скопировать» в меню'});else{sel();$('dmg').textContent='Текст выделен — скопируйте вручную'}};
+ $('dsh').onclick=()=>{if(navigator.share){navigator.share({title:req.type==='full_check'?'Запрос на полную проверку':'Запрос на углублённый анализ',text:txt}).catch(e=>{if(e&&e.name!=='AbortError')$('dmg').textContent='Поделиться не удалось: '+e.message})}
+  else{$('dcp').click();$('dmg').textContent+=' (на этом устройстве «Поделиться» недоступно — вставьте текст в чат)'}};
+ return {set:m=>{$('dwhy').textContent=m}}}
+$('deep').onclick=()=>{const list=CUR.filter(l=>SEL.has(String(l.id)));if(!list.length){alert('Отметьте лоты галочками');return}const req=deepReq(list),T='Запрос на углублённый анализ (ПЦ «Эверест»)';
+ if(EMB||!TOKEN||FAVRO===true||!REPO||REPO.startsWith('/*'))return deepShow(req,FAVRO===true?'Ключ GitHub только для чтения — отправить запрос напрямую нельзя. Скопируйте запрос или отправьте его через «Поделиться» в чат с ботом.':'Нет подключения к GitHub. Скопируйте запрос и отправьте в чат с ботом.',T);
+ const dlg=deepShow(req,'Пробую отправить запрос в репозиторий…',T);
+ ghApi(`requests/${req.id}.json`,{method:'PUT',body:JSON.stringify({message:'deep analysis request '+req.id,branch:BRANCH,content:u8b64(JSON.stringify(req,null,1))})}).then(r=>{
+  if(r.ok){FAVRO=false;dlg.set('Запрос отправлен в репозиторий. Отчёт появится в разделе «Отчёты анализа». Копия запроса — ниже.')}
+  else{if([401,403,404].includes(r.status)){FAVRO=true;favUI()}dlg.set((FAVRO?'Ключ GitHub только для чтения — отправить напрямую нельзя.':'GitHub ответил '+r.status+'.')+' Скопируйте запрос или отправьте через «Поделиться» в чат с ботом.')}}).catch(()=>dlg.set('Нет сети. Скопируйте запрос или отправьте через «Поделиться».'))};
 // --- ручной анализ ---
 let HIDDEN=new Set(),MRSTATS=null,MR=null,MRSRC='',MRO=new Set(),FOCUS=null;
 const KEYF=[['claim_amount','сумма требования'],['start_price','начальная цена'],['debtor.name','должник'],['case','номер дела'],['counterparty.name','лицо по требованию'],['auction_date','дата торгов']];
