@@ -1,6 +1,6 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#3b4a5e"><title>Everest</title><link rel="icon" type="image/png" sizes="32x32" href="favicon-32-v2.png?v=b37cd8d"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64-v2.png?v=b37cd8d"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png?v=b37cd8d"><link rel="manifest" href="manifest.webmanifest?v=b37cd8d"><meta name="apple-mobile-web-app-title" content="Everest"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#3b4a5e"><title>Everest</title><link rel="icon" type="image/png" sizes="32x32" href="favicon-32-v2.png?v=b261388"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64-v2.png?v=b261388"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png?v=b261388"><link rel="manifest" href="manifest.webmanifest?v=b261388"><meta name="apple-mobile-web-app-title" content="Everest"><meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 :root{--bg:#eef1f5;--pan:#fff;--ink:#1e2834;--mut:#5d6b7c;--line:#d5dce5;--acc:#3b4a5e;--acc2:#56708f;--soft:#e3e9f0}
 *{box-sizing:border-box}body{margin:0;font:15px/1.45 -apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
@@ -110,11 +110,11 @@ nav button.on{box-shadow:0 1px 6px #0002}
 @media(hover:none){button:active,.lbtn:active{filter:brightness(.92)}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}button:active,.lbtn:active,button:hover{transform:none!important}}
 </style></head><body>
-<div id="pin" style="display:none"><img src="logo-s.png?v=b37cd8d" alt="" style="width:min(62vw,240px);height:auto"><div class="brand-n">ПЦ «Эверест»</div><div class="brand-s">на вершине успеха</div><div class="msg" id="pinm">Введите PIN</div><div class="dots" id="pind"><i></i><i></i><i></i><i></i></div>
+<div id="pin" style="display:none"><img src="logo-s.png?v=b261388" alt="" style="width:min(62vw,240px);height:auto"><div class="brand-n">ПЦ «Эверест»</div><div class="brand-s">на вершине успеха</div><div class="msg" id="pinm">Введите PIN</div><div class="dots" id="pind"><i></i><i></i><i></i><i></i></div>
 <div class="kp" id="kp"><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><button class="x" data-k="key">Ключ</button><button>0</button><button class="x" data-k="del">⌫</button></div>
 <a href="#" id="pinkey">Войти по ключу GitHub</a></div>
 <div id="newver" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));z-index:120;background:#1f3354;color:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 4px 18px #0005;font-size:14px">Доступна новая версия. <button class="lbtn" style="margin-left:8px;background:#fff;color:#1f3354" onclick="location.replace(location.pathname+'?v='+Date.now())">Обновить</button></div>
-<header><div class="hb"><img src="logo-white-s.png?v=b37cd8d" alt=""><div class="bt"><div class="bl"><span class="brand-n">ПЦ «Эверест»</span><span class="brand-s">на вершине успеха</span></div><small>Аналитическая система</small></div></div>
+<header><div class="hb"><img src="logo-white-s.png?v=b261388" alt=""><div class="bt"><div class="bl"><span class="brand-n">ПЦ «Эверест»</span><span class="brand-s">на вершине успеха</span></div><small>Аналитическая система</small></div></div>
 <nav><button data-v="reg" class="on">Реестр</button> <button data-v="fav">Избранное<span class="badge" id="favn">0</span></button> <button data-v="man">Ручной анализ<span class="badge" id="mann">0</span></button> <button data-v="met">Методика</button> <button data-v="rep">Отчёты анализа</button> <button data-v="src">Исходные файлы</button> <button id="cfg">Данные</button></nav>
 <div class="meta" id="meta"></div></header>
 <div id="vreg" class="wrap">
@@ -173,7 +173,7 @@ const IDB=(DB)=>{const ST='kv';let P=null;const db=()=>P||(P=new Promise((res,re
  return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 18:13 UTC · b37cd8d',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1791742429, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "t8PN78XHR0Ymkk7E/cFGEw==", "iv": "L367VYemAM/sO+4T", "ct": "xZ4UFzWgGXMQafZORaKkJ9gtMN/zQAxcyk9SaYqfXTqwylRY/9WhQeiql8Dm1RlWXvnOSZ2aRbjo5RBxiiampoD70zh1SZNdIbQJ+mbh7DuzaexWQe18o4haUn3BTc3XyhOqpv6ll+YfVhED8DvvjUm0z2g="};let PINOK=!PINBLOB;
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 18:14 UTC · b261388',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1791742479, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "YamG0RtrBG2THhdf9ixIbw==", "iv": "xtO3ynEDonJfiiOy", "ct": "XTaYicOQL+N9fbOR6GKzpFm9OpwZ7u9Nv72r8yTvJqohn++ZoAeLfKXHd0tJuVdYmfFSDtrv2lrb51FgfWhMu5pjBmgt+2eVs5A3z4tPn09VmmQiY2WfovkvceXKEACrDLsJnrug+DOKOnuJDAq8CezF5Aw="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
@@ -216,7 +216,7 @@ function setData(d,src,save){
 function opts(){const u=k=>[...new Set(DATA.lots.map(l=>g(l,k)).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'ru'));
  const fill=(id,k,all)=>{const v=$(id).value;$(id).innerHTML=`<option value="">${all}</option>`+u(k).map(x=>`<option>${esc(x)}</option>`).join('');$(id).value=v};
  fill('cat','category','Все категории');fill('reg','region','Все регионы');fill('pl','platform','Все площадки');fill('stg','stage','Все этапы');
- const dt=DATA.data_date||DATA.generated_at;$('meta').innerHTML=esc(`Данные на ${dd(dt)} · лотов: ${DATA.lots.length} · источник: ${SRC}`+(DATA.source?` · ${DATA.source}`:'')+(HIDDEN.size?` · скрыто ${HIDDEN.size} лот(ов) с долгом < 100 000 ₽`:'')).split(' · ').map(x=>`<span class="mc">${x}</span>`).join('')+metaTail()}
+ const dt=DATA.data_date||DATA.generated_at;$('meta').innerHTML=esc(`Данные на ${dd(dt)} · лотов: ${DATA.lots.length} · источник: ${SRC}`+(DATA.source?` · ${DATA.source}`:'')+(HIDDEN.size?` · скрыто ${HIDDEN.size} лот(ов) с долгом < 100 000 ₽`:'')).split(' · ').map(x=>`<span class="mc">${x}</span>`).join('')+metaTail().replace(/(^|>)\s*· /g,'$1').split(/ · /).map(x=>x.trim()?`<span class="mc">${x}</span>`:'').join('')}
 function flt(SRCL){const v=id=>$(id).value.trim(),n=id=>num(v(id)),q=v('q').toLowerCase().split(/\s+/).filter(Boolean);
  const rng=(x,a,b)=>(a==null||(x!=null&&x>=a))&&(b==null||(x!=null&&x<=b));const dr=(x,a,b)=>(!a||(x&&x.slice(0,10)>=a))&&(!b||(x&&x.slice(0,10)<=b));
  return (SRCL||DATA.lots).filter(l=>q.every(w=>l._t.includes(w))&&rng(l.claim_amount,n('sum0'),n('sum1'))&&rng(l.start_price,n('p0'),n('p1'))&&rng(l.difference,n('df0'),n('df1'))&&rng(l.pct,n('pc0'),n('pc1'))&&rng(l._s,n('s0'),n('s1'))
