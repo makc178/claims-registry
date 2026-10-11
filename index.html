@@ -1,6 +1,6 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#3b4a5e"><title>Everest</title><link rel="icon" type="image/png" sizes="32x32" href="favicon-32-v2.png?v=5982dc1"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64-v2.png?v=5982dc1"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png?v=5982dc1"><link rel="manifest" href="manifest.webmanifest?v=5982dc1"><meta name="apple-mobile-web-app-title" content="Everest"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#3b4a5e"><title>Everest</title><link rel="icon" type="image/png" sizes="32x32" href="favicon-32-v2.png?v=b37cd8d"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64-v2.png?v=b37cd8d"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png?v=b37cd8d"><link rel="manifest" href="manifest.webmanifest?v=b37cd8d"><meta name="apple-mobile-web-app-title" content="Everest"><meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 :root{--bg:#eef1f5;--pan:#fff;--ink:#1e2834;--mut:#5d6b7c;--line:#d5dce5;--acc:#3b4a5e;--acc2:#56708f;--soft:#e3e9f0}
 *{box-sizing:border-box}body{margin:0;font:15px/1.45 -apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
@@ -79,12 +79,42 @@ nav button.on .badge{background:var(--acc);color:#fff}#favbar{display:none;gap:8
 .th .hsel{display:none}#vreg.fav .th .hsel{display:flex}.mselall{display:none!important}
 @media(max-width:900px){#vreg.fav .row{grid-template-columns:44px minmax(0,1fr) auto}#vreg.fav .row>.c-sel{grid-column:1;grid-row:1/span 8;align-self:start;margin:0}
  #vreg.fav .row>.c-d{grid-column:2}#vreg.fav .row>.c-s{grid-column:3;grid-row:1}#vreg.fav .row>.c-w,#vreg.fav .row>.c-cat{grid-column:2/-1}#vreg.fav .row>.c-sum,#vreg.fav .row>.c-p,#vreg.fav .row>.c-r,#vreg.fav .row>.c-dt{grid-column:2/-1}.mselall{display:flex!important}}
+
+/* header v2 */
+header{background:linear-gradient(135deg,#46576d 0%,#3b4a5e 55%,#2f3c4d 100%);padding:8px 16px;padding-top:max(8px,env(safe-area-inset-top));gap:6px 14px;box-shadow:0 2px 12px #1f33542e;border-bottom:1px solid #ffffff14}
+header .hb{gap:11px;min-width:0;flex:1 1 auto}header .hb img{height:34px;width:auto;display:block;flex:none;filter:drop-shadow(0 1px 2px #0003)}
+header .hb .bt{display:flex;flex-direction:column;justify-content:center;min-width:0;line-height:1.15}
+header .hb .bl{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;row-gap:0}
+header .hb .brand-n{font-size:17px;font-weight:800;letter-spacing:.01em;white-space:nowrap}
+header .hb .brand-s{font-variant:normal;text-transform:uppercase;font-size:10px;letter-spacing:.18em;color:#c9d4e2;white-space:nowrap;font-weight:500}
+header .hb small{font-size:11.5px;color:#d7dfea;opacity:.8;letter-spacing:.03em;margin-top:2px}
+nav{display:flex;flex-wrap:wrap;gap:6px}
+nav button,.btn{border-color:#ffffff40;padding:5px 11px;font-size:14px}
+.meta{display:flex;flex-wrap:wrap;gap:4px 6px;font-size:11.5px;opacity:1;color:#d7dfea}
+.meta .mc{background:#ffffff14;border:1px solid #ffffff1f;border-radius:999px;padding:1px 9px;white-space:nowrap}
+@media(max-width:600px){header{padding:6px 10px;padding-top:max(6px,env(safe-area-inset-top));gap:6px}
+ header .hb img{height:28px}header .hb .brand-n{font-size:15.5px}header .hb .brand-s{display:none}header .hb small{display:block;font-size:10.5px;margin-top:1px}
+ nav{flex-wrap:nowrap;overflow-x:auto;width:100%;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin:0 -10px;padding:0 10px}nav::-webkit-scrollbar{display:none}
+ nav button{flex:none;padding:4px 10px;font-size:13.5px}
+ .meta{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;font-size:11px}.meta::-webkit-scrollbar{display:none}}
+/* animations */
+button,.btn,.lbtn,.star{-webkit-tap-highlight-color:transparent;transition:transform .17s ease,box-shadow .17s ease,background-color .17s ease,color .17s ease,border-color .17s ease,filter .17s ease}
+@media(hover:hover){button:hover,.btn:hover,.lbtn:hover{transform:translateY(-1px);box-shadow:0 3px 10px #1f335426}nav button:hover:not(.on){background:#ffffff1c;border-color:#ffffff70}.lbtn:hover{filter:brightness(1.08)}.star:hover{transform:scale(1.15);box-shadow:none}}
+button:active,.btn:active,.lbtn:active{transform:scale(.97);box-shadow:none;transition-duration:.08s}
+button:focus-visible,.lbtn:focus-visible{outline:2px solid #8fb0d8;outline-offset:2px}
+@keyframes starpop{0%{transform:scale(1)}35%{transform:scale(1.45) rotate(-12deg)}65%{transform:scale(.9) rotate(4deg)}100%{transform:scale(1)}}
+.star.pop{animation:starpop .42s cubic-bezier(.3,1.5,.5,1)}
+@keyframes viewin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#vreg,#vfav,#vman,#vmet,#vrep,#vsrc{animation:viewin .2s ease}
+nav button.on{box-shadow:0 1px 6px #0002}
+@media(hover:none){button:active,.lbtn:active{filter:brightness(.92)}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}button:active,.lbtn:active,button:hover{transform:none!important}}
 </style></head><body>
-<div id="pin" style="display:none"><img src="logo-s.png?v=5982dc1" alt="" style="width:min(62vw,240px);height:auto"><div class="brand-n">ПЦ «Эверест»</div><div class="brand-s">на вершине успеха</div><div class="msg" id="pinm">Введите PIN</div><div class="dots" id="pind"><i></i><i></i><i></i><i></i></div>
+<div id="pin" style="display:none"><img src="logo-s.png?v=b37cd8d" alt="" style="width:min(62vw,240px);height:auto"><div class="brand-n">ПЦ «Эверест»</div><div class="brand-s">на вершине успеха</div><div class="msg" id="pinm">Введите PIN</div><div class="dots" id="pind"><i></i><i></i><i></i><i></i></div>
 <div class="kp" id="kp"><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><button class="x" data-k="key">Ключ</button><button>0</button><button class="x" data-k="del">⌫</button></div>
 <a href="#" id="pinkey">Войти по ключу GitHub</a></div>
 <div id="newver" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));z-index:120;background:#1f3354;color:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 4px 18px #0005;font-size:14px">Доступна новая версия. <button class="lbtn" style="margin-left:8px;background:#fff;color:#1f3354" onclick="location.replace(location.pathname+'?v='+Date.now())">Обновить</button></div>
-<header><div class="hb"><img src="logo-white-s.png?v=5982dc1" alt="" style="height:32px;width:auto"><div><span class="brand-n">ПЦ «Эверест»</span> <span class="brand-s">· на вершине успеха</span><br><small>Everest</small></div></div>
+<header><div class="hb"><img src="logo-white-s.png?v=b37cd8d" alt=""><div class="bt"><div class="bl"><span class="brand-n">ПЦ «Эверест»</span><span class="brand-s">на вершине успеха</span></div><small>Аналитическая система</small></div></div>
 <nav><button data-v="reg" class="on">Реестр</button> <button data-v="fav">Избранное<span class="badge" id="favn">0</span></button> <button data-v="man">Ручной анализ<span class="badge" id="mann">0</span></button> <button data-v="met">Методика</button> <button data-v="rep">Отчёты анализа</button> <button data-v="src">Исходные файлы</button> <button id="cfg">Данные</button></nav>
 <div class="meta" id="meta"></div></header>
 <div id="vreg" class="wrap">
@@ -143,7 +173,7 @@ const IDB=(DB)=>{const ST='kv';let P=null;const db=()=>P||(P=new Promise((res,re
  return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 18:06 UTC · 5982dc1',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1791741971, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "igKNvH6MYHFw/0JEyorpVg==", "iv": "LmvSZ6j01K2rh5TH", "ct": "DWLTXmhDC8qTzR3t1ySQynltwQZmh6bmTDJ5CROdcA2nqSgYi4CpqwGlx+Y+n4AQnPmqeDJKIYcTJbkWwaEBMKaOOx2tOxUMaikQXrl+yR49M5XSbnY3O8VYzX+LVS7spmhN4p3ZrJWY0orNv4d8678b3NY="};let PINOK=!PINBLOB;
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 18:13 UTC · b37cd8d',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1791742429, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "t8PN78XHR0Ymkk7E/cFGEw==", "iv": "L367VYemAM/sO+4T", "ct": "xZ4UFzWgGXMQafZORaKkJ9gtMN/zQAxcyk9SaYqfXTqwylRY/9WhQeiql8Dm1RlWXvnOSZ2aRbjo5RBxiiampoD70zh1SZNdIbQJ+mbh7DuzaexWQe18o4haUn3BTc3XyhOqpv6ll+YfVhED8DvvjUm0z2g="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
@@ -186,7 +216,7 @@ function setData(d,src,save){
 function opts(){const u=k=>[...new Set(DATA.lots.map(l=>g(l,k)).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'ru'));
  const fill=(id,k,all)=>{const v=$(id).value;$(id).innerHTML=`<option value="">${all}</option>`+u(k).map(x=>`<option>${esc(x)}</option>`).join('');$(id).value=v};
  fill('cat','category','Все категории');fill('reg','region','Все регионы');fill('pl','platform','Все площадки');fill('stg','stage','Все этапы');
- const dt=DATA.data_date||DATA.generated_at;$('meta').innerHTML=esc(`Данные на ${dd(dt)} · лотов: ${DATA.lots.length} · источник: ${SRC}`+(DATA.source?` · ${DATA.source}`:'')+(HIDDEN.size?` · скрыто ${HIDDEN.size} лот(ов) с долгом < 100 000 ₽`:''))+metaTail()}
+ const dt=DATA.data_date||DATA.generated_at;$('meta').innerHTML=esc(`Данные на ${dd(dt)} · лотов: ${DATA.lots.length} · источник: ${SRC}`+(DATA.source?` · ${DATA.source}`:'')+(HIDDEN.size?` · скрыто ${HIDDEN.size} лот(ов) с долгом < 100 000 ₽`:'')).split(' · ').map(x=>`<span class="mc">${x}</span>`).join('')+metaTail()}
 function flt(SRCL){const v=id=>$(id).value.trim(),n=id=>num(v(id)),q=v('q').toLowerCase().split(/\s+/).filter(Boolean);
  const rng=(x,a,b)=>(a==null||(x!=null&&x>=a))&&(b==null||(x!=null&&x<=b));const dr=(x,a,b)=>(!a||(x&&x.slice(0,10)>=a))&&(!b||(x&&x.slice(0,10)<=b));
  return (SRCL||DATA.lots).filter(l=>q.every(w=>l._t.includes(w))&&rng(l.claim_amount,n('sum0'),n('sum1'))&&rng(l.start_price,n('p0'),n('p1'))&&rng(l.difference,n('df0'),n('df1'))&&rng(l.pct,n('pc0'),n('pc1'))&&rng(l._s,n('s0'),n('s1'))
@@ -322,7 +352,7 @@ function favUI(){$('favn').textContent=FAV.size;$('favbar').style.display=FAVMOD
  $('favnote').textContent=FAVMODE?(FAVRO===true?'Избранное хранится только на этом устройстве: ключ GitHub только для чтения.':FAVRO===false?'Избранное синхронизируется с GitHub (favorites.json).':(TOKEN&&!EMB?'Избранное сохраняется на устройстве; синхронизация — при первом изменении.':'Избранное хранится только на этом устройстве.'))+(FAVMSG?' '+FAVMSG:''):'';manBadge();for(const id of [...SEL])if(!FAV.has(id))SEL.delete(id);const ns=CUR.filter(l=>SEL.has(String(l.id))).length;$('selc').textContent='Выбрано: '+ns;for(const k of ['selall','selall2']){$(k).checked=CUR.length>0&&ns===CUR.length;$(k).indeterminate=ns>0&&ns<CUR.length}
  $('pdf').disabled=!CUR.length;$('pdf').textContent=ns?`Экспорт в PDF (${ns})`:'Экспорт в PDF';$('deep').disabled=!CUR.length;$('deep').textContent=ns?`Углублённый анализ (${ns})`:CUR.length?`Углублённый анализ (все ${CUR.length})`:'Углублённый анализ'}
 function favSave(){FAVUP=Date.now();CACHE.set('claims:fav',{updated:FAVUP,ids:Object.fromEntries(FAV)});clearTimeout(favT);favT=setTimeout(favPush,1500)}
-function favToggle(id){id=String(id);FAV.has(id)?FAV.delete(id):FAV.set(id,Date.now());favSave();
+function favToggle(id){id=String(id);FAV.has(id)?FAV.delete(id):FAV.set(id,Date.now());favSave();document.querySelectorAll(`.star[data-fid="${CSS.escape(id)}"]`).forEach(b=>{b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop')});
  document.querySelectorAll(`.star[data-fid="${CSS.escape(id)}"]`).forEach(b=>{const on=FAV.has(id);b.classList.toggle('on',on);b.textContent=on?'★':'☆';b.setAttribute('aria-pressed',on);b.title=on?'Убрать из избранного':'В избранное'});
  if(FAVMODE&&!FAV.has(id))render();else favUI()}
 const WRITE_OK=p=>p==='favorites.json'||/^requests\/[\w.\-]+\.json$/.test(p);
