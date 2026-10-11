@@ -98,7 +98,23 @@ const num=v=>{if(v==null||v==='')return null;const n=typeof v==='number'?v:parse
 const rub=v=>{v=num(v);return v==null?'—':v.toLocaleString('ru-RU',{maximumFractionDigits:v<1000?2:0})};
 const dd=s=>{if(!s)return '—';const m=String(s).match(/(\d{4})-(\d\d)-(\d\d)(?:T(\d\d:\d\d))?/);return m?`${m[3]}.${m[2]}.${m[1]}`+(m[4]?' '+m[4]:''):esc(s)};
 const g=(o,p)=>p.split('.').reduce((a,k)=>a==null?a:a[k],o);
-function norm(l){ // терпим отсутствующие поля и простые формы
+const FN={status:'Статус контрагента',realty:'Недвижимость',movable:'Движимое имущество',shares:'Доли/бизнес',press:'Публикации',spouse:'Супруг(а)',kdl_assets:'Активы КДЛ',enforcement:'Исп. производства'};
+const KC=s=>{s=(s||'').toLowerCase();return s.includes('субсидиар')?'Субсидиарная ответственность':s.includes('убытк')?'Убытки':/сделк|реституц/.test(s)?'Оспоренная сделка':s.includes('дебитор')?'Дебиторская задолженность':/кредит|займ/.test(s)?'Кредит/заём':'Прочее'};
+function adapt(l){if(!l.table)return l;const t=l.table,S=l.sources||{},a=l.analyst,sb=l.subsidiary||{},ls=l.losses||{},ap=String(t['Приём заявок']||'').match(/\d{4}-\d\d-\d\d(?: \d\d:\d\d)?/g)||[],iso=x=>x?String(x).replace(' ','T'):null,txt=l.full_text||t['Описание лота (начало)'];
+ const j=x=>Array.isArray(x)?x.filter(Boolean).join('; '):x;
+ return {id:l.id,stage:l.sheet||t['Категория дат'],debtor:{name:t['Должник'],inn:t['ИНН должника']},case:t['Дело'],court:(t['Дело']||'').slice(0,3)||null,lot_no:t['Лот'],
+ counterparty:{name:t['Требование к'],inn:t['ИНН лица-контрагента'],ogrn:t['ОГРН лица-контрагента'],type:t['ФЛ/ЮЛ']},category:KC(txt),score_category:l.category,rank:l.rank,
+ claim_amount:l.debt??t['Сумма требования, руб (из текста лота)'],start_price:l.price??t['Начальная цена, руб'],difference:l.diff,ratio:l.ratio??t['Требование/цена'],
+ auction_type:t['Тип торгов'],platform:t['Площадка'],arbitration_manager:t['АУ'],application_start:iso(ap[0]),application_end:iso(ap[1]),auction_date:iso(t['Начало торгов']),
+ description:txt,note:t['Примечание'],
+ links:{efrsb:S.efrsb_message,auction:S.fedresurs_bidding,kad:S.kad_arbitr,analytics:[S.trade_place?{title:'Площадка',url:S.trade_place}:null,...(S.analyst||[])].filter(Boolean)},
+ score:{total:l.score,factors:Object.entries(l.balls||{}).map(([k,b])=>({name:k,label:(FN[k]||k)+(b.label?': '+b.label:''),points:Math.round((b.points??0)*10)/10,max:b.weight,note:b.found&&b.found!==b.label?String(b.found).slice(0,160):''})),
+  comment:[(l.unknown_factors||[]).length?'Не проверено: '+l.unknown_factors.map(k=>FN[k]||k).join(', '):'',(l.caps||[]).length?'Ограничения: '+j(l.caps):''].filter(Boolean).join('. ')},
+ flags:{subsidiary:!!sb.flag,third_party_damages:!!ls.flag},
+ assets:a?{status:a['Статус'],summary:a['Активы/финансы'],enforcement:a['Исполнительные производства'],own_bankruptcy:a['Собственное банкротство'],prospects:a['Пересмотренная оценка']||a['Перспективы взыскания'],rationale:a['Обоснование'],unchecked:a['Не проверено']}:(l.assets_by_kind?{summary:Object.entries(l.assets_by_kind).map(([k,v])=>(FN[k]||k)+': '+v).join('; '),_auto:1}:null),
+ subsidiary:{grounds:j(sb.basis),controlling_persons:sb.role,deadlines:sb.deadline,score:sb.score!=null?Math.round(sb.score*100):null,third_parties:j(ls.basis)+(ls.score!=null?` (оценка ${Math.round(ls.score*100)}/100)`:''),
+  cdl_assets:l.assets_by_kind&&l.assets_by_kind.kdl_assets,outlook:l.spouse&&l.spouse.applicable?'Супруг(а): '+(l.spouse.status||''):null}}}
+function norm(l){l=adapt(l); // терпим отсутствующие поля и простые формы
  const o={...l};o.debtor=typeof l.debtor==='string'?{name:l.debtor}:(l.debtor||{});o.counterparty=typeof l.counterparty==='string'?{name:l.counterparty}:(l.counterparty||{});
  o.claim_amount=num(l.claim_amount);o.start_price=num(l.start_price);
  o.ratio=num(l.ratio)??(o.claim_amount&&o.start_price?o.claim_amount/o.start_price:null);
@@ -119,7 +135,7 @@ function flt(){const v=id=>$(id).value.trim(),n=id=>num(v(id)),q=v('q').toLowerC
  return DATA.lots.filter(l=>q.every(w=>l._t.includes(w))&&rng(l.claim_amount,n('sum0'),n('sum1'))&&rng(l.start_price,n('p0'),n('p1'))&&rng(l.difference,n('df0'),n('df1'))&&rng(l._s,n('s0'),n('s1'))
  &&(!v('cat')||l.category===v('cat'))&&(!v('reg')||l.region===v('reg'))&&(!v('pl')||l.platform===v('pl'))&&(!v('stg')||l.stage===v('stg'))
  &&(!v('fl')||(v('fl')==='-'?!l.counterparty.type:l.counterparty.type===v('fl')))&&dr(l.auction_date,v('d0'),v('d1'))&&dr(l.application_start,v('a0'),v('a1'))
- &&(!$('fsub').checked||l.flags.subsidiary)&&(!$('fdmg').checked||l.flags.third_party_damages)&&(!$('fas').checked||l.assets))}
+ &&(!$('fsub').checked||l.flags.subsidiary)&&(!$('fdmg').checked||l.flags.third_party_damages)&&(!$('fas').checked||(l.assets&&!l.assets._auto)))}
 function key(l){return SK==='score'?l._s:SK==='debtor'?l.debtor.name:l[SK]}
 function srt(a){return a.sort((x,y)=>{const A=key(x),B=key(y);if(A==null&&B==null)return 0;if(A==null)return 1;if(B==null)return -1;return (typeof A==='number'?A-B:String(A).localeCompare(String(B),'ru'))*SD})}
 const scl=s=>s==null?'':s>=60?'h':s>=35?'m':'';
