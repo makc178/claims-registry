@@ -1,0 +1,173 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#3b4a5e"><title>Реестр прав требования</title>
+<style>
+:root{--bg:#eef1f5;--pan:#fff;--ink:#1e2834;--mut:#5d6b7c;--line:#d5dce5;--acc:#3b4a5e;--acc2:#56708f;--soft:#e3e9f0}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 -apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{position:sticky;top:0;z-index:5;background:var(--acc);color:#fff;padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+header h1{font-size:18px;margin:0;font-weight:600;flex:1 1 auto}
+nav button,.btn{font:inherit;border:1px solid #ffffff55;background:transparent;color:#fff;border-radius:8px;padding:6px 11px;cursor:pointer}
+nav button.on{background:#fff;color:var(--acc)}
+.meta{font-size:12.5px;opacity:.85;width:100%}
+.wrap{display:flex;gap:16px;padding:16px;max-width:1500px;margin:auto}
+aside{flex:0 0 270px;background:var(--pan);border:1px solid var(--line);border-radius:12px;padding:12px;align-self:flex-start;position:sticky;top:90px;max-height:calc(100vh - 110px);overflow:auto}
+aside label{display:block;font-size:12.5px;color:var(--mut);margin:9px 0 3px}
+input,select{font:inherit;width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
+.two{display:flex;gap:6px}.two>*{min-width:0;flex:1}.chk{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--ink);margin:6px 0}.chk input{width:auto}
+main{flex:1;min-width:0}
+.bar{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}.bar .cnt{color:var(--mut);flex:1}
+.bar select{width:auto}
+.lbtn{background:var(--acc2);color:#fff;border:0;border-radius:7px;padding:7px 11px;font:inherit;cursor:pointer}
+.lbtn.sec{background:var(--soft);color:var(--acc)}
+.th,.row{display:grid;grid-template-columns:minmax(180px,2.2fr) 1.6fr 1.1fr 1fr .8fr .9fr .9fr .6fr;gap:10px;align-items:center;padding:9px 12px}
+.th{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em}.th span{cursor:pointer;user-select:none}.th span.on{color:var(--acc);font-weight:700}
+.lot{background:var(--pan);border:1px solid var(--line);border-radius:10px;margin-bottom:6px;overflow:hidden}
+.row{cursor:pointer}.row:hover{background:#f6f8fb}
+.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.d1{font-weight:600}.sm{font-size:12.5px;color:var(--mut)}
+.sc{display:inline-block;min-width:38px;text-align:center;border-radius:6px;padding:2px 6px;font-weight:700;background:var(--soft);color:var(--acc)}
+.sc.h{background:#3b4a5e;color:#fff}.sc.m{background:#9fb0c4;color:#fff}
+.tag{display:inline-block;font-size:11.5px;border:1px solid var(--line);border-radius:5px;padding:0 5px;margin:2px 3px 0 0;color:var(--mut)}
+.tag.f{border-color:var(--acc2);color:var(--acc2)}
+.card{border-top:1px solid var(--line);padding:12px 14px;background:#fafbfd;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card h3{font-size:13px;margin:0 0 6px;color:var(--acc);text-transform:uppercase;letter-spacing:.03em}
+.card .full{grid-column:1/-1}.kv{display:grid;grid-template-columns:150px 1fr;gap:3px 10px;font-size:13.5px}.kv dt{color:var(--mut)}.kv dd{margin:0}
+.links a{display:inline-block;margin:0 6px 6px 0;padding:5px 10px;border-radius:7px;background:var(--acc);color:#fff;text-decoration:none;font-size:13px}
+.links a.sec{background:var(--soft);color:var(--acc)}
+.fb{display:grid;grid-template-columns:1fr 110px 50px;gap:6px;align-items:center;font-size:13px;margin:3px 0}
+.fb i{display:block;height:7px;background:var(--soft);border-radius:4px;overflow:hidden}.fb i b{display:block;height:100%;background:var(--acc2)}
+.md{background:var(--pan);border:1px solid var(--line);border-radius:12px;padding:8px 26px 20px;max-width:900px;margin:16px auto}
+.md table{border-collapse:collapse}.md td,.md th{border:1px solid var(--line);padding:5px 9px}.md blockquote{margin:0;padding:4px 12px;border-left:4px solid var(--acc2);color:var(--mut)}
+.empty{padding:40px;text-align:center;color:var(--mut)}
+#tog{display:none}
+dialog{border:1px solid var(--line);border-radius:12px;max-width:440px}
+@media(max-width:900px){
+ .wrap{display:block;padding:10px}aside{position:static;max-height:none;display:none;margin-bottom:10px}aside.open{display:block}
+ #tog{display:inline-block}.th{display:none}
+ .row{grid-template-columns:1fr auto;gap:2px 10px}.row>.c-d{grid-column:1/2}.row>.c-s{grid-column:2;grid-row:1;text-align:right}
+ .row>.c-x{display:none}.row>.c-w,.row>.c-cat{grid-column:1/-1}
+ .row>.num{text-align:left}.row>.c-sum::before{content:"Требование: ";color:var(--mut)}.row>.c-p::before{content:"Цена: ";color:var(--mut)}.row>.c-r::before{content:"×";color:var(--mut)}.row>.c-dt::before{content:"Торги: ";color:var(--mut)}
+ .row>.c-sum,.row>.c-p,.row>.c-r,.row>.c-dt{grid-column:auto;font-size:13.5px}
+ .card{grid-template-columns:1fr}.kv{grid-template-columns:110px 1fr}
+ .md{padding:4px 14px 14px}
+}
+</style></head><body>
+<header><h1>Реестр прав требования</h1>
+<nav><button data-v="reg" class="on">Реестр</button> <button data-v="met">Методика</button> <button id="cfg">Данные</button></nav>
+<div class="meta" id="meta"></div></header>
+<div id="vreg" class="wrap">
+<aside id="flt">
+ <label>Поиск по тексту</label><input id="q" type="search" placeholder="должник, ИНН, дело, описание…">
+ <label>Сумма требования, ₽</label><div class="two"><input id="sum0" inputmode="numeric" placeholder="от"><input id="sum1" inputmode="numeric" placeholder="до"></div>
+ <label>Начальная цена, ₽</label><div class="two"><input id="p0" inputmode="numeric" placeholder="от"><input id="p1" inputmode="numeric" placeholder="до"></div>
+ <label>Разница (требование − цена), ₽</label><div class="two"><input id="df0" inputmode="numeric" placeholder="от"><input id="df1" inputmode="numeric" placeholder="до"></div>
+ <label>Балл перспективы</label><div class="two"><input id="s0" inputmode="numeric" placeholder="от 0"><input id="s1" inputmode="numeric" placeholder="до 100"></div>
+ <label>Категория</label><select id="cat"></select>
+ <label>Контрагент</label><select id="fl"><option value="">ФЛ и ЮЛ</option><option>ФЛ</option><option>ЮЛ</option><option value="-">не указан</option></select>
+ <label>Этап</label><select id="stg"></select>
+ <label>Регион / суд</label><select id="reg"></select>
+ <label>Площадка</label><select id="pl"></select>
+ <label>Дата торгов</label><div class="two"><input id="d0" type="date"><input id="d1" type="date"></div>
+ <label>Начало приёма заявок</label><div class="two"><input id="a0" type="date"><input id="a1" type="date"></div>
+ <div class="chk"><input type="checkbox" id="fsub"><span>Субсидиарная ответственность</span></div>
+ <div class="chk"><input type="checkbox" id="fdmg"><span>Убытки с третьих лиц</span></div>
+ <div class="chk"><input type="checkbox" id="fas"><span>Есть проверка активов</span></div>
+ <button class="lbtn sec" id="rst" style="margin-top:10px;width:100%">Сбросить фильтры</button>
+</aside>
+<main>
+ <div class="bar"><button class="lbtn" id="tog">Фильтры</button><span class="cnt" id="cnt"></span>
+  <select id="so"><option value="score">Балл</option><option value="ratio">Требование/цена</option><option value="claim_amount">Сумма требования</option><option value="start_price">Цена</option><option value="difference">Разница</option><option value="auction_date">Дата торгов</option><option value="application_start">Начало приёма</option><option value="debtor">Должник</option><option value="region">Регион</option><option value="platform">Площадка</option><option value="category">Категория</option></select>
+  <select id="dir"><option value="-1">↓ убыв.</option><option value="1">↑ возр.</option></select></div>
+ <div class="th"><span data-k="debtor">Должник / дело</span><span data-k="category">Требование к</span><span data-k="claim_amount" class="num">Требование</span><span data-k="start_price" class="num">Цена</span><span data-k="ratio" class="num">×</span><span data-k="auction_date">Торги</span><span data-k="platform">Площадка</span><span data-k="score">Балл</span></div>
+ <div id="L"></div><div id="more"></div>
+</main></div>
+<div id="vmet" style="display:none"><div class="md" id="md"></div></div>
+<dialog id="dlg"><h3 style="margin-top:0">Данные</h3>
+ <p class="sm" id="dsrc"></p>
+ <p><button class="lbtn" id="ld">Загрузить lots.json с устройства</button><input type="file" id="file" accept=".json,application/json" hidden></p>
+ <div id="ghbox"><p class="sm">Синхронизация с закрытым репозиторием GitHub. Нужен fine-grained ключ только на чтение (Contents: Read-only) к репозиторию <b id="rp"></b>. Ключ хранится только на этом устройстве.</p>
+ <input id="tok" placeholder="github_pat_…" autocomplete="off"><p><button class="lbtn" id="con">Подключить</button> <button class="lbtn sec" id="syn">Обновить сейчас</button> <button class="lbtn sec" id="dis">Отключить</button></p></div>
+ <p id="dmsg" class="sm"></p><p style="text-align:right"><button class="lbtn sec" id="cls">Закрыть</button></p></dialog>
+<script>
+const EMB=/*__DATA__*/null, EMD=/*__MD__*/null, REPO='makc178/claims-registry-data', BRANCH='main';
+const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
+let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
+const ls={g:k=>{try{return localStorage.getItem(k)}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},d:k=>{try{localStorage.removeItem(k)}catch(e){}}};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num=v=>{if(v==null||v==='')return null;const n=typeof v==='number'?v:parseFloat(String(v).replace(/\s/g,'').replace(',','.'));return isFinite(n)?n:null};
+const rub=v=>{v=num(v);return v==null?'—':v.toLocaleString('ru-RU',{maximumFractionDigits:v<1000?2:0})};
+const dd=s=>{if(!s)return '—';const m=String(s).match(/(\d{4})-(\d\d)-(\d\d)(?:T(\d\d:\d\d))?/);return m?`${m[3]}.${m[2]}.${m[1]}`+(m[4]?' '+m[4]:''):esc(s)};
+const g=(o,p)=>p.split('.').reduce((a,k)=>a==null?a:a[k],o);
+function norm(l){ // терпим отсутствующие поля и простые формы
+ const o={...l};o.debtor=typeof l.debtor==='string'?{name:l.debtor}:(l.debtor||{});o.counterparty=typeof l.counterparty==='string'?{name:l.counterparty}:(l.counterparty||{});
+ o.claim_amount=num(l.claim_amount);o.start_price=num(l.start_price);
+ o.ratio=num(l.ratio)??(o.claim_amount&&o.start_price?o.claim_amount/o.start_price:null);
+ o.difference=num(l.difference)??(o.claim_amount!=null&&o.start_price!=null?o.claim_amount-o.start_price:null);
+ const s=l.score;o._s=typeof s==='object'&&s?num(s.total):num(s);o.score=typeof s==='object'&&s?s:{total:o._s};
+ o.flags=l.flags||{};o.links=l.links||{};o.region=l.region||l.court||null;
+ o._t=[o.debtor.name,o.debtor.inn,o.case,o.counterparty.name,o.counterparty.inn,o.description,o.category,o.platform,o.region,o.court,o.arbitration_manager,JSON.stringify(o.assets||''),JSON.stringify(o.subsidiary||'')].join(' ').toLowerCase();
+ return o}
+function setData(d,src,save){
+ if(Array.isArray(d))d={lots:d};if(!d||!Array.isArray(d.lots))throw new Error('В файле нет массива lots');
+ DATA={...d,lots:d.lots.map(norm)};SRC=src;if(save)ls.s(LS,JSON.stringify(d));opts();render()}
+function opts(){const u=k=>[...new Set(DATA.lots.map(l=>g(l,k)).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'ru'));
+ const fill=(id,k,all)=>{const v=$(id).value;$(id).innerHTML=`<option value="">${all}</option>`+u(k).map(x=>`<option>${esc(x)}</option>`).join('');$(id).value=v};
+ fill('cat','category','Все категории');fill('reg','region','Все регионы');fill('pl','platform','Все площадки');fill('stg','stage','Все этапы');
+ const dt=DATA.data_date||DATA.generated_at;$('meta').textContent=`Данные на ${dd(dt)} · лотов: ${DATA.lots.length} · источник: ${SRC}`+(DATA.source?` · ${DATA.source}`:'')}
+function flt(){const v=id=>$(id).value.trim(),n=id=>num(v(id)),q=v('q').toLowerCase().split(/\s+/).filter(Boolean);
+ const rng=(x,a,b)=>(a==null||(x!=null&&x>=a))&&(b==null||(x!=null&&x<=b));const dr=(x,a,b)=>(!a||(x&&x.slice(0,10)>=a))&&(!b||(x&&x.slice(0,10)<=b));
+ return DATA.lots.filter(l=>q.every(w=>l._t.includes(w))&&rng(l.claim_amount,n('sum0'),n('sum1'))&&rng(l.start_price,n('p0'),n('p1'))&&rng(l.difference,n('df0'),n('df1'))&&rng(l._s,n('s0'),n('s1'))
+ &&(!v('cat')||l.category===v('cat'))&&(!v('reg')||l.region===v('reg'))&&(!v('pl')||l.platform===v('pl'))&&(!v('stg')||l.stage===v('stg'))
+ &&(!v('fl')||(v('fl')==='-'?!l.counterparty.type:l.counterparty.type===v('fl')))&&dr(l.auction_date,v('d0'),v('d1'))&&dr(l.application_start,v('a0'),v('a1'))
+ &&(!$('fsub').checked||l.flags.subsidiary)&&(!$('fdmg').checked||l.flags.third_party_damages)&&(!$('fas').checked||l.assets))}
+function key(l){return SK==='score'?l._s:SK==='debtor'?l.debtor.name:l[SK]}
+function srt(a){return a.sort((x,y)=>{const A=key(x),B=key(y);if(A==null&&B==null)return 0;if(A==null)return 1;if(B==null)return -1;return (typeof A==='number'?A-B:String(A).localeCompare(String(B),'ru'))*SD})}
+const scl=s=>s==null?'':s>=60?'h':s>=35?'m':'';
+function row(l){const f=l.flags;return `<div class="lot" data-id="${esc(l.id)}"><div class="row">
+<div class="c-d"><div class="d1">${esc(l.debtor.name||'Должник не указан')}</div><div class="sm">${esc(l.case||'')}${l.lot_no!=null?' · лот '+esc(l.lot_no):''}${l.region?' · '+esc(l.region):''}</div></div>
+<div class="c-w"><div>${esc(l.counterparty.name||'—')} ${l.counterparty.type?`<span class="tag">${esc(l.counterparty.type)}</span>`:''}</div><div>${l.category?`<span class="tag">${esc(l.category)}</span>`:''}${f.subsidiary?'<span class="tag f">субсидиарка</span>':''}${f.third_party_damages?'<span class="tag f">убытки</span>':''}</div></div>
+<div class="num c-sum">${rub(l.claim_amount)}</div><div class="num c-p">${rub(l.start_price)}</div><div class="num c-r">${l.ratio==null?'—':Math.round(l.ratio).toLocaleString('ru-RU')}</div>
+<div class="c-dt">${dd(l.auction_date)}</div><div class="c-x sm">${esc(l.platform||'')}</div><div class="c-s"><span class="sc ${scl(l._s)}">${l._s??'—'}</span></div></div>${OPEN.has(l.id)?card(l):''}</div>`}
+const kv=(o)=>'<dl class="kv">'+o.filter(x=>x[1]!=null&&x[1]!=='').map(x=>`<dt>${x[0]}</dt><dd>${x[2]?x[1]:esc(x[1])}</dd>`).join('')+'</dl>';
+function card(l){const L=l.links,a=l.assets,s=l.subsidiary,sc=l.score||{};
+ const an=(L.analytics||[]).map((u,i)=>{const h=typeof u==='string'?u:u.url,t=typeof u==='string'?(()=>{try{return new URL(u).hostname}catch(e){return 'источник '+(i+1)}})():(u.title||u.url);return h?`<a class="sec" target="_blank" rel="noopener" href="${esc(h)}">${esc(t)}</a>`:''}).join('');
+ const fa=(sc.factors||[]).map(f=>{const m=num(f.max),p=num(f.points)??0;return `<div class="fb"><span>${esc(f.label||f.name)}${f.note?`<div class="sm">${esc(f.note)}</div>`:''}</span><i><b style="width:${m?Math.max(0,Math.min(100,p/m*100)):0}%"></b></i><span class="num">${p}${m?' / '+m:''}</span></div>`}).join('');
+ return `<div class="card">
+<div class="full links">${L.efrsb?`<a target="_blank" rel="noopener" href="${esc(L.efrsb)}">Сообщение ЕФРСБ</a>`:''}${L.auction?`<a target="_blank" rel="noopener" href="${esc(L.auction)}">Торги</a>`:''}${L.kad?`<a target="_blank" rel="noopener" href="${esc(L.kad)}">kad.arbitr</a>`:''}${an}</div>
+<div><h3>Лот</h3>${kv([['Должник',l.debtor.name],['ИНН должника',l.debtor.inn],['Дело',l.case],['Суд',l.court],['Требование к',l.counterparty.name],['ИНН/ОГРН',[l.counterparty.inn,l.counterparty.ogrn].filter(Boolean).join(' / ')],['Категория',l.category],['Сумма требования',l.claim_amount!=null?rub(l.claim_amount)+' ₽':null],['Начальная цена',l.start_price!=null?rub(l.start_price)+' ₽':null],['Разница',l.difference!=null?rub(l.difference)+' ₽':null],['Тип торгов',l.auction_type],['Приём заявок',(l.application_start||l.application_end)?dd(l.application_start)+' – '+dd(l.application_end):null],['Торги',l.auction_date?dd(l.auction_date):null],['Площадка',l.platform],['АУ',l.arbitration_manager]])}</div>
+<div><h3>Балл перспективы: ${l._s??'—'} / 100</h3>${fa||'<p class="sm">Разбивка по факторам не передана.</p>'}${sc.comment?`<p class="sm">${esc(sc.comment)}</p>`:''}</div>
+<div><h3>Активы контрагента</h3>${a?kv([['Статус',a.status],['Активы',a.summary],['Исп. производства',a.enforcement],['Банкротство',a.own_bankruptcy],['Перспективы',a.prospects],['Обоснование',a.rationale],['Не проверено',a.unchecked]]):'<p class="sm">Проверка активов не проводилась.</p>'}</div>
+<div><h3>Субсидиарка и убытки с третьих лиц</h3>${s?kv([['КДЛ',s.controlling_persons],['Активы КДЛ',s.cdl_assets],['Третьи лица',s.third_parties],['Основания',s.grounds],['Сроки',s.deadlines],['Перспектива',s.outlook],['Оценка',s.score!=null?s.score+' / 100':null]]):'<p class="sm">Нет данных.</p>'}</div>
+${l.description?`<div class="full"><h3>Описание лота</h3><div class="sm">${esc(l.description)}</div></div>`:''}${l.note?`<div class="full sm">Примечание: ${esc(l.note)}</div>`:''}</div>`}
+function render(){if(!DATA){$('L').innerHTML='<div class="empty">Данных нет. Нажмите «Данные», чтобы загрузить lots.json или подключить GitHub.</div>';$('cnt').textContent='';return}
+ const r=srt(flt());$('cnt').textContent=`Найдено: ${r.length} из ${DATA.lots.length}`;$('L').innerHTML=r.slice(0,SHOW).map(row).join('')||'<div class="empty">Ничего не найдено</div>';
+ $('more').innerHTML=r.length>SHOW?`<button class="lbtn sec" style="width:100%" onclick="SHOW+=200;render()">Показать ещё (${r.length-SHOW})</button>`:'';
+ document.querySelectorAll('.th span').forEach(s=>s.classList.toggle('on',s.dataset.k===SK));$('so').value=SK;$('dir').value=SD}
+$('L').onclick=e=>{if(e.target.closest('a')||e.target.closest('.card'))return;const el=e.target.closest('.lot');if(!el)return;const id=el.dataset.id;OPEN.has(id)?OPEN.delete(id):OPEN.add(id);const l=DATA.lots.find(x=>x.id==id);el.outerHTML=row(l)};
+document.querySelectorAll('aside input,aside select').forEach(x=>x.addEventListener('input',()=>{SHOW=100;render()}));
+$('rst').onclick=()=>{document.querySelectorAll('aside input').forEach(x=>x.type==='checkbox'?x.checked=false:x.value='');document.querySelectorAll('aside select').forEach(x=>x.value='');render()};
+$('so').onchange=()=>{SK=$('so').value;render()};$('dir').onchange=()=>{SD=+$('dir').value;render()};
+document.querySelectorAll('.th span').forEach(s=>s.onclick=()=>{if(SK===s.dataset.k)SD=-SD;else{SK=s.dataset.k;SD=['debtor','category','platform','region'].includes(SK)?1:-1}render()});
+$('tog').onclick=()=>$('flt').classList.toggle('open');
+document.querySelectorAll('nav button[data-v]').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button[data-v]').forEach(x=>x.classList.toggle('on',x===b));$('vreg').style.display=b.dataset.v==='reg'?'':'none';$('vmet').style.display=b.dataset.v==='met'?'':'none';if(b.dataset.v==='met')$('md').innerHTML=md(MD||'# Методика\n\nМетодика ещё не загружена.')});
+function inl(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\*(.+?)\*/g,'<i>$1</i>').replace(/`(.+?)`/g,'<code>$1</code>').replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')}
+function md(t){const L=t.replace(/\r/g,'').split('\n');let h='',i=0;while(i<L.length){let x=L[i];
+ if(/^#{1,6}\s/.test(x)){const n=x.match(/^#+/)[0].length;h+=`<h${n}>${inl(x.slice(n).trim())}</h${n}>`;i++}
+ else if(/^\s*\|/.test(x)){const rows=[];while(i<L.length&&/^\s*\|/.test(L[i]))rows.push(L[i++]);const c=r=>r.trim().replace(/^\||\|$/g,'').split('|').map(s=>s.trim());
+  h+='<table>'+rows.filter(r=>!/^\s*\|?[\s:\-|]+\|?\s*$/.test(r)).map((r,j)=>'<tr>'+c(r).map(v=>j?`<td>${inl(v)}</td>`:`<th>${inl(v)}</th>`).join('')+'</tr>').join('')+'</table>'}
+ else if(/^\s*([-*]|\d+\.)\s/.test(x)){const o=/^\s*\d+\./.test(x);h+=o?'<ol>':'<ul>';while(i<L.length&&/^\s*([-*]|\d+\.)\s/.test(L[i]))h+='<li>'+inl(L[i++].replace(/^\s*([-*]|\d+\.)\s/,''))+'</li>';h+=o?'</ol>':'</ul>'}
+ else if(/^>/.test(x)){let b='';while(i<L.length&&/^>/.test(L[i]))b+=L[i++].replace(/^>\s?/,'')+' ';h+=`<blockquote>${inl(b)}</blockquote>`}
+ else if(/^(---|\*\*\*)\s*$/.test(x)){h+='<hr>';i++}else if(!x.trim())i++;
+ else{let p='';while(i<L.length&&L[i].trim()&&!/^(#|\s*\||\s*[-*]\s|\s*\d+\.\s|>)/.test(L[i]))p+=L[i++]+' ';h+=`<p>${inl(p)}</p>`}}return h}
+// --- данные: файл, GitHub (закрытый репозиторий), кэш ---
+$('cfg').onclick=()=>{$('dsrc').textContent=DATA?`Сейчас: ${SRC}, данные на ${dd(DATA.data_date||DATA.generated_at)}.`:'Данных нет.';$('rp').textContent=REPO;$('ghbox').style.display=REPO&&!REPO.startsWith('/*')?'':'none';$('tok').value=ls.g(LT)?'••••••••':'';$('dlg').showModal()};
+$('cls').onclick=()=>$('dlg').close();$('ld').onclick=()=>$('file').click();
+$('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{setData(JSON.parse(await f.text()),'файл '+f.name,true);$('dmsg').textContent='Загружено: '+DATA.lots.length+' лотов'}catch(err){$('dmsg').textContent='Ошибка: '+err.message}e.target.value=''};
+async function gh(path){const t=ls.g(LT);if(!t)throw new Error('нет ключа');const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?ref=${BRANCH}&_=${Date.now()}`,{headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github.raw+json'},cache:'no-store'});
+ if(r.status===401)throw new Error('ключ не подходит или отозван');if(r.status===404)throw new Error('нет доступа к '+REPO+'/'+path);if(!r.ok)throw new Error('GitHub '+r.status);return r.text()}
+async function sync(manual){if(EMB||!ls.g(LT))return;try{const j=JSON.parse(await gh('lots.json'));setData(j,'GitHub',true);try{MD=await gh('METHODOLOGY.md');ls.s(LM,MD)}catch(e){}if(manual)$('dmsg').textContent='Обновлено с GitHub: '+DATA.lots.length+' лотов'}catch(e){(manual?$('dmsg'):$('meta')).textContent+=(manual?'':' · ')+'Синхронизация не удалась: '+e.message+(DATA?' (показан кэш)':'')}}
+$('con').onclick=()=>{const v=$('tok').value.trim();if(!/^(github_pat_|ghp_)/.test(v)){$('dmsg').textContent='Ключ должен начинаться с github_pat_';return}ls.s(LT,v);$('tok').value='••••••••';sync(true)};
+$('syn').onclick=()=>sync(true);$('dis').onclick=()=>{ls.d(LT);$('tok').value='';$('dmsg').textContent='Ключ удалён с устройства'};
+// старт
+if(EMB)setData(EMB,'встроенные данные',false);else{try{const c=ls.g(LS);if(c){setData(JSON.parse(c),'кэш устройства',false)}}catch(e){}MD=MD||ls.g(LM);if(!DATA)render();sync(false);document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync(false)})}
+</script></body></html>
