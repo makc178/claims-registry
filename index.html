@@ -53,7 +53,7 @@ dialog{border:1px solid var(--line);border-radius:12px;max-width:440px}
 }
 </style></head><body>
 <header><h1>Реестр прав требования</h1>
-<nav><button data-v="reg" class="on">Реестр</button> <button data-v="met">Методика</button> <button id="cfg">Данные</button></nav>
+<nav><button data-v="reg" class="on">Реестр</button> <button data-v="met">Методика</button> <button data-v="src">Исходные файлы</button> <button id="cfg">Данные</button></nav>
 <div class="meta" id="meta"></div></header>
 <div id="vreg" class="wrap">
 <aside id="flt">
@@ -82,6 +82,7 @@ dialog{border:1px solid var(--line);border-radius:12px;max-width:440px}
  <div id="L"></div><div id="more"></div>
 </main></div>
 <div id="vmet" style="display:none"><div class="md" id="md"></div></div>
+<div id="vsrc" style="display:none"><div class="md"><h2>Исходные файлы</h2><p class="sm" id="srcm"></p><div id="srcl"></div></div></div>
 <dialog id="dlg"><h3 style="margin-top:0">Данные</h3>
  <p class="sm" id="dsrc"></p>
  <p><button class="lbtn" id="ld">Загрузить lots.json с устройства</button><input type="file" id="file" accept=".json,application/json" hidden></p>
@@ -175,7 +176,7 @@ $('rst').onclick=()=>{document.querySelectorAll('aside input').forEach(x=>x.type
 $('so').onchange=()=>{SK=$('so').value;render()};$('dir').onchange=()=>{SD=+$('dir').value;render()};
 document.querySelectorAll('.th span').forEach(s=>s.onclick=()=>{if(SK===s.dataset.k)SD=-SD;else{SK=s.dataset.k;SD=['debtor','category','platform','region'].includes(SK)?1:-1}render()});
 $('tog').onclick=()=>$('flt').classList.toggle('open');
-document.querySelectorAll('nav button[data-v]').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button[data-v]').forEach(x=>x.classList.toggle('on',x===b));$('vreg').style.display=b.dataset.v==='reg'?'':'none';$('vmet').style.display=b.dataset.v==='met'?'':'none';if(b.dataset.v==='met')$('md').innerHTML=md(MD||'# Методика\n\nМетодика ещё не загружена.')});
+document.querySelectorAll('nav button[data-v]').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button[data-v]').forEach(x=>x.classList.toggle('on',x===b));$('vreg').style.display=b.dataset.v==='reg'?'':'none';$('vmet').style.display=b.dataset.v==='met'?'':'none';$('vsrc').style.display=b.dataset.v==='src'?'':'none';if(b.dataset.v==='src')srcList();if(b.dataset.v==='met')$('md').innerHTML=md(MD||'# Методика\n\nМетодика ещё не загружена.')});
 function inl(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\*(.+?)\*/g,'<i>$1</i>').replace(/`(.+?)`/g,'<code>$1</code>').replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')}
 function md(t){const L=t.replace(/\r/g,'').split('\n');let h='',i=0;while(i<L.length){let x=L[i];
  if(/^#{1,6}\s/.test(x)){const n=x.match(/^#+/)[0].length;h+=`<h${n}>${inl(x.slice(n).trim())}</h${n}>`;i++}
@@ -205,6 +206,19 @@ async function gh(path){const t=clean(ls.g(LT));if(!t)throw new Error('нет к
 async function sync(manual){if(EMB||!ls.g(LT))return;try{const j=JSON.parse(await gh('lots.json'));setData(j,'GitHub',true);try{MD=await gh('METHODOLOGY.md');ls.s(LM,MD)}catch(e){}if(manual)$('dmsg').textContent='Обновлено с GitHub: '+DATA.lots.length+' лотов'}catch(e){(manual?$('dmsg'):$('meta')).textContent+=(manual?'':' · ')+'Синхронизация не удалась: '+e.message+(DATA?' (показан кэш)':'')}}
 $('con').onclick=()=>{const v=clean($('tok').value);if(v==='••••••••'||/^•+$/.test(v)){sync(true);return}if(!/^(github_pat_|gh[pou]_)/.test(v)){$('dmsg').textContent='Ключ должен начинаться с github_pat_';return}ls.s(LT,v);VAULT.set('claims:token',v);VAULT.set('shared:token',v);VAULT.persist();$('tok').value='••••••••';sync(true)};
 $('syn').onclick=()=>sync(true);$('dis').onclick=()=>{if(!confirm('Удалить ключ GitHub с этого устройства?'))return;const o=ls.g(LT);VAULT.get('shared:token').then(t=>{if(t&&t===o)VAULT.set('shared:token',null)});VAULT.set('claims:token',null);ls.d(LT);$('tok').value='';$('dmsg').textContent='Ключ удалён с устройства'};
+// --- исходные файлы (закрытый репозиторий, sources/) ---
+const fsz=n=>n>1048576?(n/1048576).toFixed(1)+' МБ':Math.max(1,Math.round(n/1024))+' КБ';
+async function srcList(){const m=$('srcm'),L=$('srcl');L.innerHTML='';
+ if(EMB||!REPO||REPO.startsWith('/*')){m.textContent='Доступно в онлайн-версии после подключения ключа GitHub («Данные»).';return}
+ if(!ls.g(LT)){m.textContent='Подключите ключ GitHub в разделе «Данные», чтобы видеть и скачивать исходные файлы.';return}
+ m.textContent='Загрузка списка…';try{const j=JSON.parse(await gh('sources/index.json'));m.textContent='Обновлено на сервере: '+dd(j.deployed_at.slice(0,16));
+  L.innerHTML=j.files.map(f=>`<div class="lot"><div class="row" style="grid-template-columns:1fr auto;cursor:default"><div><div class="d1">${esc(f.name)}</div><div class="sm">${dd(f.updated.slice(0,16))} · ${fsz(f.size)}</div></div><button class="lbtn" data-f="${esc(f.name)}">Скачать</button></div></div>`).join('')}catch(e){m.textContent='Не удалось получить список: '+e.message}}
+$('srcl').onclick=async e=>{const b=e.target.closest('button[data-f]');if(!b)return;const n=b.dataset.f,o=b.textContent;b.textContent='…';b.disabled=true;
+ try{const r=await fetch(`https://api.github.com/repos/${REPO}/contents/sources/${encodeURIComponent(n)}?ref=${BRANCH}&_=${Date.now()}`,{headers:{Authorization:'Bearer '+ls.g(LT),Accept:'application/vnd.github.raw+json'},cache:'no-store'});
+  if(!r.ok)throw new Error('GitHub '+r.status);const bl=await r.blob(),file=new File([bl],n,{type:bl.type||'application/octet-stream'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/.test(navigator.userAgent)){try{await navigator.share({files:[file],title:n})}catch(x){if(x.name!=='AbortError')throw x}}
+  else{const u=URL.createObjectURL(file),a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)}
+  b.textContent='Готово'}catch(x){b.textContent='Ошибка';alert('Не удалось скачать '+n+': '+x.message)}setTimeout(()=>{b.textContent=o;b.disabled=false},2500)};
 // старт
 if(EMB)setData(EMB,'встроенные данные',false);else (async()=>{
  try{const c=ls.g(LS);if(c){await VAULT.set('claims:data',JSON.parse(c));ls.d(LS)}}catch(e){ls.d(LS)}   // перенос старого кэша из localStorage
