@@ -68,7 +68,7 @@ nav button.on .badge{background:var(--acc);color:#fff}#favbar{display:none;gap:8
 <div class="kp" id="kp"><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><button class="x" data-k="key">Ключ</button><button>0</button><button class="x" data-k="del">⌫</button></div>
 <a href="#" id="pinkey">Войти по ключу GitHub</a></div>
 <header><div class="hb"><img src="logo-white-s.png" alt="" style="height:32px;width:auto"><div><span class="brand-n">ПЦ «Эверест»</span> <span class="brand-s">· на вершине успеха</span><br><small>Аналитическая система</small></div></div>
-<nav><button data-v="reg" class="on">Реестр</button> <button data-v="fav">Избранное<span class="badge" id="favn">0</span></button> <button data-v="met">Методика</button> <button data-v="src">Исходные файлы</button> <button id="cfg">Данные</button></nav>
+<nav><button data-v="reg" class="on">Реестр</button> <button data-v="fav">Избранное<span class="badge" id="favn">0</span></button> <button data-v="met">Методика</button> <button data-v="rep">Отчёты анализа</button> <button data-v="src">Исходные файлы</button> <button id="cfg">Данные</button></nav>
 <div class="meta" id="meta"></div></header>
 <div id="vreg" class="wrap">
 <aside id="flt">
@@ -90,7 +90,7 @@ nav button.on .badge{background:var(--acc);color:#fff}#favbar{display:none;gap:8
  <button class="lbtn sec" id="rst" style="margin-top:10px;width:100%">Сбросить фильтры</button>
 </aside>
 <main>
- <div id="favbar"><span class="sm" id="favnote"></span><button class="lbtn" id="pdf">Экспорт в PDF</button></div>
+ <div id="favbar"><span class="sm" id="favnote"></span><button class="lbtn sec" id="deep">Углублённый анализ</button> <button class="lbtn" id="pdf">Экспорт в PDF</button></div>
  <div class="bar"><button class="lbtn" id="tog">Фильтры</button><span class="cnt" id="cnt"></span>
   <select id="so"><option value="score">Балл</option><option value="ratio">Требование/цена</option><option value="claim_amount">Сумма требования</option><option value="start_price">Цена</option><option value="difference">Разница</option><option value="auction_date">Дата торгов</option><option value="application_start">Начало приёма</option><option value="debtor">Должник</option><option value="region">Регион</option><option value="platform">Площадка</option><option value="category">Категория</option></select>
   <select id="dir"><option value="-1">↓ убыв.</option><option value="1">↑ возр.</option></select></div>
@@ -98,6 +98,8 @@ nav button.on .badge{background:var(--acc);color:#fff}#favbar{display:none;gap:8
  <div id="L"></div><div id="more"></div>
 </main></div>
 <div id="vmet" style="display:none"><div class="md" id="md"></div></div>
+<div id="vrep" style="display:none"><div class="md"><h2>Отчёты анализа</h2><p class="sm" id="repm"></p><div id="repl"></div></div></div>
+<div id="dreq" style="display:none"></div>
 <div id="vsrc" style="display:none"><div class="md"><h2>Исходные файлы</h2><p class="sm" id="srcm"></p><div id="srcl"></div></div></div>
 <footer style="text-align:center;font-size:11.5px;color:var(--mut);padding:14px">Аналитическая система Эверест · версия <span id="ver"></span></footer>
 <div id="printv"></div>
@@ -117,7 +119,7 @@ const IDB=(DB)=>{const ST='kv';let P=null;const db=()=>P||(P=new Promise((res,re
  return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 16:07 UTC · ff674a5',PINBLOB={"v": 1, "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "ABtw/TNMu8zPAvvxsVqXow==", "iv": "xV4IB3UEKDM6IKnz", "ct": "G+iyeWNHMlCR7PyNsgPGOIEF/fzCs7zH+i9ZBg67gBaCWyoF0Zta9wPe7YMRzcdzTYgQs/xhbshoRbgqzjy7btQFkLyZlk6dIKtBum+NSzrLa0gPKHJwFDcA8BuqGiLZYm3LQVSh9MTkyzR6mBVDDOu0u0I="};let PINOK=!PINBLOB;
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 16:10 UTC · 92f8108',PINBLOB={"v": 1, "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "ABtw/TNMu8zPAvvxsVqXow==", "iv": "xV4IB3UEKDM6IKnz", "ct": "G+iyeWNHMlCR7PyNsgPGOIEF/fzCs7zH+i9ZBg67gBaCWyoF0Zta9wPe7YMRzcdzTYgQs/xhbshoRbgqzjy7btQFkLyZlk6dIKtBum+NSzrLa0gPKHJwFDcA8BuqGiLZYm3LQVSh9MTkyzR6mBVDDOu0u0I="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
@@ -199,7 +201,7 @@ $('rst').onclick=()=>{document.querySelectorAll('aside input').forEach(x=>x.type
 $('so').onchange=()=>{SK=$('so').value;render()};$('dir').onchange=()=>{SD=+$('dir').value;render()};
 document.querySelectorAll('.th span').forEach(s=>s.onclick=()=>{if(SK===s.dataset.k)SD=-SD;else{SK=s.dataset.k;SD=['debtor','category','platform','region'].includes(SK)?1:-1}render()});
 $('tog').onclick=()=>$('flt').classList.toggle('open');
-document.querySelectorAll('nav button[data-v]').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button[data-v]').forEach(x=>x.classList.toggle('on',x===b));FAVMODE=b.dataset.v==='fav';$('vreg').style.display=(b.dataset.v==='reg'||FAVMODE)?'':'none';if(b.dataset.v==='reg'||FAVMODE){SHOW=100;render()}$('vmet').style.display=b.dataset.v==='met'?'':'none';$('vsrc').style.display=b.dataset.v==='src'?'':'none';if(b.dataset.v==='src')srcList();if(b.dataset.v==='met')$('md').innerHTML=md(MD||'# Методика\n\nМетодика ещё не загружена.')});
+document.querySelectorAll('nav button[data-v]').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button[data-v]').forEach(x=>x.classList.toggle('on',x===b));FAVMODE=b.dataset.v==='fav';$('vreg').style.display=(b.dataset.v==='reg'||FAVMODE)?'':'none';if(b.dataset.v==='reg'||FAVMODE){SHOW=100;render()}$('vmet').style.display=b.dataset.v==='met'?'':'none';$('vsrc').style.display=b.dataset.v==='src'?'':'none';$('vrep').style.display=b.dataset.v==='rep'?'':'none';if(b.dataset.v==='rep')repList();if(b.dataset.v==='src')srcList();if(b.dataset.v==='met')$('md').innerHTML=md(MD||'# Методика\n\nМетодика ещё не загружена.')});
 function inl(s){return esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\*(.+?)\*/g,'<i>$1</i>').replace(/`(.+?)`/g,'<code>$1</code>').replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')}
 function md(t){const L=t.replace(/\r/g,'').split('\n');let h='',i=0;while(i<L.length){let x=L[i];
  if(/^#{1,6}\s/.test(x)){const n=x.match(/^#+/)[0].length;h+=`<h${n}>${inl(x.slice(n).trim())}</h${n}>`;i++}
@@ -236,8 +238,9 @@ async function srcList(){const m=$('srcm'),L=$('srcl');L.innerHTML='';
  if(!TOKEN){m.textContent='Подключите ключ GitHub в разделе «Данные», чтобы видеть и скачивать исходные файлы.';return}
  m.textContent='Загрузка списка…';try{const j=JSON.parse(await gh('sources/index.json'));m.textContent='Обновлено на сервере: '+dd(j.deployed_at.slice(0,16));
   L.innerHTML=j.files.map(f=>`<div class="lot"><div class="row" style="grid-template-columns:1fr auto;cursor:default"><div><div class="d1">${esc(f.name)}</div><div class="sm">${dd(f.updated.slice(0,16))} · ${fsz(f.size)}</div></div><button class="lbtn" data-f="${esc(f.name)}">Скачать</button></div></div>`).join('')}catch(e){m.textContent='Не удалось получить список: '+e.message}}
-$('srcl').onclick=async e=>{const b=e.target.closest('button[data-f]');if(!b)return;const n=b.dataset.f,o=b.textContent;b.textContent='…';b.disabled=true;
- try{const r=await fetch(`https://api.github.com/repos/${REPO}/contents/sources/${encodeURIComponent(n)}?ref=${BRANCH}&_=${Date.now()}`,{headers:{Authorization:'Bearer '+clean(TOKEN),Accept:'application/vnd.github.raw+json'},cache:'no-store'});
+const dlClick=async e=>{const b=e.target.closest('button[data-f]');if(!b)return;const n=b.dataset.f,o=b.textContent;b.textContent='…';b.disabled=true;
+$('srcl').onclick=dlClick;$('repl').onclick=dlClick;
+ try{const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${(b.dataset.p||'sources/'+n).split('/').map(encodeURIComponent).join('/')}?ref=${BRANCH}&_=${Date.now()}`,{headers:{Authorization:'Bearer '+clean(TOKEN),Accept:'application/vnd.github.raw+json'},cache:'no-store'});
   if(!r.ok)throw new Error('GitHub '+r.status);const bl=await r.blob(),file=new File([bl],n,{type:bl.type||'application/octet-stream'});
   if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/.test(navigator.userAgent)){try{await navigator.share({files:[file],title:n})}catch(x){if(x.name!=='AbortError')throw x}}
   else{const u=URL.createObjectURL(file),a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000)}
@@ -267,7 +270,7 @@ function pinGate(){return new Promise(done=>{if(PINOK||!window.crypto||!crypto.s
 let FAV=new Map(),FAVUP=0,FAVMODE=false,FAVRO=null,FAVMSG='',CUR=[],favT=null;
 const star=(id,big)=>{const on=FAV.has(String(id));return `<button class="star${on?' on':''}" data-fid="${esc(id)}" title="${on?'Убрать из избранного':'В избранное'}" aria-pressed="${on}"${big?' style="font-size:24px;margin-right:6px"':''}>${on?'★':'☆'}</button>`};
 function favUI(){$('favn').textContent=FAV.size;$('favbar').style.display=FAVMODE?'flex':'none';
- $('favnote').textContent=FAVMODE?(FAVRO===true?'Избранное хранится только на этом устройстве: ключ GitHub только для чтения.':FAVRO===false?'Избранное синхронизируется с GitHub (favorites.json).':(TOKEN&&!EMB?'Избранное сохраняется на устройстве; синхронизация — при первом изменении.':'Избранное хранится только на этом устройстве.'))+(FAVMSG?' '+FAVMSG:''):'';$('pdf').disabled=!CUR.length}
+ $('favnote').textContent=FAVMODE?(FAVRO===true?'Избранное хранится только на этом устройстве: ключ GitHub только для чтения.':FAVRO===false?'Избранное синхронизируется с GitHub (favorites.json).':(TOKEN&&!EMB?'Избранное сохраняется на устройстве; синхронизация — при первом изменении.':'Избранное хранится только на этом устройстве.'))+(FAVMSG?' '+FAVMSG:''):'';$('pdf').disabled=!CUR.length;$('deep').disabled=!CUR.length}
 function favSave(){FAVUP=Date.now();CACHE.set('claims:fav',{updated:FAVUP,ids:Object.fromEntries(FAV)});clearTimeout(favT);favT=setTimeout(favPush,1500)}
 function favToggle(id){id=String(id);FAV.has(id)?FAV.delete(id):FAV.set(id,Date.now());favSave();
  document.querySelectorAll(`.star[data-fid="${CSS.escape(id)}"]`).forEach(b=>{const on=FAV.has(id);b.classList.toggle('on',on);b.textContent=on?'★':'☆';b.setAttribute('aria-pressed',on);b.title=on?'Убрать из избранного':'В избранное'});
@@ -328,6 +331,32 @@ function printReport(list){const T=rows=>'<table>'+clean2(rows).map(r=>`<tr><td 
   list.map((l,i)=>{const x=lotRows(l);return `<div class="pg">${hd}<h3>${i+1}. ${esc(l.debtor.name||'')} — ${esc(l.counterparty.name||'')} · балл ${l._s??'—'}</h3>${T(x.det)}<h4>Балл по факторам</h4><table>${x.fac.map(f=>`<tr><td>${esc(f[0])}</td><td>${esc(f[1])}</td><td>${esc(f[2])}</td></tr>`).join('')}</table><h4>Активы</h4>${T(x.ast)}<h4>Субсидиарка и убытки</h4>${T(x.sub)}<h4>Источники</h4>${x.links.map(k=>`<div>${esc(k[0])}: <a href="${esc(k[1])}">${esc(k[1])}</a></div>`).join('')}</div>`}).join('');
  setTimeout(()=>window.print(),100)}
 $('pdf').onclick=exportPdf;
+// --- отчёты анализа: reports/ в закрытом репозитории ---
+async function repList(){const m=$('repm'),L=$('repl');L.innerHTML='';
+ if(EMB||!REPO||REPO.startsWith('/*')){m.textContent='Доступно в онлайн-версии.';return}if(!TOKEN){m.textContent='Нужен вход (PIN или ключ GitHub).';return}
+ m.textContent='Загрузка списка…';try{const r=await ghApi('reports');if(r.status===404){m.textContent='Отчётов пока нет. Отметьте лоты в «Избранном» и нажмите «Углублённый анализ».';return}if(!r.ok)throw new Error('GitHub '+r.status);
+  const f=(await r.json()).filter(x=>x.type==='file'&&/\.(pdf|docx?|xlsx|html|md)$/i.test(x.name)).sort((a,b)=>b.name.localeCompare(a.name));
+  m.textContent=f.length?`Отчётов: ${f.length}`:'Отчётов пока нет.';
+  L.innerHTML=f.map(x=>`<div class="lot"><div class="row" style="grid-template-columns:1fr auto;cursor:default"><div><div class="d1">${esc(x.name)}</div><div class="sm">${fsz(x.size)}</div></div><button class="lbtn" data-f="${esc(x.name)}" data-p="${esc(x.path)}">Скачать</button></div></div>`).join('')}catch(e){m.textContent='Не удалось получить список: '+e.message+' '}}
+// --- запрос на углублённый анализ ---
+function deepReq(list){const t=new Date(),id=t.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z-'+Math.random().toString(36).slice(2,6);
+ return {type:'deep_analysis_request',version:1,id,created_at:t.toISOString(),source:'ПЦ «Эверест» / Избранное',data_date:DATA.data_date||null,
+  lots:list.map(l=>({id:l.id,debtor:{name:l.debtor.name||null,inn:l.debtor.inn||null},case:l.case||null,lot_no:l.lot_no??null,
+   counterparty:{name:l.counterparty.name||null,inn:l.counterparty.inn||null,ogrn:l.counterparty.ogrn||null,type:l.counterparty.type||null},
+   claim_amount:l.claim_amount,start_price:l.start_price,score:l._s,links:{efrsb:l.links.efrsb||null,auction:l.links.auction||null,kad:l.links.kad||null}}))}}
+function deepShow(req,why){const txt='Запрос на углублённый анализ (ПЦ «Эверест»)\n'+JSON.stringify(req,null,1);const D=$('dreq');
+ D.innerHTML=`<dialog id="dreqd" style="max-width:640px;width:92vw"><h3 style="margin-top:0">Углублённый анализ: ${req.lots.length} лот(ов)</h3><p class="sm">${esc(why)} Скопируйте запрос или отправьте его через «Поделиться» в чат с ботом.</p>
+ <textarea id="dreqt" readonly style="width:100%;height:220px;font:12px ui-monospace,monospace;border:1px solid var(--line);border-radius:7px;padding:6px">${esc(txt)}</textarea>
+ <p style="display:flex;gap:8px;flex-wrap:wrap"><button class="lbtn" id="dcp">Скопировать</button>${navigator.share?'<button class="lbtn" id="dsh">Поделиться</button>':''}<span style="flex:1"></span><button class="lbtn sec" id="dcl">Закрыть</button></p><p class="sm" id="dmg"></p></dialog>`;
+ D.style.display='';const d=$('dreqd');d.showModal();$('dcl').onclick=()=>{d.close();D.style.display='none'};
+ $('dcp').onclick=async()=>{try{await navigator.clipboard.writeText(txt);$('dmg').textContent='Скопировано'}catch(e){const t=$('dreqt');t.focus();t.select();t.setSelectionRange(0,1e6);try{document.execCommand('copy');$('dmg').textContent='Скопировано'}catch(x){$('dmg').textContent='Выделено — скопируйте вручную'}}};
+ if($('dsh'))$('dsh').onclick=async()=>{try{await navigator.share({title:'Запрос на углублённый анализ',text:txt})}catch(e){}}}
+$('deep').onclick=async()=>{const list=CUR.slice();if(!list.length)return;const req=deepReq(list),b=$('deep'),o=b.textContent;
+ if(EMB||!TOKEN||FAVRO===true||!REPO||REPO.startsWith('/*'))return deepShow(req,FAVRO===true?'Ключ GitHub только для чтения — отправить запрос напрямую нельзя.':'Нет подключения к GitHub.');
+ b.disabled=true;b.textContent='Отправка…';try{const r=await ghApi(`requests/${req.id}.json`,{method:'PUT',body:JSON.stringify({message:'deep analysis request '+req.id,branch:BRANCH,content:u8b64(JSON.stringify(req,null,1))})});
+  if(r.ok){FAVRO=false;alert(`Запрос отправлен (${req.lots.length} лот.). Отчёт появится в разделе «Отчёты анализа».`)}
+  else if([401,403,404].includes(r.status)){FAVRO=true;favUI();deepShow(req,'Ключ GitHub только для чтения — отправить запрос напрямую нельзя.')}
+  else deepShow(req,'GitHub ответил '+r.status+'.')}catch(e){deepShow(req,'Нет сети.')}finally{b.disabled=false;b.textContent=o}};
 // старт
 $('ver').textContent=VER.startsWith('/*')?'dev':VER;
 if(EMB){BOOTED=true;(async()=>{const f=await CACHE.get('claims:fav');if(f){FAV=new Map(Object.entries(f.ids||{}));FAVUP=f.updated||0}setData(EMB,'встроенные данные',false)})()}else (async()=>{
