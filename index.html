@@ -19,8 +19,11 @@ main{flex:1;min-width:0}
 .bar select{width:auto}
 .lbtn{background:var(--acc2);color:#fff;border:0;border-radius:7px;padding:7px 11px;font:inherit;cursor:pointer}
 .lbtn.sec{background:var(--soft);color:var(--acc)}
-.th,.row{display:grid;grid-template-columns:minmax(180px,2.2fr) 1.6fr 1.1fr 1fr .8fr .9fr .9fr .6fr;gap:10px;align-items:center;padding:9px 12px}
-.th{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em}.th span{cursor:pointer;user-select:none}.th span.on{color:var(--acc);font-weight:700}
+:root{--cols:minmax(0,2.2fr) minmax(0,1.6fr) minmax(0,1.1fr) minmax(0,1fr) minmax(0,.7fr) minmax(0,.9fr) minmax(0,.9fr) 120px}
+.th,.row{display:grid;grid-template-columns:var(--cols);gap:10px;align-items:center;padding:9px 12px}.th{border:1px solid transparent;border-bottom:0}.th>span{min-width:0}
+.th .num,.row>.num{text-align:right}.th .ctr,.row>.ctr{text-align:center}.c-s{text-align:center}
+.th span[data-k=score]{position:relative;display:block}#legh{position:absolute;left:0;right:0;top:100%;display:flex;justify-content:center}#legh .leg{margin:2px 0 0}
+.th{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.03em;padding-bottom:16px}.th span{cursor:pointer;user-select:none}.th span.on{color:var(--acc);font-weight:700}
 .lot{background:var(--pan);border:1px solid var(--line);border-radius:10px;margin-bottom:6px;overflow:hidden}
 .row{cursor:pointer}.row:hover{background:#f6f8fb}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -63,7 +66,7 @@ header .hb{display:flex;align-items:center;gap:10px;flex:1 1 auto}header .hb .br
 .c-s{white-space:nowrap}.badge{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:#fff;color:var(--acc);font-size:12px;font-weight:700;margin-left:4px}
 nav button.on .badge{background:var(--acc);color:#fff}#favbar{display:none;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}#favbar .sm{flex:1}
 #printv{display:none}@media print{body>*:not(#printv){display:none!important}#printv{display:block}#printv .pg{page-break-before:always}#printv table{border-collapse:collapse;width:100%;font-size:10px}#printv td,#printv th{border:1px solid #ccd;padding:3px}}
-.th .pct,.row>.pct{text-align:center}@media(max-width:900px){.row>.pct{text-align:left}}
+@media(max-width:900px){.row>.ctr,.row>.c-s{text-align:left}.row>.c-s{text-align:right}}
 .tag.ar,.arb{border-color:#a8483f;color:#a8483f}.arb{display:inline-block;border:1px solid;border-radius:6px;padding:1px 8px;font-size:12.5px;font-weight:600;background:#fbeeec;margin-left:6px}
 .mini{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}.mini td,.mini th{border-bottom:1px solid var(--line);padding:3px 5px;text-align:left;vertical-align:top}.mini th{color:var(--mut);font-weight:500}
 </style></head><body>
@@ -100,7 +103,7 @@ nav button.on .badge{background:var(--acc);color:#fff}#favbar{display:none;gap:8
  <div class="bar"><button class="lbtn" id="tog">Фильтры</button><span class="cnt" id="cnt"></span>
   <select id="so"><option value="score">Балл</option><option value="pct">Цена, % от долга</option><option value="claim_amount">Сумма требования</option><option value="start_price">Цена</option><option value="difference">Разница</option><option value="auction_date">Дата торгов</option><option value="application_start">Начало приёма</option><option value="debtor">Должник</option><option value="region">Регион</option><option value="platform">Площадка</option><option value="category">Категория</option></select>
   <select id="dir"><option value="-1">↓ убыв.</option><option value="1">↑ возр.</option></select></div>
- <div class="th"><span data-k="debtor">Должник / дело</span><span data-k="category">Требование к</span><span data-k="claim_amount" class="num">Требование</span><span data-k="start_price" class="num">Цена</span><span data-k="pct" class="pct">%</span><span data-k="auction_date">Торги</span><span data-k="platform">Площадка</span><span data-k="score">Балл<span id="legh"></span></span></div>
+ <div class="th"><span data-k="debtor">Должник / дело</span><span data-k="category">Требование к</span><span data-k="claim_amount" class="num">Требование</span><span data-k="start_price" class="num">Цена</span><span data-k="pct" class="ctr">%</span><span data-k="auction_date" class="ctr">Торги</span><span data-k="platform">Площадка</span><span data-k="score" class="ctr">Балл<span id="legh"></span></span></div>
  <div id="L"></div><div id="more"></div>
 </main></div>
 <div id="vmet" style="display:none"><div class="md" id="md"></div></div>
@@ -125,7 +128,7 @@ const IDB=(DB)=>{const ST='kv';let P=null;const db=()=>P||(P=new Promise((res,re
  return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 16:17 UTC · 4434ec4',PINBLOB={"v": 1, "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "ABtw/TNMu8zPAvvxsVqXow==", "iv": "xV4IB3UEKDM6IKnz", "ct": "G+iyeWNHMlCR7PyNsgPGOIEF/fzCs7zH+i9ZBg67gBaCWyoF0Zta9wPe7YMRzcdzTYgQs/xhbshoRbgqzjy7btQFkLyZlk6dIKtBum+NSzrLa0gPKHJwFDcA8BuqGiLZYm3LQVSh9MTkyzR6mBVDDOu0u0I="};let PINOK=!PINBLOB;
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 16:18 UTC · bfc2359',PINBLOB={"v": 1, "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "ABtw/TNMu8zPAvvxsVqXow==", "iv": "xV4IB3UEKDM6IKnz", "ct": "G+iyeWNHMlCR7PyNsgPGOIEF/fzCs7zH+i9ZBg67gBaCWyoF0Zta9wPe7YMRzcdzTYgQs/xhbshoRbgqzjy7btQFkLyZlk6dIKtBum+NSzrLa0gPKHJwFDcA8BuqGiLZYm3LQVSh9MTkyzR6mBVDDOu0u0I="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
@@ -189,8 +192,8 @@ function legend(){const st=[0,.25,.5,.75,1].map(t=>`rgb(${hsl2rgb(130*t,48,46)})
 function row(l){const f=l.flags;return `<div class="lot" data-id="${esc(l.id)}"><div class="row">
 <div class="c-d"><div class="d1">${esc(l.debtor.name||'Должник не указан')}</div><div class="sm">${esc(l.case||'')}${l.lot_no!=null?' · лот '+esc(l.lot_no):''}${l.region?' · '+esc(l.region):''}</div></div>
 <div class="c-w"><div>${esc(l.counterparty.name||'—')} ${l.counterparty.type?`<span class="tag">${esc(l.counterparty.type)}</span>`:''}</div><div>${l.category?`<span class="tag">${esc(l.category)}</span>`:''}${f.subsidiary?'<span class="tag f">субсидиарка</span>':''}${f.third_party_damages?'<span class="tag f">убытки</span>':''}${l.fssp_arrest?'<span class="tag ar">арест</span>':''}${l.pledges.length?'<span class="tag f">залог</span>':''}</div></div>
-<div class="num c-sum">${rub(l.claim_amount)}</div><div class="num c-p">${rub(l.start_price)}</div><div class="num c-r pct">${fpct(l.pct)}</div>
-<div class="c-dt">${dd(l.auction_date)}</div><div class="c-x sm">${esc(l.platform||'')}</div><div class="c-s">${star(l.id)}<span class="sc" style="${scSt(l._s)}">${l._s??'—'}</span></div></div>${OPEN.has(l.id)?card(l):''}</div>`}
+<div class="num c-sum">${rub(l.claim_amount)}</div><div class="num c-p">${rub(l.start_price)}</div><div class="c-r ctr">${fpct(l.pct)}</div>
+<div class="c-dt ctr">${dd(l.auction_date)}</div><div class="c-x sm">${esc(l.platform||'')}</div><div class="c-s">${star(l.id)}<span class="sc" style="${scSt(l._s)}">${l._s??'—'}</span></div></div>${OPEN.has(l.id)?card(l):''}</div>`}
 const kv=(o)=>'<dl class="kv">'+o.filter(x=>x[1]!=null&&x[1]!=='').map(x=>`<dt>${x[0]}</dt><dd>${x[2]?x[1]:esc(x[1])}</dd>`).join('')+'</dl>';
 function fsspBlock(l){const F=l.fssp,P=l.pledges;if(!F.length&&!P.length&&!l.fssp_arrest&&!l.fssp_arrest_note)return '';
  const fx=F.length?`<p class="sm" style="margin:2px 0">Исполнительных производств: <b>${F.length}</b>${l.fssp_sum?` · на сумму <b>${rub(l.fssp_sum)} ₽</b>`:''}</p><table class="mini"><tr><th>№ ИП</th><th>Дата</th><th>Предмет</th><th>Сумма, ₽</th><th>Статус</th><th>ОСП</th></tr>${F.map(x=>`<tr><td>${esc(x.number||'—')}</td><td>${dd(x.date)}</td><td>${esc(x.subject||'—')}</td><td class="num">${rub(x.amount)}</td><td>${esc(x.status||'—')}</td><td>${esc(x.osp||'—')}</td></tr>`).join('')}</table>`:'<p class="sm">Исполнительные производства не переданы.</p>';
