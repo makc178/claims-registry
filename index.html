@@ -86,10 +86,20 @@ dialog{border:1px solid var(--line);border-radius:12px;max-width:440px}
  <p class="sm" id="dsrc"></p>
  <p><button class="lbtn" id="ld">Загрузить lots.json с устройства</button><input type="file" id="file" accept=".json,application/json" hidden></p>
  <div id="ghbox"><p class="sm">Синхронизация с закрытым репозиторием GitHub. Нужен fine-grained ключ только на чтение (Contents: Read-only) к репозиторию <b id="rp"></b>. Ключ хранится только на этом устройстве.</p>
- <input id="tok" placeholder="github_pat_…" autocomplete="off"><p><button class="lbtn" id="con">Подключить</button> <button class="lbtn sec" id="syn">Обновить сейчас</button> <button class="lbtn sec" id="dis">Отключить</button></p></div>
+ <input id="tok" placeholder="github_pat_…" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><p class="sm">Ключ хранится на этом устройстве и не стирается при ошибках сети. На iPhone Safari и значок на экране «Домой» хранят данные раздельно — ключ вводится в каждом один раз; в «Частном доступе» ключ не сохраняется.</p><p><button class="lbtn" id="con">Подключить</button> <button class="lbtn sec" id="syn">Обновить сейчас</button> <button class="lbtn sec" id="dis">Отключить</button></p></div>
  <p id="dmsg" class="sm"></p><p style="text-align:right"><button class="lbtn sec" id="cls">Закрыть</button></p></dialog>
 <script>
 const EMB=/*__DATA__*/null, EMD=/*__MD__*/null, REPO='makc178/claims-registry-data', BRANCH='main';
+/* Общее надёжное хранилище для приложений на makc178.github.io (одно происхождение => общий localStorage с лимитом ~5 МБ).
+   Ключи с префиксом приложения; дубль в IndexedDB; navigator.storage.persist(). Ничего не удаляет само. */
+const VAULT = (() => { const DB = 'makc178-vault', ST = 'kv';
+  const db = () => new Promise((res, rej) => { if (!window.indexedDB) return rej(new Error('no idb')); const o = indexedDB.open(DB, 1);
+    o.onupgradeneeded = () => o.result.createObjectStore(ST); o.onsuccess = () => res(o.result); o.onerror = () => rej(o.error); });
+  const get = async k => { const d = await db(); return new Promise((res, rej) => { const r = d.transaction(ST).objectStore(ST).get(k); r.onsuccess = () => res(r.result ?? null); r.onerror = () => rej(r.error); }); };
+  const put = async (k, v) => { const d = await db(); return new Promise((res, rej) => { const t = d.transaction(ST, 'readwrite'); v == null ? t.objectStore(ST).delete(k) : t.objectStore(ST).put(v, k); t.oncomplete = () => res(true); t.onerror = () => rej(t.error); }); };
+  const persist = () => { try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) {} };
+  return {get: k => get(k).catch(() => null), set: (k, v) => put(k, v).catch(() => false), persist}; })();
+
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
 const ls={g:k=>{try{return localStorage.getItem(k)}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},d:k=>{try{localStorage.removeItem(k)}catch(e){}}};
@@ -125,7 +135,7 @@ function norm(l){l=adapt(l); // терпим отсутствующие поля
  return o}
 function setData(d,src,save){
  if(Array.isArray(d))d={lots:d};if(!d||!Array.isArray(d.lots))throw new Error('В файле нет массива lots');
- DATA={...d,lots:d.lots.map(norm)};SRC=src;if(save)ls.s(LS,JSON.stringify(d));opts();render()}
+ DATA={...d,lots:d.lots.map(norm)};SRC=src;if(save){VAULT.set('claims:data',d);ls.d(LS)}opts();render()}
 function opts(){const u=k=>[...new Set(DATA.lots.map(l=>g(l,k)).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'ru'));
  const fill=(id,k,all)=>{const v=$(id).value;$(id).innerHTML=`<option value="">${all}</option>`+u(k).map(x=>`<option>${esc(x)}</option>`).join('');$(id).value=v};
  fill('cat','category','Все категории');fill('reg','region','Все регионы');fill('pl','platform','Все площадки');fill('stg','stage','Все этапы');
@@ -179,11 +189,28 @@ function md(t){const L=t.replace(/\r/g,'').split('\n');let h='',i=0;while(i<L.le
 $('cfg').onclick=()=>{$('dsrc').textContent=DATA?`Сейчас: ${SRC}, данные на ${dd(DATA.data_date||DATA.generated_at)}.`:'Данных нет.';$('rp').textContent=REPO;$('ghbox').style.display=REPO&&!REPO.startsWith('/*')?'':'none';$('tok').value=ls.g(LT)?'••••••••':'';$('dlg').showModal()};
 $('cls').onclick=()=>$('dlg').close();$('ld').onclick=()=>$('file').click();
 $('file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{setData(JSON.parse(await f.text()),'файл '+f.name,true);$('dmsg').textContent='Загружено: '+DATA.lots.length+' лотов'}catch(err){$('dmsg').textContent='Ошибка: '+err.message}e.target.value=''};
-async function gh(path){const t=ls.g(LT);if(!t)throw new Error('нет ключа');const r=await fetch(`https://api.github.com/repos/${REPO}/contents/${path}?ref=${BRANCH}&_=${Date.now()}`,{headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github.raw+json'},cache:'no-store'});
- if(r.status===401)throw new Error('ключ не подходит или отозван');if(r.status===404)throw new Error('нет доступа к '+REPO+'/'+path);if(!r.ok)throw new Error('GitHub '+r.status);return r.text()}
+const clean=t=>String(t||'').replace(/[\s\u200b-\u200d\ufeff]/g,'');
+async function gh(path){const t=clean(ls.g(LT));if(!t)throw new Error('нет ключа');if(/[^\x21-\x7e]/.test(t))throw new Error('в ключе лишние символы — вставьте его заново');
+ const url=`https://api.github.com/repos/${REPO}/contents/${path}?ref=${BRANCH}&_=${Date.now()}`;let r,last;
+ for(let a=0;a<3;a++){const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),90000);
+  try{r=await fetch(url,{headers:{Authorization:'Bearer '+t,Accept:'application/vnd.github.raw+json','X-GitHub-Api-Version':'2022-11-28'},cache:'no-store',signal:ctl.signal});
+   if(r.status>=500&&a<2){await new Promise(z=>setTimeout(z,1500*(a+1)));continue}
+   if(r.ok){const x=await r.text();clearTimeout(tm);return x}break}
+  catch(e){last=e;await new Promise(z=>setTimeout(z,1500*(a+1)))}finally{clearTimeout(tm)}}
+ if(!r)throw new Error(`нет связи с api.github.com (${last&&last.name==='AbortError'?'истекло время':(last&&last.message)||'Load failed'}). Проверьте интернет/VPN и блокировщики контента; файл данных большой — нужна стабильная сеть. Ключ при этом сохранён`);
+ if(r.status===401)throw new Error('GitHub: ключ не подходит, истёк или отозван (401) — создайте новый');
+ if(r.status===403)throw new Error(r.headers.get('x-ratelimit-remaining')==='0'?'GitHub: превышен лимит запросов, попробуйте через час':'GitHub: у ключа нет права Contents: Read на '+REPO+' (403)');
+ if(r.status===404)throw new Error('GitHub: ключ не видит '+REPO+'/'+path+' (404). При создании ключа выберите репозиторий '+REPO+' в «Only select repositories»');
+ throw new Error('GitHub ответил '+r.status)}
 async function sync(manual){if(EMB||!ls.g(LT))return;try{const j=JSON.parse(await gh('lots.json'));setData(j,'GitHub',true);try{MD=await gh('METHODOLOGY.md');ls.s(LM,MD)}catch(e){}if(manual)$('dmsg').textContent='Обновлено с GitHub: '+DATA.lots.length+' лотов'}catch(e){(manual?$('dmsg'):$('meta')).textContent+=(manual?'':' · ')+'Синхронизация не удалась: '+e.message+(DATA?' (показан кэш)':'')}}
-$('con').onclick=()=>{const v=$('tok').value.trim();if(!/^(github_pat_|gh[pou]_)/.test(v)){$('dmsg').textContent='Ключ должен начинаться с github_pat_';return}ls.s(LT,v);$('tok').value='••••••••';sync(true)};
-$('syn').onclick=()=>sync(true);$('dis').onclick=()=>{ls.d(LT);$('tok').value='';$('dmsg').textContent='Ключ удалён с устройства'};
+$('con').onclick=()=>{const v=clean($('tok').value);if(v==='••••••••'||/^•+$/.test(v)){sync(true);return}if(!/^(github_pat_|gh[pou]_)/.test(v)){$('dmsg').textContent='Ключ должен начинаться с github_pat_';return}ls.s(LT,v);VAULT.set('claims:token',v);VAULT.set('shared:token',v);VAULT.persist();$('tok').value='••••••••';sync(true)};
+$('syn').onclick=()=>sync(true);$('dis').onclick=()=>{if(!confirm('Удалить ключ GitHub с этого устройства?'))return;const o=ls.g(LT);VAULT.get('shared:token').then(t=>{if(t&&t===o)VAULT.set('shared:token',null)});VAULT.set('claims:token',null);ls.d(LT);$('tok').value='';$('dmsg').textContent='Ключ удалён с устройства'};
 // старт
-if(EMB)setData(EMB,'встроенные данные',false);else{try{const c=ls.g(LS);if(c){setData(JSON.parse(c),'кэш устройства',false)}}catch(e){}MD=MD||ls.g(LM);if(!DATA)render();sync(false);document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync(false)})}
+if(EMB)setData(EMB,'встроенные данные',false);else (async()=>{
+ try{const c=ls.g(LS);if(c){await VAULT.set('claims:data',JSON.parse(c));ls.d(LS)}}catch(e){ls.d(LS)}   // перенос старого кэша из localStorage
+ try{const c=await VAULT.get('claims:data');if(c)setData(c,'кэш устройства',false)}catch(e){}
+ if(!ls.g(LT)){const t=await VAULT.get('claims:token');if(t)ls.s(LT,t)}
+ if(!ls.g(LT)&&REPO&&!REPO.startsWith('/*')){const t=await VAULT.get('shared:token');if(t){try{const r=await fetch(`https://api.github.com/repos/${REPO}`,{headers:{Authorization:'Bearer '+t}});if(r.ok){ls.s(LT,t);VAULT.set('claims:token',t)}}catch(e){}}}
+ if(ls.g(LT)){VAULT.set('claims:token',ls.g(LT));VAULT.persist()}
+ MD=MD||ls.g(LM);if(!DATA)render();sync(false);})();if(!EMB){document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync(false)})}
 </script></body></html>
