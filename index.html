@@ -26,7 +26,7 @@ main{flex:1;min-width:0}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .d1{font-weight:600}.sm{font-size:12.5px;color:var(--mut)}
 .sc{display:inline-block;min-width:38px;text-align:center;border-radius:6px;padding:2px 6px;font-weight:700;background:var(--soft);color:var(--acc)}
-.sc.h{background:#3b4a5e;color:#fff}.sc.m{background:#9fb0c4;color:#fff}
+.leg{display:inline-flex;align-items:center;gap:3px;margin-left:6px;vertical-align:middle;text-transform:none;letter-spacing:0}.leg i{display:inline-block;width:42px;height:7px;border-radius:4px}.leg em{font-style:normal;font-size:10px;color:var(--mut)}.leg em:first-of-type{order:-1}
 .tag{display:inline-block;font-size:11.5px;border:1px solid var(--line);border-radius:5px;padding:0 5px;margin:2px 3px 0 0;color:var(--mut)}
 .tag.f{border-color:var(--acc2);color:var(--acc2)}
 .card{border-top:1px solid var(--line);padding:12px 14px;background:#fafbfd;display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -96,7 +96,7 @@ nav button.on .badge{background:var(--acc);color:#fff}#favbar{display:none;gap:8
  <div class="bar"><button class="lbtn" id="tog">Фильтры</button><span class="cnt" id="cnt"></span>
   <select id="so"><option value="score">Балл</option><option value="pct">Цена, % от долга</option><option value="claim_amount">Сумма требования</option><option value="start_price">Цена</option><option value="difference">Разница</option><option value="auction_date">Дата торгов</option><option value="application_start">Начало приёма</option><option value="debtor">Должник</option><option value="region">Регион</option><option value="platform">Площадка</option><option value="category">Категория</option></select>
   <select id="dir"><option value="-1">↓ убыв.</option><option value="1">↑ возр.</option></select></div>
- <div class="th"><span data-k="debtor">Должник / дело</span><span data-k="category">Требование к</span><span data-k="claim_amount" class="num">Требование</span><span data-k="start_price" class="num">Цена</span><span data-k="pct" class="pct">%</span><span data-k="auction_date">Торги</span><span data-k="platform">Площадка</span><span data-k="score">Балл</span></div>
+ <div class="th"><span data-k="debtor">Должник / дело</span><span data-k="category">Требование к</span><span data-k="claim_amount" class="num">Требование</span><span data-k="start_price" class="num">Цена</span><span data-k="pct" class="pct">%</span><span data-k="auction_date">Торги</span><span data-k="platform">Площадка</span><span data-k="score">Балл<span id="legh"></span></span></div>
  <div id="L"></div><div id="more"></div>
 </main></div>
 <div id="vmet" style="display:none"><div class="md" id="md"></div></div>
@@ -121,7 +121,7 @@ const IDB=(DB)=>{const ST='kv';let P=null;const db=()=>P||(P=new Promise((res,re
  return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 16:12 UTC · 11c3346',PINBLOB={"v": 1, "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "ABtw/TNMu8zPAvvxsVqXow==", "iv": "xV4IB3UEKDM6IKnz", "ct": "G+iyeWNHMlCR7PyNsgPGOIEF/fzCs7zH+i9ZBg67gBaCWyoF0Zta9wPe7YMRzcdzTYgQs/xhbshoRbgqzjy7btQFkLyZlk6dIKtBum+NSzrLa0gPKHJwFDcA8BuqGiLZYm3LQVSh9MTkyzR6mBVDDOu0u0I="};let PINOK=!PINBLOB;
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-11 16:13 UTC · 2860cb9',PINBLOB={"v": 1, "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "ABtw/TNMu8zPAvvxsVqXow==", "iv": "xV4IB3UEKDM6IKnz", "ct": "G+iyeWNHMlCR7PyNsgPGOIEF/fzCs7zH+i9ZBg67gBaCWyoF0Zta9wPe7YMRzcdzTYgQs/xhbshoRbgqzjy7btQFkLyZlk6dIKtBum+NSzrLa0gPKHJwFDcA8BuqGiLZYm3LQVSh9MTkyzR6mBVDDOu0u0I="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
@@ -159,7 +159,7 @@ function norm(l){l=adapt(l); // терпим отсутствующие поля
  return o}
 function setData(d,src,save){
  if(Array.isArray(d))d={lots:d};if(!d||!Array.isArray(d.lots))throw new Error('В файле нет массива lots');
- DATA={...d,lots:d.lots.map(norm)};SRC=src;if(save){VAULT.set('claims:data',d);ls.d(LS)}opts();render()}
+ DATA={...d,lots:d.lots.map(norm)};scoreRange();SRC=src;if(save){VAULT.set('claims:data',d);ls.d(LS)}opts();render()}
 function opts(){const u=k=>[...new Set(DATA.lots.map(l=>g(l,k)).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'ru'));
  const fill=(id,k,all)=>{const v=$(id).value;$(id).innerHTML=`<option value="">${all}</option>`+u(k).map(x=>`<option>${esc(x)}</option>`).join('');$(id).value=v};
  fill('cat','category','Все категории');fill('reg','region','Все регионы');fill('pl','platform','Все площадки');fill('stg','stage','Все этапы');
@@ -172,12 +172,20 @@ function flt(SRCL){const v=id=>$(id).value.trim(),n=id=>num(v(id)),q=v('q').toLo
  &&(!$('fsub').checked||l.flags.subsidiary)&&(!$('fdmg').checked||l.flags.third_party_damages)&&(!$('fas').checked||(l.assets&&!l.assets._auto)))}
 function key(l){return SK==='score'?l._s:SK==='debtor'?l.debtor.name:l[SK]}
 function srt(a){return a.sort((x,y)=>{const A=key(x),B=key(y);if(A==null&&B==null)return 0;if(A==null)return 1;if(B==null)return -1;return (typeof A==='number'?A-B:String(A).localeCompare(String(B),'ru'))*SD})}
-const scl=s=>s==null?'':s>=60?'h':s>=35?'m':'';
+let SMIN=0,SMAX=100;
+function scoreRange(){const v=DATA.lots.map(l=>l._s).filter(x=>x!=null).sort((a,b)=>a-b);if(v.length<5){SMIN=0;SMAX=100;return}
+ const q=p=>v[Math.round(p*(v.length-1))];SMIN=q(.05);SMAX=q(.95);if(SMAX-SMIN<10){SMIN=0;SMAX=100}}
+function hsl2rgb(h,s,l){s/=100;l/=100;const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1));return [f(0),f(8),f(4)].map(x=>Math.round(x*255))}
+function scoreRGB(s){if(s==null)return null;const t=Math.max(0,Math.min(1,(s-SMIN)/(SMAX-SMIN)));return hsl2rgb(130*t,48,46)}
+function scoreTxt(rgb){const L=rgb.map(c=>{c/=255;return c<=.03928?c/12.92:((c+.055)/1.055)**2.4}),Y=.2126*L[0]+.7152*L[1]+.0722*L[2];return Y>.32?'#1e2834':'#fff'}
+function scSt(s){const c=scoreRGB(s);return c?`background:rgb(${c});color:${scoreTxt(c)}`:''}
+const scl=s=>'';
+function legend(){const st=[0,.25,.5,.75,1].map(t=>`rgb(${hsl2rgb(130*t,48,46)})`).join(',');return `<span class="leg" title="Цвет балла: красный — наименее перспективные, зелёный — наиболее (шкала ${SMIN}–${SMAX}, 5–95-й процентиль)"><i style="background:linear-gradient(90deg,${st})"></i><em>${SMIN}</em><em>${SMAX}</em></span>`}
 function row(l){const f=l.flags;return `<div class="lot" data-id="${esc(l.id)}"><div class="row">
 <div class="c-d"><div class="d1">${esc(l.debtor.name||'Должник не указан')}</div><div class="sm">${esc(l.case||'')}${l.lot_no!=null?' · лот '+esc(l.lot_no):''}${l.region?' · '+esc(l.region):''}</div></div>
 <div class="c-w"><div>${esc(l.counterparty.name||'—')} ${l.counterparty.type?`<span class="tag">${esc(l.counterparty.type)}</span>`:''}</div><div>${l.category?`<span class="tag">${esc(l.category)}</span>`:''}${f.subsidiary?'<span class="tag f">субсидиарка</span>':''}${f.third_party_damages?'<span class="tag f">убытки</span>':''}</div></div>
 <div class="num c-sum">${rub(l.claim_amount)}</div><div class="num c-p">${rub(l.start_price)}</div><div class="num c-r pct">${fpct(l.pct)}</div>
-<div class="c-dt">${dd(l.auction_date)}</div><div class="c-x sm">${esc(l.platform||'')}</div><div class="c-s">${star(l.id)}<span class="sc ${scl(l._s)}">${l._s??'—'}</span></div></div>${OPEN.has(l.id)?card(l):''}</div>`}
+<div class="c-dt">${dd(l.auction_date)}</div><div class="c-x sm">${esc(l.platform||'')}</div><div class="c-s">${star(l.id)}<span class="sc" style="${scSt(l._s)}">${l._s??'—'}</span></div></div>${OPEN.has(l.id)?card(l):''}</div>`}
 const kv=(o)=>'<dl class="kv">'+o.filter(x=>x[1]!=null&&x[1]!=='').map(x=>`<dt>${x[0]}</dt><dd>${x[2]?x[1]:esc(x[1])}</dd>`).join('')+'</dl>';
 function card(l){const L=l.links,a=l.assets,s=l.subsidiary,sc=l.score||{};
  const an=(L.analytics||[]).map((u,i)=>{const h=typeof u==='string'?u:u.url,t=typeof u==='string'?(()=>{try{return new URL(u).hostname}catch(e){return 'источник '+(i+1)}})():(u.title||u.url);return h?`<a class="sec" target="_blank" rel="noopener" href="${esc(h)}">${esc(t)}</a>`:''}).join('');
@@ -185,7 +193,7 @@ function card(l){const L=l.links,a=l.assets,s=l.subsidiary,sc=l.score||{};
  return `<div class="card">
 <div class="full links">${star(l.id,1)}${L.efrsb?`<a target="_blank" rel="noopener" href="${esc(L.efrsb)}">Сообщение ЕФРСБ</a>`:''}${L.auction?`<a target="_blank" rel="noopener" href="${esc(L.auction)}">Торги</a>`:''}${L.kad?`<a target="_blank" rel="noopener" href="${esc(L.kad)}">kad.arbitr</a>`:''}${an}</div>
 <div><h3>Лот</h3>${kv([['Должник',l.debtor.name],['ИНН должника',l.debtor.inn],['Дело',l.case],['Суд',l.court],['Требование к',l.counterparty.name],['ИНН/ОГРН',[l.counterparty.inn,l.counterparty.ogrn].filter(Boolean).join(' / ')],['Категория',l.category],['Сумма требования',l.claim_amount!=null?rub(l.claim_amount)+' ₽':null],['Начальная цена',l.start_price!=null?rub(l.start_price)+' ₽':null],['Разница',l.difference!=null?rub(l.difference)+' ₽':null],['Цена, % от долга',l.pct!=null?fpct(l.pct):null],['Тип торгов',l.auction_type],['Приём заявок',(l.application_start||l.application_end)?dd(l.application_start)+' – '+dd(l.application_end):null],['Торги',l.auction_date?dd(l.auction_date):null],['Площадка',l.platform],['АУ',l.arbitration_manager]])}</div>
-<div><h3>Балл перспективы: ${l._s??'—'} / 100</h3>${fa||'<p class="sm">Разбивка по факторам не передана.</p>'}${sc.comment?`<p class="sm">${esc(sc.comment)}</p>`:''}</div>
+<div><h3>Балл перспективы: <span class="sc" style="${scSt(l._s)}">${l._s??'—'}</span> / 100</h3>${fa||'<p class="sm">Разбивка по факторам не передана.</p>'}${sc.comment?`<p class="sm">${esc(sc.comment)}</p>`:''}</div>
 <div><h3>Активы контрагента</h3>${a?kv([['Статус',a.status],['Активы',a.summary],['Исп. производства',a.enforcement],['Банкротство',a.own_bankruptcy],['Перспективы',a.prospects],['Обоснование',a.rationale],['Не проверено',a.unchecked]]):'<p class="sm">Проверка активов не проводилась.</p>'}</div>
 <div><h3>Субсидиарка и убытки с третьих лиц</h3>${s?kv([['КДЛ',s.controlling_persons],['Активы КДЛ',s.cdl_assets],['Третьи лица',s.third_parties],['Основания',s.grounds],['Сроки',s.deadlines],['Перспектива',s.outlook],['Оценка',s.score!=null?s.score+' / 100':null]]):'<p class="sm">Нет данных.</p>'}</div>
 ${l.description?`<div class="full"><h3>Описание лота</h3><div class="sm">${esc(l.description)}</div></div>`:''}${l.note?`<div class="full sm">Примечание: ${esc(l.note)}</div>`:''}</div>`}
@@ -197,7 +205,7 @@ function render(){if(!DATA){$('cnt').textContent='';$('meta').innerHTML=metaTail
  const all=FAVMODE?DATA.lots.filter(l=>FAV.has(String(l.id))):DATA.lots,r=srt(flt(all));$('cnt').textContent=`Найдено: ${r.length} из ${all.length}`+(FAVMODE?' в избранном':'');CUR=r;
  $('L').innerHTML=r.slice(0,SHOW).map(row).join('')||(FAVMODE&&!all.length?'<div class="empty">В избранном пока пусто.<br>Нажмите ☆ у лота в реестре или в его карточке, чтобы добавить его сюда.</div>':'<div class="empty">Ничего не найдено</div>');favUI();
  $('more').innerHTML=r.length>SHOW?`<button class="lbtn sec" style="width:100%" onclick="SHOW+=200;render()">Показать ещё (${r.length-SHOW})</button>`:'';
- document.querySelectorAll('.th span').forEach(s=>s.classList.toggle('on',s.dataset.k===SK));$('so').value=SK;$('dir').value=SD}
+ $('legh').innerHTML=legend();document.querySelectorAll('.th span[data-k]').forEach(s=>s.classList.toggle('on',s.dataset.k===SK));$('so').value=SK;$('dir').value=SD}
 $('L').onclick=e=>{const st=e.target.closest('.star');if(st){e.stopPropagation();favToggle(st.dataset.fid);return}if(e.target.closest('a')||e.target.closest('.card'))return;const el=e.target.closest('.lot');if(!el)return;const id=el.dataset.id;OPEN.has(id)?OPEN.delete(id):OPEN.add(id);const l=DATA.lots.find(x=>x.id==id);el.outerHTML=row(l)};
 document.querySelectorAll('aside input,aside select').forEach(x=>x.addEventListener('input',()=>{SHOW=100;render()}));
 $('rst').onclick=()=>{document.querySelectorAll('aside input').forEach(x=>x.type==='checkbox'?x.checked=false:x.value='');document.querySelectorAll('aside select').forEach(x=>x.value='');render()};
@@ -311,10 +319,10 @@ async function exportPdf(){const list=CUR.slice();if(!list.length)return;const b
    doc.setDrawColor(213,220,229);doc.line(12,24,W-12,24)};
   const AT={styles:{font:'Roboto',fontSize:8,cellPadding:1.6,textColor:[30,40,52],lineColor:[213,220,229],lineWidth:.1},headStyles:{font:'Roboto',fontStyle:'bold',fillColor:[59,74,94],textColor:255},alternateRowStyles:{fillColor:[243,246,250]},margin:{top:28,left:12,right:12},didDrawPage:head};
   head();doc.setFont('Roboto','bold');doc.setFontSize(13);doc.setTextColor(...NAVY);doc.text(`Избранные лоты: ${list.length}`,12,32);
-  doc.autoTable({...AT,startY:36,head:[SUMH],body:list.map(sumRow),columnStyles:{0:{cellWidth:8},4:{halign:'right'},5:{halign:'right'},6:{halign:'right'},7:{halign:'center'},8:{halign:'center',fontStyle:'bold'}}});
+  doc.autoTable({...AT,startY:36,head:[SUMH],body:list.map(sumRow),columnStyles:{0:{cellWidth:8},4:{halign:'right'},5:{halign:'right'},6:{halign:'right'},7:{halign:'center'},8:{halign:'center',fontStyle:'bold'}},didParseCell:c=>{if(c.section==='body'&&c.column.index===8){const rgb=scoreRGB(list[c.row.index]._s);if(rgb){c.cell.styles.fillColor=rgb;c.cell.styles.textColor=scoreTxt(rgb)==='#fff'?255:[30,40,52]}}}});
   const kvT=(title,rows,y)=>{rows=clean2(rows);if(!rows.length)rows=[['—','нет данных']];doc.autoTable({...AT,startY:y,head:[[{content:title,colSpan:2}]],body:rows,columnStyles:{0:{cellWidth:48,textColor:SL}}});return doc.lastAutoTable.finalY+4};
   list.forEach((l,i)=>{doc.addPage();head();const x=lotRows(l);doc.setFont('Roboto','bold');doc.setFontSize(13);doc.setTextColor(...NAVY);
-   doc.text(doc.splitTextToSize(`${i+1}. ${l.debtor.name||'Должник не указан'} — ${l.counterparty.name||''}`,W-60),12,32);doc.setFontSize(12);doc.text(`Балл: ${l._s??'—'} / 100`,W-12,32,{align:'right'});
+   doc.text(doc.splitTextToSize(`${i+1}. ${l.debtor.name||'Должник не указан'} — ${l.counterparty.name||''}`,W-60),12,32);{const rgb=scoreRGB(l._s);if(rgb){doc.setFillColor(...rgb);doc.roundedRect(W-48,26.5,36,8,1.5,1.5,'F');doc.setTextColor(...(scoreTxt(rgb)==='#fff'?[255,255,255]:[30,40,52]))}doc.setFontSize(12);doc.text(`Балл: ${l._s??'—'} / 100`,W-30,32,{align:'center'})}
    let y=kvT('Лот',x.det,40);
    doc.autoTable({...AT,startY:y,head:[['Фактор балла','Баллы','Комментарий']],body:x.fac.length?x.fac:[['—','—','разбивка не передана']],columnStyles:{0:{cellWidth:70},1:{cellWidth:22,halign:'right'}}});y=doc.lastAutoTable.finalY+4;
    if((l.score||{}).comment){doc.setFontSize(8);doc.setTextColor(...SL);const t=doc.splitTextToSize(l.score.comment,W-24);doc.text(t,12,y);y+=t.length*3.6+3}
