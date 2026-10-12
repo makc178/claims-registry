@@ -1,6 +1,6 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#3b4a5e"><title>Everest</title><link rel="icon" type="image/png" sizes="32x32" href="favicon-32-v2.png?v=8a6560a"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64-v2.png?v=8a6560a"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png?v=8a6560a"><link rel="manifest" href="manifest.webmanifest?v=8a6560a"><meta name="apple-mobile-web-app-title" content="Everest"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#3b4a5e"><title>Everest</title><link rel="icon" type="image/png" sizes="32x32" href="favicon-32-v2.png?v=852d0b8"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64-v2.png?v=852d0b8"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png?v=852d0b8"><link rel="manifest" href="manifest.webmanifest?v=852d0b8"><meta name="apple-mobile-web-app-title" content="Everest"><meta name="apple-mobile-web-app-capable" content="yes">
 <style>
 :root{--bg:#eef1f5;--pan:#fff;--ink:#1e2834;--mut:#5d6b7c;--line:#d5dce5;--acc:#3b4a5e;--acc2:#56708f;--soft:#e3e9f0}
 *{box-sizing:border-box}body{margin:0;font:15px/1.45 -apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
@@ -129,7 +129,7 @@ nav button.on{box-shadow:0 1px 6px #0002}
 #pin .psplash{display:none}
 #pin .brand-n{color:#E8EDF5;font-size:30px;margin-top:-6px}
 #pin .brand-a{font-size:17px;letter-spacing:.2em;text-transform:uppercase;color:#D4AF5A;font-weight:600;margin-top:-8px;text-align:center}
-#pin .brand-s{font-variant:normal;font-style:italic;font-size:13px;letter-spacing:.06em;color:#8b98ad;margin-top:-10px}
+#pin .brand-s{font-variant:normal;font-style:italic;font-size:13px;letter-spacing:.06em;color:#8b98ad;margin-top:-12px}#pin .brand-a{margin-top:-10px}
 #pin .msg{color:#aab6c8}#pin a{color:#D4AF5A;font-size:14px;text-decoration:none;border-bottom:1px solid rgba(212,175,90,.4)}
 #pin .plogo img{filter:drop-shadow(0 6px 18px rgba(0,0,0,.45))}
 #pin .dots i{border-color:#D4AF5A}#pin .dots i.f{background:#D4AF5A}
@@ -147,7 +147,8 @@ nav button.on{box-shadow:0 1px 6px #0002}
  #pin .psplash path{fill:none;stroke-linejoin:round;stroke-linecap:round}
  #pin .pl-a{stroke:rgba(212,175,90,.18);stroke-width:2}
  #pin .pl-b{stroke:#D4AF5A;stroke-width:2.5;stroke-dasharray:640;stroke-dashoffset:640;animation:pdraw 6s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(212,175,90,.5))}
- #pin .pbox .plogo{display:none}
+ #pin .pbox .plogo,#pin .pbox .brand-s{display:none}
+ #pin .ps-s{font-style:italic;font-size:15px;letter-spacing:.06em;color:#8b98ad;margin-top:-20px}
  #pin .ps-t{font-size:15px;letter-spacing:.3em;text-transform:uppercase;color:#8b98ad}}
 @keyframes pdraw{0%{stroke-dashoffset:640}55%,80%{stroke-dashoffset:0}100%{stroke-dashoffset:-640}}
 @media(prefers-reduced-motion:reduce){#pin *,#pin{animation:none!important}}
@@ -172,12 +173,12 @@ nav button.hid{display:none!important}#othbar{display:flex;gap:6px;flex-wrap:wra
 .row>div{min-width:0;overflow-wrap:break-word;hyphens:auto}.row .pb{display:inline-block;max-width:100%;white-space:normal;line-height:1.15;text-align:center;vertical-align:middle}.row>.c-dt{white-space:nowrap;font-variant-numeric:tabular-nums;line-height:1.25}
 #rfb{position:absolute;top:calc(env(safe-area-inset-top) + 10px);right:12px;width:38px;height:38px;border-radius:50%;border:1px solid #ffffff55;background:#ffffff1f;color:#fff;font-size:20px;cursor:pointer;z-index:5}#rfb.spin{animation:rfs .8s linear infinite}@keyframes rfs{to{transform:rotate(360deg)}}header{position:relative}
 </style></head><body>
-<div id="pin" style="display:none"><div class="pgrid" aria-hidden="true"></div><div class="psplash" aria-hidden="true"><img src="logo-s.png?v=8a6560a" alt=""><svg viewBox="0 0 400 140" preserveAspectRatio="none"><path class="pl-a" d="M0,120 L50,105 L90,112 L140,80 L190,90 L240,58 L290,66 L340,30 L400,12"/><path class="pl-b" d="M0,120 L50,105 L90,112 L140,80 L190,90 L240,58 L290,66 L340,30 L400,12"/></svg><div class="ps-t">Аналитическая система</div></div>
-<div class="pbox"><div class="plogo"><img src="logo-s.png?v=8a6560a" alt="" style="width:min(62vw,240px);height:auto;display:block"><span class="shine"></span></div><div class="brand-n">ПЦ «Эверест»</div><div class="brand-a">Аналитическая система</div><div class="brand-s">на вершине успеха</div><div class="msg" id="pinm">Введите PIN</div><div class="dots" id="pind"><i></i><i></i><i></i><i></i></div>
+<div id="pin" style="display:none"><div class="pgrid" aria-hidden="true"></div><div class="psplash" aria-hidden="true"><img src="logo-s.png?v=852d0b8" alt=""><div class="ps-s">на вершине успеха</div><svg viewBox="0 0 400 140" preserveAspectRatio="none"><path class="pl-a" d="M0,120 L50,105 L90,112 L140,80 L190,90 L240,58 L290,66 L340,30 L400,12"/><path class="pl-b" d="M0,120 L50,105 L90,112 L140,80 L190,90 L240,58 L290,66 L340,30 L400,12"/></svg><div class="ps-t">Аналитическая система</div></div>
+<div class="pbox"><div class="plogo"><img src="logo-s.png?v=852d0b8" alt="" style="width:min(62vw,240px);height:auto;display:block"><span class="shine"></span></div><div class="brand-s">на вершине успеха</div><div class="brand-n">ПЦ «Эверест»</div><div class="brand-a">Аналитическая система</div><div class="msg" id="pinm">Введите PIN</div><div class="dots" id="pind"><i></i><i></i><i></i><i></i></div>
 <div class="kp" id="kp"><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><span></span><button>0</button><button class="x" data-k="del" aria-label="Стереть">⌫</button></div>
 <a href="#" id="pinkey">Вход по ключу</a></div></div>
 <div id="newver" style="display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:max(14px,env(safe-area-inset-bottom));z-index:120;background:#1f3354;color:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 4px 18px #0005;font-size:14px">Доступна новая версия. <button class="lbtn" style="margin-left:8px;background:#fff;color:#1f3354" onclick="location.replace(location.pathname+'?v='+Date.now())">Обновить</button></div>
-<header><div class="hb"><img src="logo-white-s.png?v=8a6560a" alt=""><div class="bt"><div class="bl"><span class="brand-n">ПЦ «Эверест»</span><span class="brand-s">на вершине успеха</span></div><small>Аналитическая система</small></div></div>
+<header><div class="hb"><img src="logo-white-s.png?v=852d0b8" alt=""><div class="bt"><div class="bl"><span class="brand-n">ПЦ «Эверест»</span><span class="brand-s">на вершине успеха</span></div><small>Аналитическая система</small></div></div>
 <nav><button data-v="reg" class="on">Реестр</button> <button data-v="fav">Избранное<span class="badge" id="favn">0</span></button> <button data-v="man">Реестр с ошибками<span class="badge" id="mann">0</span></button> <button data-v="met" class="hid">Методика</button> <button data-v="rep">Расширенная аналитика</button> <button data-v="prc">Судебная практика</button> <button data-v="fin">Финанализ</button> <button data-v="prop">Торги Имущество</button> <button data-v="src" class="hid">Исходные файлы</button> <button id="cfg" class="hid">Данные</button> <button id="oth">Прочее</button></nav>
 <button id="rfb" title="Обновить без ввода PIN" aria-label="Обновить">⟳</button><div class="meta" id="meta"></div></header>
 <div id="vreg" class="wrap">
@@ -314,7 +315,7 @@ const IDB=(DB)=>{const ST='kv';let P=null;const db=()=>P||(P=new Promise((res,re
  return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-12 11:16 UTC · 8a6560a',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1791803761, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "aTIBxjQnc+T4ggPJfcktIg==", "iv": "73pPG4bvhJI730Dc", "ct": "24OxIprRbxuuOxng+wpfDX4g6kVqLolNWDycW2hj27rU+ydN0PD2ag3ACm1gAwp5whPvccwhPVzU4yTtQLhcmundrsVyYbg4rsRSnnQPyGnUojMyu5/BlIcKoCzU6S0JRwhf/Ye1OrxM08s3/hlXVn5CdQE="};let PINOK=!PINBLOB;
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-12 11:17 UTC · 852d0b8',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1791803837, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "nhRNe1/JG5hDUK8l+AwMXA==", "iv": "kcNm/TBWpF9iRhg7", "ct": "A6GbEYIxANsBv70nPDAojr+rajwIhf9BXRjt7FpkT0GwFC24YIdNV9pHD/UCo0H63+XWFKIyofH6qybDdXSRV0pdCtkWZWO0xrHf6ik+m2alz96n4J6+rB5uXGKFFtx6SLK7TYyxSsaQRToKVCbGG+75n5M="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
