@@ -35,7 +35,7 @@ var st=document.createElement('style');st.textContent='.pstar{font-size:20px!imp
 var seg=document.createElement('div');seg.id='favseg';seg.innerHTML='<div class="sg" role="tablist"><button data-s="reg" class="on">Реестр <span class="c" id="fsr">0</span></button><button data-s="prop">Имущество <span class="c" id="fsp">0</span></button></div>';$('vreg').parentNode.insertBefore(seg,$('vreg'));
 var FS='reg',PFO=null;
 var _ui=favUI;favUI=function(){_ui.apply(this,arguments);$('favn').textContent=FAV.size+PFAV.size;$('fsr').textContent=FAV.size;$('fsp').textContent=PFAV.size};
-function apply(){var a=document.querySelector('nav button[data-v].on'),fav=a&&a.dataset.v=='fav';seg.style.display=fav?'':'none';favUI();
+function apply(){var a=document.querySelector('nav button[data-v].on'),fav=a&&a.dataset.v=='fav';seg.style.display=fav?'block':'none';favUI();
  var pm=fav&&FS=='prop';seg.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.s==FS)});
  if(pm){$('vreg').style.display='none';$('vprop').style.display='';if(PFO===null)PFO=$('pfo').checked;$('pfo').checked=true;window.PFM=1;if(PERR){PERR=0;POPEN=null}PSHOW=60;propLoad()}
  else{if(window.PFM){window.PFM=0;$('pfo').checked=!!PFO;PFO=null;if(!fav)$('vprop').style.display=(a&&(a.dataset.v=='prop'||a.dataset.v=='perr'))?'':'none';else{$('vprop').style.display='none';$('vreg').style.display=''}}}}
