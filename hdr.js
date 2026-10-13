@@ -15,8 +15,8 @@ var css='header{justify-content:center}header .hb{flex:0 1 auto;justify-content:
 'nav button .ico svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}'+
 
 'nav button .qb{position:absolute;right:-6px;top:-5px;width:12px;height:12px;border-radius:50%;background:#D93C3C;color:#fff;font:700 9px/12px system-ui,sans-serif;text-align:center;box-shadow:0 0 0 1.5px var(--bg,#0F1B33)}'+
-'nav button .badge{margin-left:2px}'+
-'@media(max-width:760px){nav{justify-content:flex-start;flex-wrap:nowrap!important;overflow-x:auto}nav button{flex:none;flex-direction:column;justify-content:center;gap:3px;height:54px;min-width:72px;padding:0 8px!important;font-size:11.5px}nav button .badge{position:absolute;top:3px;right:3px;margin:0}nav button{position:relative}}';
+'nav button .badge{margin-left:2px}'+'@media(min-width:1024px){header{padding-left:12px!important;padding-right:12px!important}nav{flex-wrap:nowrap!important;gap:4px;overflow:visible}nav button{flex:none;flex-direction:row;font-size:14px;padding:0 12px!important;gap:6px}}'+
+'@media(max-width:1023.98px){nav{justify-content:flex-start;flex-wrap:nowrap!important;overflow-x:auto}nav button{flex:none;flex-direction:column;justify-content:center;gap:3px;height:54px;min-width:72px;padding:0 8px!important;font-size:11.5px}nav button .badge{position:absolute;top:3px;right:3px;margin:0}nav button{position:relative}}';
 var s=document.createElement('style');s.textContent=css;document.head.appendChild(s);
 document.querySelectorAll('nav button').forEach(function(b){var k=b.dataset.v||b.id;if(!P[k]||b.querySelector('.ico'))return;var i=document.createElement('span');i.className='ico';i.setAttribute('aria-hidden','true');i.innerHTML='<svg viewBox="0 0 24 24">'+P[k]+'</svg>'+(b.classList.contains('q')?'<span class="qb">?</span>':'');b.insertBefore(i,b.firstChild);if(b.classList.contains('q'))b.title=(k=='man'?'Реестр':'Торги имущество')+' — требуют проверки'});
 })();
