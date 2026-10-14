@@ -3,7 +3,7 @@
 var C=window.EV_CFG||{};
 var ORDER=C.tab_order||['reg','man','fav','rep','prop','perr','val'];
 var DISC=C.val_disclaimer||'Не является отчётом об оценке по 135-ФЗ, носит информационно-аналитический характер';
-var METHOD=C.val_method||'рыночная стоимость по аналогам';
+var METHOD=C.val_method||'Ориентировочная рыночная цена (сравнительный подход, по аналогам)';
 var VTTL=(C.val_ttl_min||5)*6e4;
 function g(n){try{return (0,eval)(n)}catch(e){return undefined}}
 function $(i){return document.getElementById(i)}
@@ -22,7 +22,7 @@ V.innerHTML='<div class="md"><h2>Оценка</h2><p class="sm" id="valm"></p><d
 var vrep=$('vrep');(vrep&&vrep.parentNode||document.body).insertBefore(V,vrep?vrep.nextSibling:null);
 var st=document.createElement('style');st.textContent=
 '#vall .vrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px;align-items:start}#vall .vact{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}'+
-'#vall .vdisc,.pval .vdisc{font-size:12px;color:var(--mut,#8a93a3);margin-top:6px;line-height:1.35}#vall .vsum{font-weight:600}'+
+'#vall .vcap{margin-top:2px}#vall .vhd{margin:0 0 4px;font-size:16px;color:var(--gold,var(--acc))}#vall .vdisc,.pval .vdisc{font-size:12px;color:var(--mut,#8a93a3);margin-top:6px;line-height:1.35}#vall .vsum{font-weight:600}'+
 '@media(max-width:640px){#vall .vrow{grid-template-columns:1fr}#vall .vact{justify-content:flex-start}}'+
 '.pval{grid-column:1/-1;margin-top:10px}.pval .lbtn{width:100%;justify-content:center}.pval .vreq{background:transparent!important;border:1.5px solid var(--gold,var(--acc));color:var(--gold,var(--acc))!important}'+
 '.pval .vwip{background:rgba(140,150,165,.22)!important;color:var(--mut,#8a93a3)!important;border:1px solid rgba(140,150,165,.35);cursor:default;box-shadow:none!important;transform:none!important}';
@@ -30,7 +30,7 @@ document.head.appendChild(st);
 var VIEWS=['vreg','vmet','vsrc','vrep','vprc','vfin','vprop','vman','othbar','favseg'];
 function showVal(){nav.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b===vb)});VIEWS.forEach(function(i){var e=$(i);if(e)e.style.display='none'});V.style.display='';valList(true)}
 vb.addEventListener('click',showVal);
-nav.querySelectorAll('button').forEach(function(b){if(b!==vb)b.addEventListener('click',function(){V.style.display='none';vb.classList.remove('on')})});
+nav.querySelectorAll('button').forEach(function(b){if(b!==vb)b.addEventListener('click',function(){FOC=null;V.style.display='none';vb.classList.remove('on')})});
 var oth=$('oth');if(oth)oth.addEventListener('click',function(){V.style.display='none';vb.classList.remove('on')});
 /* --- порядок вкладок (Прочее всегда последнее) --- */
 function order(){var bs=[].slice.call(nav.children);var by={};bs.forEach(function(b){var k=b.dataset&&b.dataset.v;if(k)by[k]=b});
@@ -38,7 +38,7 @@ function order(){var bs=[].slice.call(nav.children);var by={};bs.forEach(functio
  bs.forEach(function(b){if(!seen.has(b)&&b.id!=='oth')nav.appendChild(b)});if(oth)nav.appendChild(oth)}
 order();
 /* --- данные --- */
-var VIDX=[],VPEND=[],VT=0,VLD=null;
+var FOC=null,VIDX=[],VPEND=[],VT=0,VLD=null;
 function online(){return !g('EMB')&&g('TOKEN')&&g('REPO')&&!String(g('REPO')).startsWith('/*')}
 function load(force){if(!online())return Promise.resolve();if(VLD)return VLD;if(!force&&VT&&Date.now()-VT<VTTL)return Promise.resolve();
  VLD=(async function(){try{var x=await g('ghRaw')('valuation/index.json');var j=JSON.parse(x);VIDX=Array.isArray(j)?j:(j.items||j.reports||[])}catch(e){if(!/404/.test(e.message))VIDX=VIDX||[]}
@@ -55,12 +55,12 @@ function draw(){var m=$('valm'),L=$('vall');
  var R=VIDX.slice().sort(function(a,b){return String(vdate(b)).localeCompare(String(vdate(a)))||String(b.request_id).localeCompare(String(a.request_id))});
  m.textContent=(R.length?'Оценок: '+R.length:'Оценок пока нет.')+(VPEND.length?' · в работе: '+VPEND.length:'');
  var pend=VPEND.map(function(p){var q=p.q||{},l=q.lot||{},o=q.object||{};var es='';try{es=g('etaStatus')(q)}catch(e){}
-  return '<div class="lot pend"><div class="row vrow" style="cursor:default"><div><div class="d1">'+esc(q.title||o.title||l.title||o.make_model||p.id)+'</div><div class="sm">'+esc([deb(q)||deb(l),q.lot_id?'лот '+(l.trade_no||q.lot_id):'',q.method||o.method?'метод: '+(q.method||o.method):''].filter(Boolean).join(' · '))+'</div><div class="sm"><b>'+esc(es||p.st)+'</b></div></div><div></div></div></div>'}).join('');
+  return '<div class="lot pend"><div class="row vrow" style="cursor:default"><div><div class="d1">'+esc(q.title||o.title||l.title||o.make_model||p.id)+'</div><div class="sm">'+esc([deb(q)||deb(l),q.lot_id?'лот '+(l.trade_no||q.lot_id):'',q.method||o.method?(q.method||o.method):''].filter(Boolean).join(' · '))+'</div><div class="sm"><b>'+esc(es||p.st)+'</b></div></div><div></div></div></div>'}).join('');
  L.innerHTML=pend+R.map(function(v){var l=lotOf(v),r=v.range||{};
   var who=[deb(v)||deb(l),v.lot_id?'лот '+((l&&l.trade_no)||v.lot_id):''].filter(Boolean).join(' · ');
   return '<div class="lot"><div class="row vrow" style="cursor:default"><div><div class="d1">'+esc(v.title||(l&&l.title)||v.request_id)+'</div>'+(who?'<div class="sm">'+esc(who)+'</div>':'')+
-  '<div class="sm">Дата оценки: '+esc(fdt(vdate(v)))+(v.method?' · метод: '+esc(v.method):'')+'</div>'+
-  (v.value!=null?'<div class="vsum">'+rub(v.value)+(r.min!=null?' <span class="sm" style="font-weight:400">(диапазон '+rub(r.min)+' – '+rub(r.max)+')</span>':'')+'</div>':'')+
+  (FOC&&String(v.lot_id)===FOC?'<h3 class="vhd">'+esc(v.method||METHOD)+'</h3>':'')+'<div class="sm">Дата оценки: '+esc(fdt(vdate(v)))+'</div>'+
+  (v.value!=null?'<div class="vsum">'+rub(v.value)+(r.min!=null?' <span class="sm" style="font-weight:400">(диапазон '+rub(r.min)+' – '+rub(r.max)+')</span>':'')+'</div><div class="sm vcap">'+esc(v.method||METHOD)+'</div>':'')+
   '<div class="vdisc">'+esc(DISC)+'</div></div><div class="vact">'+files(v)+'</div></div></div>'}).join('');}
 V.addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(b){var f=g('dlClick');if(f)f(e)}});
 function valList(force){draw();load(force).then(draw)}
@@ -78,7 +78,7 @@ function mkReq(l){var t=new Date(),id=t.toISOString().replace(/[-:]/g,'').slice(
   lot_id:l.id,title:l.title||l.category||('Лот '+l.id),debtor:{name:pn(l.debtor),inn:pi(l,'debtor')},object_type:kind(l),
   object:{lot_id:l.id,trade_no:l.trade_no,url:l.url,type:l.type,category:l.category,title:l.title,address:l.address||l.region,area:l.area,start_price:l.start_price,current_price:l.current_price,stage:l.stage,description:l.description?String(l.description).slice(0,3000):undefined},
   method:METHOD,value_type:'market',valuation_date:t.toISOString().slice(0,10),purpose:'self',doc_title:'Аналитическая справка о рыночной стоимости',disclaimer:DISC,deliverables:['report','xlsx','methodology'],files:[]}}
-document.addEventListener('click',function(e){var o=e.target.closest('[data-pvalo]');if(o){e.stopPropagation();vb.click();return}
+document.addEventListener('click',function(e){var o=e.target.closest('[data-pvalo]');if(o){e.stopPropagation();FOC=o.dataset.pvalo;vb.click();setTimeout(function(){var h=document.querySelector('#vall .vhd');if(h)h.scrollIntoView({block:'center'})},300);return}
  var b=e.target.closest('[data-pval]');if(!b)return;e.stopPropagation();var P=g('PROP'),l=P&&P.lots.find(function(x){return String(x.id)===b.dataset.pval});if(!l)return;
  var req=mkReq(l),toast=g('toast'),ghApi=g('ghApi'),u8=g('u8b64');
  if(!online()){var ds=g('deepShow');if(ds)ds(req,'Отправить напрямую нельзя: нужен вход. Скопируйте запрос и отправьте боту «Оценщик».','Оценка');return}
