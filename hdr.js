@@ -43,11 +43,11 @@ seg.onclick=function(e){var b=e.target.closest('button[data-s]');if(!b)return;FS
 document.querySelectorAll('nav button[data-v]').forEach(function(b){b.addEventListener('click',function(){apply()})});
 document.addEventListener('click',function(e){var f=e.target.closest('[data-pfav]');if(!f)return;var id=f.dataset.pfav,was=PFAV.has(id);setTimeout(function(){if(PFAV.has(id)!==was){PUP=Date.now();if(PFAV.has(id))TS[id]=PUP;else delete TS[id];pstore();favUI();clearTimeout(window._pft);window._pft=setTimeout(favPush,1500)}},0)},true);
 favPush=async function(){if(EMB||!TOKEN||FAVRO===true||!REPO||REPO.startsWith('/*'))return favUI();try{var sha,g=await ghApi('favorites.json');if(g.ok)sha=(await g.json()).sha;
- var body={message:'favorites '+new Date().toISOString().slice(0,16),branch:BRANCH,content:u8b64(JSON.stringify({updated:FAVUP,ids:Object.fromEntries(FAV),prop_updated:PUP,prop:pobj()},null,1))};if(sha)body.sha=sha;
+ var body={message:'favorites '+new Date().toISOString().slice(0,16),branch:BRANCH,content:u8b64(JSON.stringify({updated:FAVUP,ids:Object.fromEntries(FAV),prop_updated:PUP,prop:pobj(),prop_snap:(typeof PFSNAP=='object'?PFSNAP:{})},null,1))};if(sha)body.sha=sha;
  var r=await ghApi('favorites.json',{method:'PUT',body:JSON.stringify(body)});if(r.status===403||r.status===404||r.status===401){FAVRO=true}else if(r.ok){FAVRO=false;FAVMSG=''}else FAVMSG='(синхронизация отложена: GitHub '+r.status+')'}catch(e){FAVMSG='(нет сети — синхронизируем позже)'}favUI()};
 var _pull=favPull;favPull=async function(){var push=0;try{if(!EMB&&TOKEN){var r=await ghApi('favorites.json');if(r.ok){var j=await r.json(),d=JSON.parse(new TextDecoder().decode(b64(j.content.replace(/\n/g,'')))),R=d.prop||{},ru=d.prop_updated||0,ch=0;
  var M=new Map(Object.entries(R));PFAV.forEach(function(k){if(!M.has(k)&&((TS[k]||0)>ru||ru<=PUP)){M.set(k,TS[k]||PUP);push=1}});
  if(ru<PUP)push=1;var n=new Set(M.keys());ch=n.size!==PFAV.size||[].some.call(Array.from(n),function(k){return !PFAV.has(k)});
- PFAV.clear();n.forEach(function(k){PFAV.add(k)});TS=Object.fromEntries(M);PUP=Math.max(ru,PUP);pstore();if(ch&&$('vprop').style.display!='none'&&typeof propRender=='function')propRender()}}}catch(e){}
+ PFAV.clear();n.forEach(function(k){PFAV.add(k)});TS=Object.fromEntries(M);PUP=Math.max(ru,PUP);pstore();if(d.prop_snap&&typeof PFSNAP=='object'){for(var sk in d.prop_snap)if(PFAV.has(sk)&&!PFSNAP[sk])PFSNAP[sk]=d.prop_snap[sk];pSnapSave()}if(ch&&$('vprop').style.display!='none'&&typeof propRender=='function')propRender()}}}catch(e){}
  await _pull.apply(this,arguments);favUI();if(push)favPush()};
 favUI();})();
