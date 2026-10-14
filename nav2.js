@@ -9,7 +9,7 @@ window.EV_UI={
  gold:'#D4AF5A',
  update_schedule:{days:[1,5,9,13,17,21,25,29], time:'11:54', tz_offset_hours:3, label_last:'Обновлено', label_next:'Следующее', label_sep:': ', source:'плановое обновление базы (Анализ прав требований)'},
  header:{v2:false, logo_px:56, logo_px_narrow:46, name_px:20, system_px:12, system_color:'rgba(255,255,255,.7)', slogan_px:11, slogan_color:'rgba(255,255,255,.5)', service_px:11, draw_s:1.2, under_gap:6},
- under_refresh:'',
+ under_refresh:'#oth',
  sum_reg:'Реестры', sum_torgi:'Торги', sum_total:'Всего',
  cnt_abbr_maxw:380, cnt_abbr_from:1000, cnt_abbr_suffix:'к', cnt_abbr_decimal:',', cnt_longpress_ms:500, r1_gap_narrow:'3px', r1_pad_narrow:'2px', r1_icons_narrow:false,
  sel_bg:'rgba(212,175,90,.22)', sel_border:'rgba(212,175,90,.5)', sel_text:'#D4AF5A',
