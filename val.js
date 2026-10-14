@@ -66,7 +66,7 @@ V.addEventListener('click',function(e){var b=e.target.closest('button[data-f]');
 function valList(force){draw();load(force).then(draw)}
 /* --- кнопка в карточке лота --- */
 var RL=0;function reps(id){var R=g('REPIDX')||{};if(!RL&&online()){RL=1;var f=g('repIdx');if(f)f().then(rerender)}
- return Object.keys(R).filter(function(k){var e=R[k];return e&&String(e.lot_id||'')===id}).sort(function(a,b){return String(R[b].date||'').localeCompare(String(R[a].date||''))}).map(function(k){return '<button class="lbtn sec prep" data-f="'+esc(k)+'" data-p="reports/'+esc(k)+'">↗ Отчёт анализа'+(R[k].date?' · '+esc(fdt(R[k].date)):'')+'</button>'}).join('')}
+ return Object.keys(R).filter(function(k){var e=R[k];return e&&String(e.lot_id||'')===id}).sort(function(a,b){return String(R[b].date||'').localeCompare(String(R[a].date||''))}).map(function(k){return '<button class="lbtn sec prep" data-f="'+esc(k)+'" data-p="reports/'+esc(k)+'"><svg class="rpic" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 11h7M9 14h7M9 17h4"/></svg>Отчёт анализа'+(R[k].date?' · '+esc(fdt(R[k].date)):'')+'</button>'}).join('')}
 window.valBtn=function(l){load();var id=String(l.id);
  var done=VIDX.filter(function(v){return String(v.lot_id||(v.object&&v.object.lot_id)||'')===id})[0];
  var wip=VPEND.filter(function(p){return String((p.q||{}).lot_id||'')===id})[0];
