@@ -129,7 +129,7 @@ const put=async(k,v)=>{const d=await db();return new Promise((res,rej)=>{const t
 return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-14 21:10 UTC · 0e1b1b5',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1792012208, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "yGsIpZbIJpqHmvZP7SHahA==", "iv": "g3c/cCU/hkWBeEO0", "ct": "tVPn+tImvrYryJe9t/URPfQwmPHetBorIBh/d2O+PbIaHZBKCgJAMN5Pa047GOOOwauXdaA1orZ8d9dxe/IYz+tvOXnyJtK9iyWlarRVcc1Ovoo3iXX1HHonRS9mC6KsEZ1jDRNBq3ywadR+rtoJz5NxZ7U="};let PINOK=!PINBLOB;
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-14 21:17 UTC · 0e1b1b5',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1792012641, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "tTqp9sd8H0GLxh1yY/qMEg==", "iv": "ISmiGs0mnNw9s8UH", "ct": "LJ+JZSIj8anBC4vsJ83lJ5cLKrkhBs837NCgThawKa4IDYYjjNmjatf/BRR3OjySuiDmHaDUaHrQk1RExXn0qT4Cbc4b9ZGtN7W10a/dAuSvCpPTbx1uz2x+CkIJxVzSwNn85SQgZGbWc/pNBhBErdNIG7s="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
@@ -710,4 +710,4 @@ const r=e.target.closest('.prow');if(r&&!e.target.closest('a,button')){const id=
 document.querySelectorAll('#pflt2 input,#pflt2 select').forEach(x=>x.addEventListener('input',()=>{PSHOW=60;propRender()}));
 ['pso','pdir'].forEach(k=>$(k).onchange=propRender);
 document.querySelectorAll('nav button[data-v]').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.v,on=v==='prop'||v==='perr';$('vprop').style.display=on?'':'none';if(on){if(PERR!=(v==='perr')){PERR=+(v==='perr');POPEN=null;PSHOW=60}propLoad()}}));
-</script><script src="nav2.js?v=85f86aa" defer></script></body></html>
+</script><script src="nav2.js?v=ec5d891" defer></script></body></html>
