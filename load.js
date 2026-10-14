@@ -49,5 +49,26 @@ function tick(){var ld=!!g('LOADING')||!!g('PLD'),le=g('LERR'),pe=g('PLERR'),P=g
  else if(!err&&shownErr){shownErr='';msg.className='ldmsg'}
  was=ld}
 function okStrip(){var ds=curDs()||'reg',d=dsData(ds)||dt(),old=isStale(ds);msg.className='ldmsg on ok'+(old?' stale':'');msg.innerHTML='';var l1=document.createElement('div');l1.textContent=(old?'Данные не обновились по расписанию · ':'База обновлена')+(d?(old?'':' · ')+fmt(d):'');var l2=document.createElement('div');l2.className='ldsub';l2.textContent=schText(ds);msg.appendChild(l1);if(l2.textContent)msg.appendChild(l2);clearTimeout(okT);okT=0;if(!old)okT=setTimeout(function(){okT=0;msg.className='ldmsg'},OKMS)}
+/* кнопка «Обновить» (Дизайнер): 44px, значок 20px + подпись, вращается значок; ✓ на 1 с; при ошибке — встряска и «Не удалось» */
+(function(){var b=document.getElementById('rfb');if(!b)return;var st2=document.createElement('style');
+st2.textContent='html body #rfb{width:auto!important;height:44px!important;min-width:44px;top:calc(env(safe-area-inset-top) + 8px)!important;right:10px!important;padding:0 16px!important;border-radius:12px!important;font:600 15px/1 system-ui,-apple-system,sans-serif!important;display:inline-flex;align-items:center;gap:8px;animation:none!important;opacity:1!important;background:#1C2E52!important;border:1px solid rgba(212,175,90,.75)!important;color:#F3D98B!important;white-space:nowrap}'+
+'html body #rfb[aria-busy=true]{cursor:progress}#rfb .ri{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}#rfb.busy .ri{animation:rfs .8s linear infinite}'+
+'#rfb.err .rl{color:#ffb4ab}#rfb.err{animation:rshk .4s ease-in-out 1!important}@keyframes rshk{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}'+
+'html body #thm{width:44px!important;height:44px!important;top:calc(env(safe-area-inset-top) + 8px)!important;right:var(--rfbw,140px)!important}html body header{padding-right:calc(var(--rfbw,140px) + 52px)!important}'+
+'@media(max-width:640px){html body header nav{margin-top:10px!important}html body #rfb .rl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}html body #rfb{padding:0 12px!important}}'+
+'@media(prefers-reduced-motion:reduce){#rfb.busy .ri{animation:none}#rfb.err{animation:none!important}}';document.head.appendChild(st2);
+var IC='<svg class="ri" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg>',OK='<svg class="ri" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+b.innerHTML=IC+'<span class="rl">Обновить</span>';b.setAttribute('aria-label','Обновить');var rl=b.querySelector('.rl'),bw=false,tmo=0;
+function w(){document.documentElement.style.setProperty('--rfbw',(b.offsetWidth+18)+'px')}w();window.addEventListener('resize',w);
+b.addEventListener('click',function(e){if(b.classList.contains('busy')){e.stopImmediatePropagation();e.preventDefault()}},true);
+function lbl(s){rl.textContent=s;b.setAttribute('aria-label',s);w()}
+setInterval(function(){var busy=b.classList.contains('spin')||!!g('LOADING')||!!g('PLD');
+ if(busy&&!bw){clearTimeout(tmo);b.classList.remove('err','okd');b.classList.add('busy');b.querySelector('.ri').outerHTML=IC;lbl('Обновляю…');b.setAttribute('aria-busy','true')}
+ if(!busy&&bw){var fin=function(){b.classList.remove('busy');b.setAttribute('aria-busy','false');
+   if(g('LERR')){b.classList.add('err');lbl('Не удалось');tmo=setTimeout(function(){b.classList.remove('err');lbl('Обновить')},2500)}
+   else{b.querySelector('.ri').outerHTML=OK;b.classList.add('okd');lbl('Обновить');tmo=setTimeout(function(){b.classList.remove('okd');b.querySelector('.ri').outerHTML=IC},1000)}};
+  var ic=b.querySelector('.ri'),an=ic.getAnimations?ic.getAnimations()[0]:null;
+  if(an&&an.currentTime!=null){var left=800-(an.currentTime%800);setTimeout(fin,left)}else fin()}
+ bw=busy},120)})();
 setInterval(tick,150);tick();setInterval(function(){schLoad();sl()},1000);document.addEventListener('click',function(){setTimeout(sl,50)});
 })();
