@@ -1,7 +1,7 @@
 /* Эверест: вкладка «Оценка», кнопка оценки в карточке лота торгов, порядок вкладок (всё настраивается через EV_CFG). */
 (function(){
 var C=window.EV_CFG||{};
-var ORDER=C.tab_order||['reg','man','fav','rep','prop','perr','val','rpt'];window.EV_TAB_ORDER=ORDER;
+var ORDER=C.tab_order||['reg','man','fav','rep','prop','perr','val'];window.EV_TAB_ORDER=ORDER;
 var DISC=C.val_disclaimer||'Не является отчётом об оценке по 135-ФЗ, носит информационно-аналитический характер';
 var METHOD=C.val_method||'Ориентировочная рыночная цена (сравнительный подход, по аналогам)';
 var VTTL=(C.val_ttl_min||5)*6e4;

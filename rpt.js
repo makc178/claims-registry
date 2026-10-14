@@ -6,23 +6,28 @@ var MSK={timeZone:'Europe/Moscow'};function fd(v){var d=new Date(v);return isNaN
 function fdt(v){var d=new Date(v);return isNaN(d)?'':d.toLocaleString('ru-RU',Object.assign({day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false},MSK)).replace(',',',')}
 var TY=Object.assign({property_check:'Проверка имущества',full_check:'Полная проверка',deep:'Глубокий анализ',deep_analysis_request:'Глубокий анализ',court_practice:'Судебная практика',fin_analysis:'Финанализ',valuation:'Оценка'},C.report_types||{});
 var nav=document.querySelector('nav');if(!nav)return;
-var b=document.createElement('button');b.dataset.v='rpt';b.title='Отчёты';b.innerHTML='<span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h6M9 16h4"/></svg></span><span class="lb">Отчёты</span><span class="badge" id="rptn">0</span>';nav.appendChild(b);
+var b=document.createElement('button');b.dataset.v='rpt';b.className='evx';b.title='Отчёты';b.innerHTML='Отчёты';nav.appendChild(b);
+var bar=$('othbar'),oth=$('oth'),ob=document.createElement('button');ob.dataset.o='rpt';ob.title='Отчёты анализа';ob.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h6M9 16h4"/></svg>Отчёты<span class="badge wq" id="rptn" style="display:none">0</span>';
+if(bar){var fin=bar.querySelector('button[data-o="fin"]');bar.insertBefore(ob,fin?fin.nextSibling:bar.firstChild)}
+var ob2=document.createElement('span');ob2.className='badge wq';ob2.id='othn';ob2.style.display='none';if(oth)oth.appendChild(ob2);
 var V=document.createElement('div');V.id='vrpt';V.style.display='none';V.innerHTML='<div class="md"><h2>Отчёты</h2><input id="rptq" type="search" placeholder="поиск: должник, лот, тип, номер" style="width:100%;box-sizing:border-box;margin:4px 0 10px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--pan);color:var(--ink);font:inherit"><p class="sm" id="rptm"></p><div id="rptw"></div><div id="rptl"></div></div>';
 var vv=$('vval')||$('vrep');(vv&&vv.parentNode||document.body).insertBefore(V,vv?vv.nextSibling:null);
-var st=document.createElement('style');st.textContent='#vrpt .rrw{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px;align-items:center}#vrpt .ra{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}#vrpt h3{font-size:15px;margin:14px 0 8px}#vrpt .ovd{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#fbe5e3;color:#8f2a20;font-size:12px;font-weight:600}[data-theme=dark] #vrpt .ovd{background:#4a2228;color:#ffd0ca}@media(max-width:640px){#vrpt .rrw{grid-template-columns:1fr}#vrpt .ra{justify-content:flex-start}}';document.head.appendChild(st);
+var st=document.createElement('style');st.textContent='.badge.wq{margin-left:4px}.badge.wq.ov{background:#D4AF5A!important;color:#0F1B33!important}#oth{position:relative}#oth .badge.wq{margin-left:4px}#vrpt .rrw{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px;align-items:center}#vrpt .ra{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}#vrpt h3{font-size:15px;margin:14px 0 8px}#vrpt .ovd{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:#fbe5e3;color:#8f2a20;font-size:12px;font-weight:600}[data-theme=dark] #vrpt .ovd{background:#4a2228;color:#ffd0ca}@media(max-width:640px){#vrpt .rrw{grid-template-columns:1fr}#vrpt .ra{justify-content:flex-start}}';document.head.appendChild(st);
 var VIEWS=['vreg','vmet','vsrc','vrep','vprc','vfin','vprop','vman','othbar','favseg','vval'];
 function online(){return !g('EMB')&&g('TOKEN')&&g('PINOK')&&g('REPO')&&!String(g('REPO')).startsWith('/*')}
-b.addEventListener('click',function(){nav.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b)});VIEWS.forEach(function(i){var e=$(i);if(e)e.style.display='none'});V.style.display='';load(true)});
-function hide(){V.style.display='none';b.classList.remove('on')}
+b.addEventListener('click',function(){nav.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b)});VIEWS.forEach(function(i){var e=$(i);if(e)e.style.display='none'});V.style.display='';if(bar){bar.style.display='';bar.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===ob)})}if(oth)oth.classList.add('on');load(true)});
+function hide(){V.style.display='none';b.classList.remove('on');ob.classList.remove('on')}
+if(oth)oth.addEventListener('click',hide);
 nav.querySelectorAll('button').forEach(function(x){if(x!==b)x.addEventListener('click',hide)});
-(function order(){var O=window.EV_TAB_ORDER||[];var by={};[].forEach.call(nav.children,function(x){if(x.dataset&&x.dataset.v)by[x.dataset.v]=x});O.forEach(function(k){if(by[k])nav.appendChild(by[k])});var o=$('oth');if(o)nav.appendChild(o)})();
+(function order(){return;var O=window.EV_TAB_ORDER||[];var by={};[].forEach.call(nav.children,function(x){if(x.dataset&&x.dataset.v)by[x.dataset.v]=x});O.forEach(function(k){if(by[k])nav.appendChild(by[k])});var o=$('oth');if(o)nav.appendChild(o)})();
 var R=[],P=[],T=0,LD=null;
 function load(force){if(!online()){draw();return}if(LD)return;if(!force&&T&&Date.now()-T<3e5)return draw();$('rptm').textContent='Загрузка…';
  LD=(async function(){try{await g('repIdx')()}catch(e){}var I=g('REPIDX')||{};R=Object.keys(I).map(function(k){return Object.assign({name:k},I[k]||{})});
   var done=new Set();R.forEach(function(r){if(r.request_id)done.add(r.request_id);(r.request_ids||[]).forEach(function(x){done.add(x)})});
   try{var vi=JSON.parse(await g('ghRaw')('valuation/index.json'));(Array.isArray(vi)?vi:[]).forEach(function(v){if(v.request_id)done.add(v.request_id)})}catch(e){}
   try{var EX=C.reports_exclude_types||['court_practice','fin_analysis','valuation'];P=(await g('pendList')()).filter(function(p){return p.st==='в работе'&&!done.has(p.id)&&EX.indexOf((p.q||{}).type)<0})}catch(e){P=[]}
-  T=Date.now();LD=null;$('rptn').textContent=R.length;draw()})()}
+  T=Date.now();LD=null;cnt();draw()})()}
+function cnt(){var n=P.length,ov=P.some(function(p){var q0=p.q||{},e=q0.eta?new Date(q0.eta):null;if(!e)try{e=g('etaAt')(q0)}catch(_){}return e&&+e<Date.now()});[$('rptn'),$('othn')].forEach(function(e){if(!e)return;e.textContent=n;e.style.display=n?'':'none';e.classList.toggle('ov',ov);e.title=n?('В работе: '+n+(ov?', есть просроченные':'')):''})}
 function lotLink(id,label){return id?'<button class="lbtn sec" data-rlot="'+esc(id)+'">'+esc(label||'К лоту')+'</button>':''}
 function pmatch(q,s){return !q||String(s).toLowerCase().indexOf(q)>=0}
 function draw(){var m=$('rptm'),W=$('rptw'),L=$('rptl');
@@ -42,5 +47,7 @@ V.addEventListener('click',function(e){var f=e.target.closest('button[data-f]');
  if(pl){var miss=0;try{miss=g('pMiss')(pl).length}catch(_){}var gt=g('goTab');gt(miss?'perr':'prop');setTimeout(function(){var q=$('pq');if(q){q.value=String(pl.trade_no||'').split('/')[0]||pl.title||'';}(0,eval)('POPEN='+JSON.stringify(id)+';PSHOW=60');g('propRender')();var n=document.querySelector('#vprop .plot[data-pid="'+id+'"]');if(n)n.scrollIntoView({block:'start'})},400);return}
  var D=g('DATA');if(D&&D.lots.some(function(x){return String(x.id)===id})){(0,eval)('FOCUS='+JSON.stringify(id)+';OPEN.add(FOCUS)');g('goTab')('reg');return}
  alert('Лот не найден в текущей базе (возможно, торги завершены).')});
-setInterval(function(){if(online()&&!T&&!LD)load()},3000);
+setInterval(function(){if(online()&&!T&&!LD)load()},3000);setInterval(function(){if(online()&&T&&Date.now()-T>3e5&&!LD)load(true)},60000);
 })();
+(function(){var s=document.createElement('style');s.textContent='.stg{display:inline-block;font-size:12px;line-height:1.3;padding:1px 8px;border-radius:999px;background:var(--soft,rgba(140,150,165,.2));color:var(--ink);border:1px solid transparent;white-space:nowrap;font-weight:500}.stg.unc{background:transparent!important;border:1px solid currentColor;color:var(--mut,#8a93a3);cursor:help}';document.head.appendChild(s);
+document.addEventListener('click',function(e){var u=e.target.closest&&e.target.closest('.stg.unc');if(!u)return;e.stopPropagation();var t=document.getElementById('stgtip');if(!t){t=document.createElement('div');t.id='stgtip';t.style.cssText='position:fixed;z-index:140;max-width:260px;padding:7px 10px;border-radius:8px;background:#0F1B33;color:#F2F2F2;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.35)';document.body.appendChild(t)}var r=u.getBoundingClientRect();t.textContent=u.getAttribute('title');t.style.left=Math.max(8,Math.min(innerWidth-270,r.left))+'px';t.style.top=(r.bottom+6)+'px';t.style.display='';clearTimeout(t._h);t._h=setTimeout(function(){t.style.display='none'},2500)},true)})();
