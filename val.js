@@ -24,7 +24,7 @@ var st=document.createElement('style');st.textContent=
 '#vall .vrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px;align-items:start}#vall .vact{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}'+
 '#vall .vcap{margin-top:2px}#vall .vhd{margin:0 0 4px;font-size:16px;color:var(--gold,var(--acc))}#vall .vdisc,.pval .vdisc{font-size:12px;color:var(--mut,#8a93a3);margin-top:6px;line-height:1.35}#vall .vsum{font-weight:600}'+
 '@media(max-width:640px){#vall .vrow{grid-template-columns:1fr}#vall .vact{justify-content:flex-start}}'+
-'.pval{grid-column:1/-1;margin-top:10px}.pval .lbtn{width:100%;justify-content:center}.pval .vreq{background:transparent!important;border:1.5px solid var(--gold,var(--acc));color:var(--gold,var(--acc))!important}'+
+'.pval{grid-column:1/-1;margin-top:10px}.prepw{display:flex;gap:6px;flex-wrap:wrap}.prepw .lbtn{width:auto!important}.pval .lbtn{width:100%;justify-content:center}.pval .vreq{background:transparent!important;border:1.5px solid var(--gold,var(--acc));color:var(--gold,var(--acc))!important}'+
 '.pval .vwip{background:rgba(140,150,165,.22)!important;color:var(--mut,#8a93a3)!important;border:1px solid rgba(140,150,165,.35);cursor:default;box-shadow:none!important;transform:none!important}';
 document.head.appendChild(st);
 var VIEWS=['vreg','vmet','vsrc','vrep','vprc','vfin','vprop','vman','othbar','favseg'];
@@ -65,20 +65,22 @@ function draw(){var m=$('valm'),L=$('vall');
 V.addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(b){var f=g('dlClick');if(f)f(e)}});
 function valList(force){draw();load(force).then(draw)}
 /* --- кнопка в карточке лота --- */
+var RL=0;function reps(id){var R=g('REPIDX')||{};if(!RL&&online()){RL=1;var f=g('repIdx');if(f)f().then(rerender)}
+ return Object.keys(R).filter(function(k){var e=R[k];return e&&String(e.lot_id||'')===id}).sort(function(a,b){return String(R[b].date||'').localeCompare(String(R[a].date||''))}).map(function(k){return '<button class="lbtn sec prep" data-f="'+esc(k)+'" data-p="reports/'+esc(k)+'">↗ Отчёт анализа'+(R[k].date?' · '+esc(fdt(R[k].date)):'')+'</button>'}).join('')}
 window.valBtn=function(l){load();var id=String(l.id);
  var done=VIDX.filter(function(v){return String(v.lot_id||(v.object&&v.object.lot_id)||'')===id})[0];
  var wip=VPEND.filter(function(p){return String((p.q||{}).lot_id||'')===id})[0];
  var b;if(done)b='<button class="lbtn" data-pvalo="'+esc(id)+'">Открыть оценку</button>';
  else if(wip){var t='';try{t=g('etaHM')(g('etaAt')(wip.q))}catch(e){}b='<button class="lbtn vwip" disabled>Оценка в работе'+(t?' · до '+esc(t):'')+'</button>'}
  else b='<button class="lbtn vreq" data-pval="'+esc(id)+'">Запросить оценку</button>';
- return '<div class="pval">'+b+'<div class="vdisc">'+esc(DISC)+'</div></div>'};
+ var rp=reps(id);return (rp?'<div class="pval prepw">'+rp+'</div>':'')+'<div class="pval">'+b+'<div class="vdisc">'+esc(DISC)+'</div></div>'};
 function kind(l){var s=[l.type,l.category,l.title].join(' ').toLowerCase();return /недвиж|квартир|дом|участ|помещ|здан/.test(s)?'real_estate':/автомоб|транспорт|машин/.test(s)?'movable':'other'}
 function mkReq(l){var t=new Date(),id=t.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z-ev-'+Math.random().toString(36).slice(2,6);var pn=g('pNm')||function(x){return x&&x.name||x||''},pi=g('pInn')||function(){return ''};
  return {type:'valuation',version:2,id:id,case_id:'V'+id.slice(0,15).replace('T','')+'-'+id.slice(-4),created_at:t.toISOString(),source:'Everest / Торги',for:'Оценщик',
   lot_id:l.id,title:l.title||l.category||('Лот '+l.id),debtor:{name:pn(l.debtor),inn:pi(l,'debtor')},object_type:kind(l),
   object:{lot_id:l.id,trade_no:l.trade_no,url:l.url,type:l.type,category:l.category,title:l.title,address:l.address||l.region,area:l.area,start_price:l.start_price,current_price:l.current_price,stage:l.stage,description:l.description?String(l.description).slice(0,3000):undefined},
   method:METHOD,value_type:'market',valuation_date:t.toISOString().slice(0,10),purpose:'self',doc_title:'Аналитическая справка о рыночной стоимости',disclaimer:DISC,deliverables:['report','xlsx','methodology'],files:[]}}
-document.addEventListener('click',function(e){var o=e.target.closest('[data-pvalo]');if(o){e.stopPropagation();FOC=o.dataset.pvalo;vb.click();setTimeout(function(){var h=document.querySelector('#vall .vhd');if(h)h.scrollIntoView({block:'center'})},300);return}
+document.addEventListener('click',function(e){var rb=e.target.closest('.prep[data-f]');if(rb){e.stopPropagation();var f=g('dlClick');if(f)f(e);return}var o=e.target.closest('[data-pvalo]');if(o){e.stopPropagation();FOC=o.dataset.pvalo;vb.click();setTimeout(function(){var h=document.querySelector('#vall .vhd');if(h)h.scrollIntoView({block:'center'})},300);return}
  var b=e.target.closest('[data-pval]');if(!b)return;e.stopPropagation();var P=g('PROP'),l=P&&P.lots.find(function(x){return String(x.id)===b.dataset.pval});if(!l)return;
  var req=mkReq(l),toast=g('toast'),ghApi=g('ghApi'),u8=g('u8b64');
  if(!online()){var ds=g('deepShow');if(ds)ds(req,'Отправить напрямую нельзя: нужен вход. Скопируйте запрос и отправьте боту «Оценщик».','Оценка');return}
