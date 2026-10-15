@@ -61,10 +61,11 @@ var IC='<svg class="ri" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8
 b.innerHTML=IC+'<span class="rl">Обновить</span>';b.setAttribute('aria-label','Обновить');var rl=b.querySelector('.rl'),bw=false,tmo=0;
 function w(){document.documentElement.style.setProperty('--rfbw',(b.offsetWidth+18)+'px')}w();window.addEventListener('resize',w);
 b.addEventListener('click',function(e){if(b.classList.contains('busy')){e.stopImmediatePropagation();e.preventDefault()}},true);
-function lbl(s){rl.textContent=s;b.setAttribute('aria-label',s);w()}
+function HGc(){var H=(window.EV_UI||{}).header_grid||{};return H.on?H:null}
+function lbl(s){var H=HGc();if(H&&H.busy_keep_label&&s==='Обновляю…'){s='Обновить';b.setAttribute('aria-label','Обновляю…')}else b.setAttribute('aria-label',s);if(rl.textContent!==s)rl.textContent=s;w()}
 setInterval(function(){var busy=b.classList.contains('spin')||!!g('LOADING')||!!g('PLD');
- if(busy&&!bw){clearTimeout(tmo);b.classList.remove('err','okd');b.classList.add('busy');b.querySelector('.ri').outerHTML=IC;lbl('Обновляю…');b.setAttribute('aria-busy','true')}
- if(!busy&&bw){var fin=function(){b.classList.remove('busy');b.setAttribute('aria-busy','false');
+ if(busy&&!bw){clearTimeout(tmo);b.classList.remove('err','okd');b.classList.add('busy');b.querySelector('.ri').outerHTML=IC;lbl('Обновляю…');b.setAttribute('aria-busy','true');if(HGc())b.disabled=true}
+ if(!busy&&bw){var fin=function(){b.classList.remove('busy');b.setAttribute('aria-busy','false');b.disabled=false;
    if(g('LERR')){b.classList.add('err');lbl('Не удалось');tmo=setTimeout(function(){b.classList.remove('err');lbl('Обновить')},2500)}
    else{b.querySelector('.ri').outerHTML=OK;b.classList.add('okd');lbl('Обновить');tmo=setTimeout(function(){b.classList.remove('okd');b.querySelector('.ri').outerHTML=IC},1000)}};
   var ic=b.querySelector('.ri'),an=ic.getAnimations?ic.getAnimations()[0]:null;
