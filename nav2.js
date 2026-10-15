@@ -10,6 +10,8 @@ window.EV_UI={
  update_schedule:{days:[1,5,9,13,17,21,25,29], time:'11:54', tz_offset_hours:3, label_last:'Обновлено', label_next:'Следующее', label_sep:': ', source:'плановое обновление базы (Анализ прав требований)'},
  header:{v2:false, logo_px:56, logo_px_narrow:46, name_px:20, system_px:12, system_color:'rgba(255,255,255,.7)', slogan_px:11, slogan_color:'rgba(255,255,255,.5)', service_px:11, draw_s:1.2, under_gap:6},
  under_refresh:'#oth',
+ /* шапка-сетка (Дизайнер 15.10): слева дата и строка лотов, справа колонка «Обновить»/«Прочее» одной ширины; on:false — прежняя шапка */
+ header_grid:{on:true, pad:16, col_gap:12, btn_min:112, btn_h:36, btn_gap:8, btn_radius:10, btn_px:14, date_px:12, date_color:'rgba(255,255,255,.62)', lots_px:13, lots_color:'rgba(255,255,255,.92)', thm_px:36, row_gap:10},
  sum_reg:'Реестры', sum_torgi:'Торги', sum_total:'Всего',
  cnt_abbr_maxw:380, cnt_abbr_from:1000, cnt_abbr_suffix:'к', cnt_abbr_decimal:',', cnt_longpress_ms:500, r1_gap_narrow:'3px', r1_pad_narrow:'2px', r1_icons_narrow:false,
  sel_bg:'rgba(212,175,90,.22)', sel_border:'rgba(212,175,90,.5)', sel_text:'#D4AF5A',
@@ -147,14 +149,39 @@ var st=document.createElement('style');st.textContent=css;document.head.appendCh
 /* кнопка под «Обновить»: EV_UI.under_refresh = селектор кнопки ('nav button[data-v=rpt]' или '#oth'), '' — не переносить */
 var SEL=U.under_refresh||'';if(!SEL)return;
 var cs2=document.createElement('style');cs2.textContent='html body header #urb{position:absolute;z-index:5;display:inline-flex!important;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;cursor:pointer;font-family:inherit;margin:0!important;-webkit-tap-highlight-color:transparent}html body header #urb .ico{display:inline-flex!important;width:auto!important;position:static!important}html body header #urb .ico svg{width:16px!important;height:16px!important;display:block!important}html body header #urb:active{filter:brightness(.8)}html body header #urb.on{background:'+(U.sel_bg||'rgba(212,175,90,.22)')+'!important;border-color:'+(U.sel_border||'rgba(212,175,90,.5)')+'!important;color:'+G+'!important}';document.head.appendChild(cs2);
+var HG=U.header_grid||{},HGO=!!HG.on,HGW=null;
 function rp(){var b=document.getElementById('urb')||document.querySelector(SEL),r=document.getElementById('rfb');if(!b||!r)return;
- if(b.id!=='urb'){b.dataset.oid=b.id||'';b.id='urb';b.classList.remove('evx','r2');b.style.order='';hd.appendChild(b);b.addEventListener('click',function(){b.classList.add('on')});
+ if(b.id!=='urb'){b.dataset.oid=b.id||'';b.id='urb';b.classList.remove('evx','r2');b.style.order='';(HGO&&hgrid()||hd).appendChild(b);b.addEventListener('click',function(){b.classList.add('on')});
   var nv=document.querySelector('nav');if(nv)nv.addEventListener('click',function(e){var x=e.target.closest('button');if(x&&x!==b)b.classList.remove('on')})}
+ if(HGO&&hgrid()){var S=HGW;if(r.parentNode!==S)S.insertBefore(r,S.firstChild);if(b.parentNode!==S)S.appendChild(b);var sm=document.getElementById('msum'),L=document.getElementById('hgl');if(sm&&L&&sm.parentNode!==L)L.appendChild(sm);var th=document.getElementById('thm'),hr2=document.getElementById('hrow');if(th&&hr2&&th.parentNode!==hr2)hr2.appendChild(th);var lb0=b.querySelector('.lb');if(lb0)lb0.style.display='';return}
  var c=getComputedStyle(r),hr=hd.getBoundingClientRect(),rr=r.getBoundingClientRect(),gp=+(H.under_gap||6);
  ['width','height','borderRadius','border','background','color','boxShadow','padding'].forEach(function(k){b.style[k]=c[k]});
  b.style.fontSize=Math.min(parseFloat(c.fontSize)||14,15)+'px';b.style.right=(hr.right-rr.right)+'px';b.style.top=(rr.bottom-hr.top+gp)+'px';
  var lb=b.querySelector('.lb');if(lb)lb.style.display=rr.width>80?'':'none';
  hb.style.minHeight='';var need=rr.bottom-hr.top+gp+rr.height+4,cur=hb.getBoundingClientRect().bottom-hr.top;if(cur<need)hb.style.minHeight=(hb.offsetHeight+need-cur)+'px'}
+/* шапка-сетка: две колонки (слева flex:1 — дата и лоты, справа — «Обновить» и под ней кнопка EV_UI.under_refresh одной ширины); вторая строка — лого и переключатель темы */
+function hgrid(){if(HGW)return HGW;var P=+(HG.pad==null?16:HG.pad),BH=+(HG.btn_h||36),BG=+(HG.btn_gap==null?8:HG.btn_gap),BM=+(HG.btn_min||112),R=+(HG.btn_radius||10),TP=+(HG.thm_px||36);
+ var w=document.createElement('div');w.id='hgrid';w.innerHTML='<div id="hgl"></div><div id="hgr"></div>';hd.insertBefore(w,hd.firstChild);
+ var row=document.createElement('div');row.id='hrow';hb.parentNode.insertBefore(row,hb);row.appendChild(hb);
+ hd.classList.add('hg');HGW=w.querySelector('#hgr');
+ var c='html body header.hg{padding-left:'+P+'px!important;padding-right:'+P+'px!important;justify-content:flex-start!important;row-gap:'+(+(HG.row_gap||10))+'px!important}'+
+ 'html body header.hg>nav{margin-left:0!important;margin-right:0!important}'+
+ 'html body header.hg #hgrid{order:-3;flex:0 0 100%;width:100%;display:flex;align-items:flex-start;gap:'+(+(HG.col_gap==null?12:HG.col_gap))+'px;min-width:0;box-sizing:border-box}'+
+ 'html body header.hg #hgl{flex:1 1 0;min-width:0}'+
+ 'html body header.hg #hgr{flex:none;display:grid;grid-template-columns:minmax('+BM+'px,max-content);grid-auto-rows:'+BH+'px;row-gap:'+BG+'px;justify-items:stretch}'+
+ 'html body header.hg #msum{display:block!important;position:static!important;order:0!important;width:100%!important;max-width:none!important;flex:none!important;margin:0!important;padding:0!important;white-space:normal!important;overflow:visible!important;text-align:left!important}'+
+ 'html body header.hg #msum .ml{display:block;overflow-wrap:anywhere}html body header.hg #msum .ml>span{white-space:nowrap}@media(max-width:340px){html body header.hg #msum .ml:first-child>span{white-space:normal}}'+
+ 'html body header.hg #msum .ml:first-child{font-size:'+(+(HG.date_px||12))+'px!important;line-height:16px;color:'+(HG.date_color||'rgba(255,255,255,.62)')+'}'+
+ 'html body header.hg #msum .ml+.ml{margin-top:4px;font-size:'+(+(HG.lots_px||13))+'px!important;line-height:18px;color:'+(HG.lots_color||'rgba(255,255,255,.92)')+'}'+
+ 'html body header.hg #hgr>#rfb,html body header.hg #hgr>#urb{position:static!important;inset:auto!important;transform:none!important;width:auto!important;min-width:0!important;height:'+BH+'px!important;margin:0!important;padding:0 14px!important;box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;border-radius:'+R+'px!important;font:600 '+(+(HG.btn_px||14))+'px/1 system-ui,-apple-system,sans-serif!important;white-space:nowrap!important;background:#1C2E52!important;border:1px solid rgba(212,175,90,.75)!important;color:#F3D98B!important;box-shadow:none!important;z-index:auto!important}'+
+ 'html body header.hg #hgr>#urb.on{background:'+(U.sel_bg||'rgba(212,175,90,.22)')+'!important;border-color:'+(U.sel_border||'rgba(212,175,90,.5)')+'!important;color:'+G+'!important}'+
+ 'html body header.hg #hgr #rfb .rl{position:static!important;width:auto!important;height:auto!important;overflow:visible!important;clip:auto!important}'+
+ 'html body header.hg #hgr #rfb .ri,html body header.hg #hgr #urb .ico svg{width:18px!important;height:18px!important;display:block!important}html body header.hg #hgr #urb .ico{display:inline-flex!important;width:auto!important;position:static!important}html body header.hg #hgr #urb .lb{display:inline!important}html body header.hg #hgr #urb .badge{display:none!important}'+
+ 'html body header.hg #hrow{order:-2;flex:0 0 100%;width:100%;display:flex;align-items:center;gap:12px;min-width:0}'+
+ 'html body header.hg #hrow>.hb{flex:1 1 auto!important;min-width:0;justify-content:flex-start!important;min-height:0!important}'+
+ 'html body header.hg #hrow>#thm{display:inline-flex!important;position:static!important;flex:none;width:'+TP+'px!important;height:'+TP+'px!important;margin:0!important;border-radius:'+R+'px!important;align-items:center;justify-content:center}'+
+ '@media(min-width:1024px){html body header.hg #hrow{flex:0 1 auto;width:auto}}';
+ var s=document.createElement('style');s.textContent=c;document.head.appendChild(s);return HGW}
 addEventListener('resize',rp);setTimeout(rp,0);setTimeout(rp,400);setTimeout(rp,1500);setInterval(rp,3000);
 })();
 /* экран PIN: ввод с физической клавиатуры (цифры, numpad, Backspace, Enter) и скрытое поле для мобильной клавиатуры/автозаполнения */
