@@ -11,7 +11,7 @@ window.EV_UI={
  header:{v2:false, logo_px:56, logo_px_narrow:46, name_px:20, system_px:12, system_color:'rgba(255,255,255,.7)', slogan_px:11, slogan_color:'rgba(255,255,255,.5)', service_px:11, draw_s:1.2, under_gap:6},
  under_refresh:'#oth',
  /* шапка-сетка (Дизайнер 15.10): слева дата и строка лотов, справа колонка «Обновить»/«Прочее» одной ширины; on:false — прежняя шапка */
- header_grid:{on:true, pad:16, col_gap:12, btn_min:112, btn_w:141, busy_keep_label:true, spinner_px:14, busy_opacity:0.6, btn_h:36, btn_gap:8, btn_radius:10, btn_px:14, date_px:12, date_color:'rgba(255,255,255,.62)', lots_px:13, lots_color:'rgba(255,255,255,.92)', thm_px:36, row_gap:10},
+ header_grid:{on:true, pad:16, col_gap:12, btn_min:112, btn_w:141, busy_keep_label:true, m_bp:430, m_icon_btn:36, m_logo_px:28, m_title_px:17, m_tab_px:13, m_tab_px_min:12, m_tab_h:36, m_tab2_h:32, m_tab_min_px_at:374, spinner_px:14, busy_opacity:0.6, btn_h:36, btn_gap:8, btn_radius:10, btn_px:14, date_px:12, date_color:'rgba(255,255,255,.62)', lots_px:13, lots_color:'rgba(255,255,255,.92)', thm_px:36, row_gap:10},
  sum_reg:'Реестры', sum_torgi:'Торги', sum_total:'Всего',
  cnt_abbr_maxw:380, cnt_abbr_from:1000, cnt_abbr_suffix:'к', cnt_abbr_decimal:',', cnt_longpress_ms:500, r1_gap_narrow:'3px', r1_pad_narrow:'2px', r1_icons_narrow:false,
  sel_bg:'rgba(212,175,90,.22)', sel_border:'rgba(212,175,90,.5)', sel_text:'#D4AF5A',
@@ -184,6 +184,35 @@ function hgrid(){if(HGW)return HGW;var P=+(HG.pad==null?16:HG.pad),BH=+(HG.btn_h
  'html body header.hg #hrow>.hb{flex:1 1 auto!important;min-width:0;justify-content:flex-start!important;min-height:0!important}'+
  'html body header.hg #hrow>#thm{display:inline-flex!important;position:static!important;flex:none;width:'+TP+'px!important;height:'+TP+'px!important;margin:0!important;border-radius:'+R+'px!important;align-items:center;justify-content:center}'+
  '@media(min-width:1024px){html body header.hg #hrow{flex:0 1 auto;width:auto}}';
+ /* ≤ m_bp: ряд 1 — лого+название слева, справа круглые «Обновить» и под ней «Прочее»; ряд 2 — дата и лоты; вкладки — сегменты на всю ширину без прокрутки */
+ var MB=+(HG.m_bp||430),IB=+(HG.m_icon_btn||36),TF=+(HG.m_tab_px||13),TM=+(HG.m_tab_px_min||12),TH=+(HG.m_tab_h||36),T2=+(HG.m_tab2_h||32),TA=+(HG.m_tab_min_px_at||374);
+ c+='@media(max-width:'+MB+'px){'+
+ 'html body header.hg{padding-left:max('+P+'px,env(safe-area-inset-left))!important;padding-right:max('+P+'px,env(safe-area-inset-right))!important;align-items:flex-start!important;overflow:visible!important}'+
+ 'html body header.hg #hgrid{display:contents}'+
+ 'html body header.hg #hrow{order:1;flex:1 1 0!important;width:auto!important;min-width:0;align-self:flex-start;min-height:'+IB+'px}'+
+ 'html body header.hg #hgr{order:2;grid-template-columns:'+IB+'px!important;grid-auto-rows:'+IB+'px;row-gap:'+BG+'px;align-self:flex-start}'+
+ 'html body header.hg #hgl{order:3;flex:0 0 100%!important;width:100%}'+
+ 'html body header.hg>nav{order:4}'+
+ 'html body header.hg #hgr>#rfb,html body header.hg #hgr>#urb{width:'+IB+'px!important;height:'+IB+'px!important;padding:0!important;gap:0!important;border-radius:50%!important}'+
+ 'html body header.hg #hgr #rfb .rl,html body header.hg #hgr #urb .lb{display:none!important}'+
+ 'html body header.hg #hrow>.hb>img{height:'+(+(HG.m_logo_px||28))+'px!important;width:auto!important}'+
+ 'html body header.hg #hrow>.hb{gap:8px!important;align-items:center!important}'+
+ 'html body header.hg #hrow .brand-n{font-size:'+(+(HG.m_title_px||17))+'px!important;white-space:nowrap}html body header.hg #hrow .brand-s{display:none!important}html body header.hg #hrow small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}'+
+ 'html body header.hg #hrow .bt{min-width:0}'+
+ 'html body header.hg #hrow>#thm{border-radius:50%!important;width:'+IB+'px!important;height:'+IB+'px!important}'+
+ /* вкладки */
+ 'html body header.hg nav{overflow:visible!important;flex-wrap:wrap!important;width:100%!important;max-width:none!important}'+
+ 'html body header.hg nav>button.r1{flex:1 1 0!important;width:auto!important;max-width:none!important;min-width:0!important;height:'+TH+'px!important;padding:0 2px!important;gap:3px!important;font-size:'+TF+'px!important;letter-spacing:0!important;overflow:hidden}'+
+ 'html body header.hg nav>button.r1 .ico{display:none!important}html body header.hg nav>button.r1 .lb{min-width:0;overflow:hidden;text-overflow:ellipsis}'+
+ 'html body header.hg nav>button.r1 .badge{font-size:10px!important;padding:0 4px!important;margin:0!important;letter-spacing:0!important}'+
+ 'html body header.hg nav>button.r1 .qb{width:13px!important;height:13px!important;font-size:10px!important;line-height:13px!important}'+
+ 'html body header.hg nav #nr2{display:flex!important;flex:0 0 100%!important;overflow:visible!important;flex-wrap:nowrap!important;justify-content:stretch!important;padding:0!important}'+
+ 'html body header.hg nav #nr2>button{flex:1 1 0!important;min-width:0!important;height:'+T2+'px!important;padding:0 2px!important;gap:0!important;justify-content:center;font-size:'+TF+'px!important;overflow:visible;position:relative!important}'+
+ 'html body header.hg nav #nr2>button .ico{display:none!important}html body header.hg nav #nr2>button .lb{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'+
+ 'html body header.hg nav #nr2>button .badge{position:absolute!important;top:-6px;right:2px;font-size:9.5px!important;line-height:14px!important;padding:0 4px!important;background:'+G+'!important;color:#0F1B33!important;z-index:2}'+
+ 'html body header.hg #othbar,html body header.hg #favseg{max-width:100%!important;overflow:visible!important;flex-wrap:wrap}'+
+ '}'+
+ '@media(max-width:'+TA+'px){html body header.hg nav>button.r1,html body header.hg nav #nr2>button{font-size:'+TM+'px!important}html body header.hg nav>button.r1 .badge{padding:0 3px!important}}';
  var s=document.createElement('style');s.textContent=c;document.head.appendChild(s);return HGW}
 addEventListener('resize',rp);setTimeout(rp,0);setTimeout(rp,400);setTimeout(rp,1500);setInterval(rp,3000);
 })();
