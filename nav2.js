@@ -15,6 +15,8 @@ window.EV_UI={
  sum_reg:'Реестры', sum_torgi:'Торги', sum_total:'Всего',
  cnt_abbr_maxw:380, cnt_abbr_from:1000, cnt_abbr_suffix:'к', cnt_abbr_decimal:',', cnt_longpress_ms:500, r1_gap_narrow:'3px', r1_pad_narrow:'2px', r1_icons_narrow:false,
  sel_bg:'rgba(212,175,90,.22)', sel_border:'rgba(212,175,90,.5)', sel_text:'#D4AF5A',
+ /* «Торги» и «Торги ?»: сортировка по заголовкам таблицы и чип «Сортировка» на телефоне. cols — сортируемые колонки (k — ключ сортировки, как в списке «Сортировка» фильтров); first_dir: -1 — первое нажатие по убыванию; default — пока пользователь ничего не выбрал */
+ prop_sort:{cols:[{k:'current_price',label:'Текущая цена'},{k:'start_price',label:'Начальная'},{k:'disc',label:'Скидка'},{k:'score',label:'Балл'}], first_dir:-1, default:{k:'score',d:-1}, ls_prefix:'cr.psort.', arrows:{desc:'↓',asc:'↑',none:'↕'}, chip_label:'Сортировка', hint:'Сортировать:'},
  vreq_bg:'#D93A2F', vreq_bg_pressed:'#B52E25', vreq_text:'#FFFFFF', vreq_border:'rgba(255,255,255,.2)'
 };
 
