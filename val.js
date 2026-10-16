@@ -52,17 +52,25 @@ function files(v){return [['report','Отчёт'],['xlsx','Расчёт'],['meth
 function draw(){var m=$('valm'),L=$('vall');
  if(!online()){m.textContent=g('EMB')?'Доступно в онлайн-версии.':'Нужен вход (PIN или ключ GitHub).';L.innerHTML='';return}
  if(VLD&&!VT){m.textContent='Загрузка…';L.innerHTML='<div class="ldsk"><div class="ldt">База загружается…</div><i></i><i></i></div>';return}
- var R=VIDX.slice().sort(function(a,b){return String(vdate(b)).localeCompare(String(vdate(a)))||String(b.request_id).localeCompare(String(a.request_id))});
+ var ED=window.EVDel;var R=VIDX.filter(function(v){return !(ED&&ED.pending('val:'+v.request_id))}).sort(function(a,b){return String(vdate(b)).localeCompare(String(vdate(a)))||String(b.request_id).localeCompare(String(a.request_id))});
  m.textContent=(R.length?'Оценок: '+R.length:'Оценок пока нет.')+(VPEND.length?' · в работе: '+VPEND.length:'');
  var pend=VPEND.map(function(p){var q=p.q||{},l=q.lot||{},o=q.object||{};var es='';try{es=g('etaStatus')(q)}catch(e){}
   return '<div class="lot pend"><div class="row vrow" style="cursor:default"><div><div class="d1">'+esc(q.title||o.title||l.title||o.make_model||p.id)+'</div><div class="sm">'+esc([deb(q)||deb(l),q.lot_id?'лот '+(l.trade_no||q.lot_id):'',q.method||o.method?(q.method||o.method):''].filter(Boolean).join(' · '))+'</div><div class="sm"><b>'+esc(es||p.st)+'</b></div></div><div></div></div></div>'}).join('');
  L.innerHTML=pend+R.map(function(v){var l=lotOf(v),r=v.range||{};
   var who=[deb(v)||deb(l),v.lot_id?'лот '+((l&&l.trade_no)||v.lot_id):''].filter(Boolean).join(' · ');
-  return '<div class="lot"><div class="row vrow" style="cursor:default"><div><div class="d1">'+esc(v.title||(l&&l.title)||v.request_id)+'</div>'+(who?'<div class="sm">'+esc(who)+'</div>':'')+
+  return '<div class="lot" data-evrow><div class="row vrow" style="cursor:default"><div><div class="d1">'+esc(v.title||(l&&l.title)||v.request_id)+'</div>'+(who?'<div class="sm">'+esc(who)+'</div>':'')+
   (FOC&&String(v.lot_id)===FOC?'<h3 class="vhd">'+esc(v.method||METHOD)+'</h3>':'')+'<div class="sm">Дата оценки: '+esc(fdt(vdate(v)))+'</div>'+
   (v.value!=null?'<div class="vsum">'+rub(v.value)+(r.min!=null?' <span class="sm" style="font-weight:400">(диапазон '+rub(r.min)+' – '+rub(r.max)+')</span>':'')+'</div><div class="sm vcap">'+esc(v.method||METHOD)+'</div>':'')+
-  '<div class="vdisc">'+esc(DISC)+'</div></div><div class="vact">'+files(v)+'</div></div></div>'}).join('');}
+  '<div class="vdisc">'+esc(DISC)+'</div></div><div class="vact">'+files(v)+(ED&&v.request_id&&vfiles(v).length?ED.icon('valuation','val:'+v.request_id,v.title||v.request_id):'')+'</div></div></div>'}).join('');}
 V.addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(b){var f=g('dlClick');if(f)f(e)}});
+/* удаление оценки: только файлы результата (отчёт, расчёт, методика) и запись в valuation/index.json; запрос и лот остаются */
+function vfiles(v){return ['report','xlsx','methodology'].map(function(k){return v[k]}).filter(function(p){return typeof p==='string'&&/^valuation\/[\w.\-]+\/[^/]+$/.test(p)})}
+if(window.EVDel){EVDel.op_valuation=function(b){var id=b.dataset.evkey.slice(4),v=VIDX.find(function(x){return String(x.request_id)===id});if(!v)return null;
+  return {kind:'valuation',key:'val:'+id,request_id:id,name:b.dataset.evnm,paths:vfiles(v),files:vfiles(v).map(function(p){return p.split('/').slice(-2).join('/')})}};
+ EVDel.kind('valuation',async function(op){await EVDel.tombAdd('valuation',op.request_id,[op.request_id]);for(var i=0;i<op.paths.length;i++)await g('ghDelete')(op.paths[i]);
+  await EVDel.idxEdit('valuation/index.json',function(o){var arr=Array.isArray(o)?o:(o.items||o.reports||[]),n=arr.filter(function(x){return String(x.request_id)!==op.request_id});if(n.length===arr.length)return false;if(Array.isArray(o))return n;var c=Object.assign({},o);c[o.items?'items':'reports']=n;return c});
+  VIDX=VIDX.filter(function(x){return String(x.request_id)!==op.request_id});$('valn').textContent=VIDX.length+VPEND.length});
+ ['hide','done','restore'].forEach(function(ev){document.addEventListener('evdel:'+ev,function(e){if(e.detail.op.kind!=='valuation')return;if(ev==='done'){VT=0;load(true).then(draw)}else draw();rerender()})})}
 function valList(force){draw();load(force).then(draw)}
 /* --- кнопка в карточке лота --- */
 var RL=0;function reps(id){var R=g('REPIDX')||{};if(!RL&&online()){RL=1;var f=g('repIdx');if(f)f().then(rerender)}
@@ -88,6 +96,6 @@ document.addEventListener('click',function(e){var rb=e.target.closest('.prep[dat
  ghApi('requests/'+req.id+'.json',{method:'PUT',body:JSON.stringify({message:'valuation '+req.id,branch:g('BRANCH'),content:u8(JSON.stringify(req,null,1))})}).then(function(r){
   if(!r.ok)throw new Error('GitHub '+r.status);var a='';try{a=g('etaAccepted')(req)}catch(x){}
   toast('✓ '+esc(a||'Запрос принят')+'. Метод: '+esc(METHOD)+'. Результат будет во вкладке <a href="#" data-go="val" style="color:#bcd3ff;text-decoration:underline">«Оценка»</a>.',15000);
-  VPEND.unshift({id:req.id,q:req,st:'в очереди',val:true});$('valn').textContent=VIDX.length+VPEND.length;g('propRender')()}).catch(function(x){b.disabled=false;b.textContent='Запросить оценку';toast('Не удалось отправить запрос: '+esc(x.message),8000)})},true);
+  VPEND.unshift({id:req.id,q:req,st:'в очереди',val:true});if(C.val_autofav!==false&&typeof window.pFavAdd==='function')window.pFavAdd(String(l.id));$('valn').textContent=VIDX.length+VPEND.length;g('propRender')()}).catch(function(x){b.disabled=false;b.textContent='Запросить оценку';toast('Не удалось отправить запрос: '+esc(x.message),8000)})},true);
 setTimeout(function(){load()},4000);
 })();
