@@ -87,21 +87,23 @@ var ICON='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d=
 function icon(kind,key,name){return '<button type="button" class="evdel" data-evdel="'+esc(kind)+'" data-evkey="'+esc(key)+'" data-evnm="'+esc(name)+'" title="Удалить" aria-label="Удалить '+esc(name)+'">'+ICON+'</button>'}
 function ro(){var t=g('TOKEN'),fr=g('FAVRO');return !t||fr===true}
 function toast(m,ms){var f=g('toast');if(f)f(m,ms||6000)}
-function ask(name,files){return new Promise(function(res){var m=document.createElement('div');m.id='evdelm';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
- m.innerHTML='<div class="bx"><b>Удалить файл?</b><div class="fn">'+esc(name)+'</div>'+(files&&files.length>1?'<div class="sm">Будут удалены: '+files.map(esc).join(', ')+'</div>':'')+'<div class="sm">Исходные данные (лот, запрос) не удаляются.</div><div class="bt"><button type="button" class="lbtn no">Отмена</button><button type="button" class="lbtn ok">Удалить</button></div></div>';
+/* тексты диалога/тоста можно задать в op (заявки на оценку — из EV_CFG.val_requests): title, note, ok_text, no_text, toast_text, undo_text, restored_text, done_text */
+function ask(name,files,op){op=op||{};return new Promise(function(res){var m=document.createElement('div');m.id='evdelm';m.setAttribute('role','dialog');m.setAttribute('aria-modal','true');
+ var note=op.note!==undefined?op.note:'Исходные данные (лот, запрос) не удаляются.';
+ m.innerHTML='<div class="bx"><b>'+esc(op.title||'Удалить файл?')+'</b><div class="fn">'+esc(name)+'</div>'+(files&&files.length>1?'<div class="sm">Будут удалены: '+files.map(esc).join(', ')+'</div>':'')+(note?'<div class="sm">'+esc(note)+'</div>':'')+'<div class="bt"><button type="button" class="lbtn no">'+esc(op.no_text||'Отмена')+'</button><button type="button" class="lbtn ok">'+esc(op.ok_text||'Удалить')+'</button></div></div>';
  function done(v){document.removeEventListener('keydown',kd,true);m.remove();res(v)}function kd(e){if(e.key==='Escape'){e.preventDefault();done(false)}}
  m.addEventListener('click',function(e){if(e.target===m||e.target.closest('.no'))done(false);else if(e.target.closest('.ok'))done(true)});document.addEventListener('keydown',kd,true);document.body.appendChild(m);m.querySelector('.no').focus()})}
 function fire(op,ok,err){document.dispatchEvent(new CustomEvent('evdel:'+(ok?'done':'restore'),{detail:{op:op,error:err}}))}
 async function commit(key){var op=PEND[key];if(!op)return;clearTimeout(T[key]);delete T[key];var k=KINDS[op.kind];if(!k)return; // исполнитель ещё не зарегистрирован — останется в очереди
- try{await k(op);delete PEND[key];save();fire(op,true);toast('Удалено: '+esc(op.name),5000)}
- catch(e){op.err=String(e.message||e);op.tries=(op.tries||0)+1;save();toast('Не удалось удалить '+esc(op.name)+': '+esc(op.err)+'. Повторю при следующем открытии.',9000);fire(op,false,op.err)}}
+ try{await k(op);delete PEND[key];save();fire(op,true);toast(esc(op.done_text||'Удалено')+': '+esc(op.name),5000)}
+ catch(e){op.err=String(e.message||e);op.tries=(op.tries||0)+1;save();toast(esc(op.fail_text||'Не удалось удалить')+' '+esc(op.name)+': '+esc(op.err)+'. Повторю при следующем открытии.',9000);fire(op,false,op.err)}}
 function undoToast(op){var t=document.getElementById('evdelt');if(t)t.remove();t=document.createElement('div');t.id='evdelt';t.setAttribute('role','status');
- t.innerHTML='<span>Файл удалён</span><button type="button">Вернуть</button>';document.body.appendChild(t);
- t.querySelector('button').onclick=function(){clearTimeout(T[op.key]);delete T[op.key];delete PEND[op.key];save();t.remove();fire(op,false);toast('Файл возвращён: '+esc(op.name),4000)};
+ t.innerHTML='<span>'+esc(op.toast_text||'Файл удалён')+'</span><button type="button">'+esc(op.undo_text||'Вернуть')+'</button>';document.body.appendChild(t);
+ t.querySelector('button').onclick=function(){clearTimeout(T[op.key]);delete T[op.key];delete PEND[op.key];save();t.remove();fire(op,false);toast(esc(op.restored_text||'Файл возвращён')+': '+esc(op.name),4000)};
  T[op.key]=setTimeout(function(){t.remove();commit(op.key)},+D.undo_ms||5000)}
 /* Запуск удаления по кнопке/свайпу. op: {kind,key,name,files?,...данные для исполнителя} */
 async function start(op){if(ro()){toast('Удаление недоступно: ключ только для чтения.',6000);return}
- if(!KINDS[op.kind])return;if(!(await ask(op.name,op.files)))return;op.at=Date.now();PEND[op.key]=op;save();
+ if(!KINDS[op.kind])return;if(!(await ask(op.name,op.files,op)))return;op.at=Date.now();PEND[op.key]=op;save();
  document.dispatchEvent(new CustomEvent('evdel:hide',{detail:{op:op}}));
  if(D.undo_toast)undoToast(op);else commit(op.key)}
 function pending(key){return !!PEND[key]}
@@ -124,7 +126,7 @@ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.c
  var mk=window.EVDel['op_'+b.dataset.evdel];var op=mk?mk(b):{kind:b.dataset.evdel,key:b.dataset.evkey,name:b.dataset.evnm};if(op)start(op)},true);
 /* «надгробия» в закрытом репо (deleted.json): id запросов удалённых отчётов/оценок, чтобы запрос не вернулся в «В работе» */
 var TOMB=null,TL=null;try{TOMB=JSON.parse(localStorage.getItem('ev.del.tomb')||'null')}catch(e){}
-function tombIds(){var o=TOMB||{},s=[];['reports','valuation'].forEach(function(k){var m=o[k]||{};Object.keys(m).forEach(function(n){var r=m[n];(r&&r.request_ids||[]).forEach(function(x){s.push(x)})})});return s}
+function tombIds(){var o=TOMB||{},s=[];['reports','valuation','requests'].forEach(function(k){var m=o[k]||{};Object.keys(m).forEach(function(n){var r=m[n];(r&&r.request_ids||[]).forEach(function(x){s.push(x)})})});return s}
 function tombLoad(){if(TL)return TL;var R=g('ghRaw');if(!R||!g('TOKEN'))return Promise.resolve();TL=R('deleted.json').then(function(t){TOMB=JSON.parse(t);try{localStorage.setItem('ev.del.tomb',t)}catch(e){}}).catch(function(){}).then(function(){setTimeout(function(){TL=null},6e4)});return TL}
 async function tombAdd(kind,key,ids){ids=(ids||[]).filter(Boolean);if(!ids.length)return;var REPO=g('REPO'),BR=g('BRANCH'),H=g('ghH'),U=g('u8b64'),B=g('b64');
  for(var k=0;k<4;k++){var r=await fetch('https://api.github.com/repos/'+REPO+'/contents/deleted.json?ref='+BR+'&_='+Date.now(),{headers:H(),cache:'no-store'}),o={},sha;
@@ -132,7 +134,9 @@ async function tombAdd(kind,key,ids){ids=(ids||[]).filter(Boolean);if(!ids.lengt
   o[kind]=o[kind]||{};o[kind][key]={request_ids:ids,deleted_at:new Date().toISOString()};var b={message:'deleted: '+key,branch:BR,content:U(JSON.stringify(o,null,1))};if(sha)b.sha=sha;
   var p=await fetch('https://api.github.com/repos/'+REPO+'/contents/deleted.json',{method:'PUT',headers:H(),body:JSON.stringify(b)});
   if(p.ok){TOMB=o;try{localStorage.setItem('ev.del.tomb',JSON.stringify(o))}catch(e){}return}if(p.status!==409&&p.status!==422)throw new Error('deleted.json '+p.status);await new Promise(function(z){setTimeout(z,600)})}throw new Error('конфликт версий deleted.json')}
-window.EVDel={icon:icon,start:start,kind:kind,pending:pending,idxEdit:idxEdit,tombAdd:tombAdd,tombLoad:tombLoad,tombIds:tombIds,cfg:D,_pend:PEND};
+/* отменённые заявки (deleted.json → cancelled): {id:{request_ids,deleted_at}} */
+function cancelled(id){var c=(TOMB||{}).cancelled||{};return !!c[id]}
+window.EVDel={cancelled:cancelled,icon:icon,start:start,kind:kind,pending:pending,idxEdit:idxEdit,tombAdd:tombAdd,tombLoad:tombLoad,tombIds:tombIds,cfg:D,_pend:PEND};
 })();
 
 /* Эверест: «Торги» / «Торги ?» — заголовок лота (2 строки, «Предмет не указан»), источник предмета, типы имущества со значками,

@@ -14,7 +14,7 @@ var orig=pendList;
 pendList=async function(){
  var ev=(typeof EV_APP!=='undefined'&&EV_APP&&window.EVDel);
  var dirs=[['requests','в очереди'],['requests/picked','в работе']];
- var L=await Promise.all([ev?EVDel.tombLoad():null].concat(dirs.map(async function(d){try{var r=await ghApi(d[0]);if(!r.ok)return [];return (await r.json()).filter(function(x){return x.type==='file'&&x.name.endsWith('.json')}).map(function(f){return {f:f,st:d[1]}})}catch(e){return []}})));
+ var L=await Promise.all([ev?EVDel.tombLoad():null].concat(dirs.map(async function(d){try{var r=await ghApi(d[0]);if(!r.ok)return [];return (await r.json()).filter(function(x){return x.type==='file'&&x.name.endsWith('.json')&&!x.name.endsWith('.cancel.json')}).map(function(f){return {f:f,st:d[1]}})}catch(e){return []}})));
  var done=new Set(Object.values(REPIDX).flatMap(function(x){return x?[x.request_id].concat(x.request_ids||[]):[]}).filter(Boolean).concat(ev?EVDel.tombIds():[]));
  var items=[].concat(L[1],L[2]).filter(function(it){it.id=it.f.name.replace(/\.json$/,'');return !done.has(it.id)});
  return pool(items,N,async function(it){var q=await readQ(it.f);return {id:it.id,path:it.f.path,st:it.st,q:q,n:(q.lots||[]).length||1,pr:q.type==='court_practice',fin:q.type==='fin_analysis',val:q.type==='valuation'}})};

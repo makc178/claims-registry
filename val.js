@@ -5,6 +5,8 @@ var ORDER=C.tab_order||['reg','man','fav','rep','prop','perr','val'];window.EV_T
 var DISC=C.val_disclaimer||'Не является отчётом об оценке по 135-ФЗ, носит информационно-аналитический характер';
 var METHOD=C.val_method||'Ориентировочная рыночная цена (сравнительный подход, по аналогам)';
 var VTTL=(C.val_ttl_min||5)*6e4;
+/* заявки на оценку: удаление (в очереди / отменённые) и отмена (переданные Оценщику); тексты и правила — config/everest.json → val_requests (встраивает build.py) */
+var VR=Object.assign({delete_states:['queue','cancelled'],cancel_states:['picked'],cancel_index_statuses:['pending','need_data','partial'],delete:{},cancel:{},cancelled_tag:'Отменена',cancel_note:''},{"delete_states":["queue","cancelled"],"cancel_states":["picked"],"cancel_index_statuses":["pending","need_data","partial"],"delete":{"title":"Удалить заявку на оценку?","note":"","ok_text":"Удалить","no_text":"Отмена","toast_text":"Заявка удалена","undo_text":"Вернуть","restored_text":"Заявка возвращена","done_text":"Заявка удалена","fail_text":"Не удалось удалить заявку"},"cancel":{"button":"Отменить заявку","title":"Отменить заявку на оценку?","note":"Оценщик получит уведомление об отмене. После отмены заявку можно удалить.","ok_text":"Отменить заявку","no_text":"Не отменять","toast_text":"Заявка отменена","undo_text":"Вернуть","restored_text":"Заявка не отменена","done_text":"Заявка отменена","fail_text":"Не удалось отменить заявку"},"cancelled_tag":"Отменена","cancel_note":"Заявка отменена пользователем в Эвересте: оценку не выполнять, если начата — остановить."},C.val_requests||{});
 function g(n){try{return (0,eval)(n)}catch(e){return undefined}}
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -20,7 +22,7 @@ nav.appendChild(vb);
 var V=document.createElement('div');V.id='vval';V.style.display='none';
 V.innerHTML='<div class="md"><h2>Оценка</h2><p class="sm" id="valm"></p><div id="vall"></div></div>';
 var vrep=$('vrep');(vrep&&vrep.parentNode||document.body).insertBefore(V,vrep?vrep.nextSibling:null);
-var st=document.createElement('style');st.textContent='#vall .vnd .vndt{background:color-mix(in srgb,#d9822b 18%,transparent);color:#b5651d}[data-theme=dark] #vall .vnd .vndt{color:#f0b37a}#vall .vmis{margin:4px 0 6px;padding-left:20px}#vall .vmis li{margin:2px 0;line-height:1.35;font-size:13px}#vall .vndh{margin-top:6px}#vall .vre{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}#vall .vre textarea{flex:1 1 100%;box-sizing:border-box;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--pan);color:var(--ink);font:inherit}#vall .vfp{cursor:pointer}'+
+var st=document.createElement('style');st.textContent='#vall .vnd .vndt{background:color-mix(in srgb,#d9822b 18%,transparent);color:#b5651d}[data-theme=dark] #vall .vnd .vndt{color:#f0b37a}#vall .vmis{margin:4px 0 6px;padding-left:20px}#vall .vmis li{margin:2px 0;line-height:1.35;font-size:13px}#vall .vndh{margin-top:6px}#vall .vre{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}#vall .vre textarea{flex:1 1 100%;box-sizing:border-box;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--pan);color:var(--ink);font:inherit}#vall .vfp{cursor:pointer}#vall .vcan{font:inherit;font-size:13px;white-space:nowrap}#vall .vcx{background:rgba(140,150,165,.22);color:var(--mut,#8a93a3)}'+
 '#vall .vrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px;align-items:start}#vall .vact{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}'+
 '#vall .vcap{margin-top:2px}#vall .vhd{margin:0 0 4px;font-size:16px;color:var(--gold,var(--acc))}#vall .vdisc,.pval .vdisc{font-size:12px;color:var(--mut,#8a93a3);margin-top:6px;line-height:1.35}#vall .vsum{font-weight:600}'+
 '@media(max-width:640px){#vall .vrow{grid-template-columns:1fr}#vall .vact{justify-content:flex-start}}'+
@@ -53,14 +55,20 @@ function files(v){return [['report','Отчёт'],['xlsx','Расчёт'],['meth
    со status:pending и rev+1 (сборщик заберёт его снова; ключ пересылки id#r<rev>), копия в requests/picked/ удаляется --- */
 function isArb(q){return /^arbitr/i.test(String((q||{}).source||''))}
 function ndRow(p){var q=p.q||{},o=q.object||{},mis=Array.isArray(q.missing)?q.missing:(q.missing?[String(q.missing)]:[]),id=esc(p.id);
- return '<div class="lot pend vnd" data-vnd="'+id+'"><div class="row vrow" style="cursor:default"><div style="min-width:0"><div class="d1">'+esc(q.title||o.title||p.id)+'</div>'+
+ return '<div class="lot pend vnd" data-evrow data-vnd="'+id+'"><div class="row vrow" style="cursor:default"><div style="min-width:0"><div class="d1">'+esc(q.title||o.title||p.id)+'</div>'+
   '<div class="sm">'+esc([deb(q),q.lot_id?'лот '+(o.trade_no||q.lot_id):''].filter(Boolean).join(' · '))+'</div>'+
   '<div class="sm"><span class="tag vndt">Нужны данные</span>'+(q.rev>1?' <span class="sm">повтор '+(q.rev-1)+'</span>':'')+'</div>'+
   (mis.length?'<div class="sm vndh">Оценщику не хватает:</div><ol class="vmis">'+mis.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ol>':'')+
   (q.need_data_note?'<div class="sm">'+esc(q.need_data_note)+'</div>':'')+
   '<div class="vre"><label class="lbtn sec vfp">Прикрепить файлы<input type="file" multiple hidden data-vfi="'+id+'"></label><span class="sm vfl" data-vfl="'+id+'"></span>'+
   '<textarea rows="3" data-vtx="'+id+'" placeholder="Или напишите недостающие данные текстом"></textarea>'+
-  '<button class="lbtn" data-vresend="'+id+'">Отправить повторно</button><span class="sm vrm" data-vrm="'+id+'"></span></div></div><div></div></div></div>'}
+  '<button class="lbtn" data-vresend="'+id+'">Отправить повторно</button><span class="sm vrm" data-vrm="'+id+'"></span></div></div><div class="vact">'+reqAct(p)+'</div></div></div>'}
+function vstate(p){var q=p.q||{},ED=window.EVDel;if(q.status==='cancelled'||(ED&&ED.cancelled&&ED.cancelled(p.id)))return 'cancelled';return p.st==='в очереди'?'queue':'picked'}
+function reqAct(p){var ED=window.EVDel;if(!ED)return '';var s=vstate(p),q=p.q||{},o=q.object||{},nm=q.title||o.title||p.id,h='';
+ if(s==='cancelled')h+='<span class="tag vcx">'+esc(VR.cancelled_tag||'Отменена')+'</span>';
+ if(VR.delete_states.indexOf(s)>=0)h+=ED.icon('valreq','vrq:'+p.id,nm);
+ else if(VR.cancel_states.indexOf(s)>=0)h+='<button type="button" class="evdel vcan" data-evdel="valreq_cancel" data-evkey="vrc:'+esc(p.id)+'" data-evnm="'+esc(nm)+'" title="'+esc((VR.cancel||{}).button||'Отменить заявку')+'">'+esc((VR.cancel||{}).button||'Отменить заявку')+'</button>';
+ return h}
 var VSEL={};
 V.addEventListener('change',function(e){var i=e.target.closest('input[data-vfi]');if(!i)return;var id=i.dataset.vfi;VSEL[id]=[].slice.call(i.files||[]);var s=V.querySelector('[data-vfl="'+id+'"]');if(s)s.textContent=VSEL[id].map(function(f){return f.name}).join(', ')});
 function cleanReq(q){var o={};Object.keys(q).forEach(function(k){if(k.charAt(0)!=='_')o[k]=q[k]});return o}
@@ -89,8 +97,8 @@ function draw(){var m=$('valm'),L=$('vall');
  if(VLD&&!VT){m.textContent='Загрузка…';L.innerHTML='<div class="ldsk"><div class="ldt">База загружается…</div><i></i><i></i></div>';return}
  var ED=window.EVDel;var R=VIDX.filter(function(v){return !(ED&&ED.pending('val:'+v.request_id))}).sort(function(a,b){return String(vdate(b)).localeCompare(String(vdate(a)))||String(b.request_id).localeCompare(String(a.request_id))});
  m.textContent=(R.length?'Оценок: '+R.length:'Оценок пока нет.')+(VPEND.length?' · в работе: '+VPEND.length:'');
- var pend=VPEND.map(function(p){var q=p.q||{},l=q.lot||{},o=q.object||{};if(q.status==='need_data')return ndRow(p);var es='';try{es=g('etaStatus')(q)}catch(e){}
-  return '<div class="lot pend"><div class="row vrow" style="cursor:default"><div><div class="d1">'+esc(q.title||o.title||l.title||o.make_model||p.id)+'</div><div class="sm">'+esc([deb(q)||deb(l),q.lot_id?'лот '+(l.trade_no||q.lot_id):'',q.method||o.method?(q.method||o.method):''].filter(Boolean).join(' · '))+'</div><div class="sm"><b>'+esc(es||p.st)+'</b></div></div><div></div></div></div>'}).join('');
+ var pend=VPEND.filter(function(p){return !(ED&&ED.pending('vrq:'+p.id))}).map(function(p){var q=p.q||{},l=q.lot||{},o=q.object||{},vs=vstate(p);if(q.status==='need_data'&&vs!=='cancelled')return ndRow(p);var es='';if(vs==='cancelled')es='Заявка отменена';else try{es=g('etaStatus')(q)}catch(e){}
+  return '<div class="lot pend" data-evrow><div class="row vrow" style="cursor:default"><div><div class="d1">'+esc(q.title||o.title||l.title||o.make_model||p.id)+'</div><div class="sm">'+esc([deb(q)||deb(l),q.lot_id?'лот '+(l.trade_no||q.lot_id):'',q.method||o.method?(q.method||o.method):''].filter(Boolean).join(' · '))+'</div><div class="sm"><b>'+esc(es||p.st)+'</b></div></div><div class="vact">'+reqAct(p)+'</div></div></div>'}).join('');
  L.innerHTML=pend+R.map(function(v){var l=lotOf(v),r=v.range||{};
   var who=[deb(v)||deb(l),v.lot_id?'лот '+((l&&l.trade_no)||v.lot_id):''].filter(Boolean).join(' · ');
   return '<div class="lot" data-evrow><div class="row vrow" style="cursor:default"><div><div class="d1">'+esc(v.title||(l&&l.title)||v.request_id)+'</div>'+(who?'<div class="sm">'+esc(who)+'</div>':'')+
@@ -105,6 +113,27 @@ if(window.EVDel){EVDel.op_valuation=function(b){var id=b.dataset.evkey.slice(4),
  EVDel.kind('valuation',async function(op){await EVDel.tombAdd('valuation',op.request_id,[op.request_id]);for(var i=0;i<op.paths.length;i++)await g('ghDelete')(op.paths[i]);
   await EVDel.idxEdit('valuation/index.json',function(o){var arr=Array.isArray(o)?o:(o.items||o.reports||[]),n=arr.filter(function(x){return String(x.request_id)!==op.request_id});if(n.length===arr.length)return false;if(Array.isArray(o))return n;var c=Object.assign({},o);c[o.items?'items':'reports']=n;return c});
   VIDX=VIDX.filter(function(x){return String(x.request_id)!==op.request_id});$('valn').textContent=VIDX.length+VPEND.length});
+ /* заявки на оценку. Удаление: надгробие deleted.json → requests (сборщик и списки её больше не видят) + файлы requests/<id>.json и requests/picked/<id>.json.
+    Отмена: deleted.json → cancelled + маркер requests/<id>.cancel.json (watch.py → inbox_valuation/<id>.cancel.json, ключ <id>#cancel → рутина сообщает Оценщику) + status:cancelled в valuation/index.json, если там есть незавершённая запись.
+    Избранное (favorites.json), отчёты анализа (reports/) и готовые оценки НЕ трогаются. */
+ function vrq(b,pre){var id=b.dataset.evkey.slice(4),p=VPEND.find(function(x){return x.id===id});if(!p)return null;var q=p.q||{},t=pre==='vrq'?VR.delete:VR.cancel;
+  return Object.assign({},t||{},{kind:pre==='vrq'?'valreq':'valreq_cancel',key:pre+':'+id,request_id:id,name:b.dataset.evnm,state:vstate(p),status_before:q.status||'pending',
+   q:{source:q.source,title:q.title||(q.object||{}).title,lot_id:q.lot_id,type:q.type,rev:q.rev}})}
+ EVDel.op_valreq=function(b){return vrq(b,'vrq')};EVDel.op_valreq_cancel=function(b){return vrq(b,'vrc')};
+ async function marker(op){var id=op.request_id,path='requests/'+id+'.cancel.json',ghApi=g('ghApi'),u8=g('u8b64'),sha;
+  var m={type:'valuation_cancel',id:id+'.cancel',request_id:id,for:'Оценщик',source:op.q.source||'Everest / Торги',title:op.q.title,lot_id:op.q.lot_id,status_before:op.status_before,rev:op.q.rev||1,cancelled_at:new Date().toISOString(),note:VR.cancel_note||'Заявка отменена пользователем'};
+  try{var r0=await ghApi(path);if(r0.ok)sha=(await r0.json()).sha}catch(e){}
+  var b={message:'valuation cancel '+id,branch:g('BRANCH'),content:u8(JSON.stringify(m,null,1))};if(sha)b.sha=sha;
+  var r=await ghApi(path,{method:'PUT',body:JSON.stringify(b)});if(!r.ok)throw new Error('GitHub '+r.status)}
+ async function idxCancel(id){var ST=VR.cancel_index_statuses||[];await EVDel.idxEdit('valuation/index.json',function(o){var arr=Array.isArray(o)?o:(o.items||o.reports||[]),ch=false;
+  arr.forEach(function(x){if(String(x.request_id)===id&&ST.indexOf(x.status)>=0){x.status='cancelled';x.cancelled_at=new Date().toISOString();ch=true}});return ch?o:false})}
+ EVDel.kind('valreq_cancel',async function(op){await EVDel.tombAdd('cancelled',op.request_id,[op.request_id]);await marker(op);await idxCancel(op.request_id)});
+ EVDel.kind('valreq',async function(op){var id=op.request_id;
+  if(op.state!=='cancelled'){var pk=null;try{pk=await g('ghApi')('requests/picked/'+id+'.json')}catch(e){}  // за 5 с сборщик мог успеть передать её Оценщику — тогда тоже шлём отмену
+   if(pk&&pk.ok){await EVDel.tombAdd('cancelled',id,[id]);await marker(op);await idxCancel(id)}}
+  await EVDel.tombAdd('requests',id,[id]);await g('ghDelete')('requests/'+id+'.json');await g('ghDelete')('requests/picked/'+id+'.json');
+  VPEND=VPEND.filter(function(x){return x.id!==id});$('valn').textContent=VIDX.length+VPEND.length});
+ ['hide','done','restore'].forEach(function(ev){document.addEventListener('evdel:'+ev,function(e){var k=e.detail.op.kind;if(k==='valreq'||k==='valreq_cancel'){if(ev==='done'){VT=0;load(true).then(draw)}else draw();rerender();return}});});
  ['hide','done','restore'].forEach(function(ev){document.addEventListener('evdel:'+ev,function(e){if(e.detail.op.kind!=='valuation')return;if(ev==='done'){VT=0;load(true).then(draw)}else draw();rerender()})})}
 function valList(force){draw();load(force).then(draw)}
 /* --- кнопка в карточке лота --- */
@@ -112,7 +141,7 @@ var RL=0;function reps(id){var R=g('REPIDX')||{};if(!RL&&online()){RL=1;var f=g(
  return Object.keys(R).filter(function(k){var e=R[k];return e&&String(e.lot_id||'')===id}).sort(function(a,b){return String(R[b].date||'').localeCompare(String(R[a].date||''))}).map(function(k){return '<button class="lbtn sec prep" data-f="'+esc(k)+'" data-p="reports/'+esc(k)+'"><svg class="rpic" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 11h7M9 14h7M9 17h4"/></svg>Отчёт анализа'+(R[k].date?' · '+esc(fdt(R[k].date)):'')+'</button>'}).join('')}
 window.valBtn=function(l){load();var id=String(l.id);
  var done=VIDX.filter(function(v){return String(v.lot_id||(v.object&&v.object.lot_id)||'')===id})[0];
- var wip=VPEND.filter(function(p){return String((p.q||{}).lot_id||'')===id})[0];
+ var wip=VPEND.filter(function(p){return String((p.q||{}).lot_id||'')===id&&vstate(p)!=='cancelled'})[0];
  var b;if(done)b='<button class="lbtn" data-pvalo="'+esc(id)+'">Открыть оценку</button>';
  else if(wip&&(wip.q||{}).status==='need_data')b='<button class="lbtn vwip" data-pvalnd="'+esc(id)+'">Нужны данные · дополнить</button>';
  else if(wip){var t='';try{t=g('etaHM')(g('etaAt')(wip.q))}catch(e){}b='<button class="lbtn vwip" disabled>Оценка в работе'+(t?' · до '+esc(t):'')+'</button>'}
