@@ -1,0 +1,49 @@
+window.EV_CHANGELOG={"entries":[{"items":["В «Прочее» появился раздел «Обновления»: история изменений приложения, сначала новое."],"by":"по просьбе пользователя","kind":"new","section":"upd","build":"c3ed194","at":"2026-10-16T10:57+03:00"},{"at":"2026-10-16T10:17+03:00","build":"d563383","items":["Распознаются суды ДНР, ЛНР, Запорожской и Херсонской областей.","Регион теперь сначала определяется по адресу должника, затем по КПП (для компаний) и ИНН."],"by":"по просьбе пользователя","kind":"improve","section":"reg"},{"at":"2026-10-16T10:11+03:00","build":"f6458cc","items":["Регион лота уточняется по ИНН и адресу должника, если его нет в данных.","Подготовлен общий пункт «СПб и ЛО» для дел суда А56 — пока выключен (предложение Дизайнера)."],"by":"по просьбе пользователя","kind":"improve","section":"reg"},{"at":"2026-10-16T10:03+03:00","build":"a878f22","items":["Если регион лота не указан, он определяется по коду арбитражного суда, а не показывается кодом вроде «А04».","Удаление файлов работает только в Эверест Аналитик."],"by":"по просьбе пользователя","kind":"fix","section":"reg"},{"at":"2026-10-16T09:57+03:00","build":"1198b82","items":["Регионы в «Реестре» и «Торгах» приведены к официальному списку 89 субъектов РФ — без дублей и опечаток.","В «Отчётах» и «Оценке» можно удалять файлы (с подтверждением); заказ оценки сам добавляет лот в «Избранное»."],"by":"по просьбе пользователя","kind":"fix","section":"reg"},{"at":"2026-10-16T01:40+03:00","build":"c128de8","items":["Публикаций за день: 2. Изменены: оформление, основное приложение, вкладки и счётчики, библиотеки. Подробного описания в истории нет."]},{"at":"2026-10-15T13:42+03:00","build":"d8c7c69","items":["Шапка перестроена: дата и число лотов слева, «Обновить» и «Прочее» справа одной ширины; на телефонах — компактные кнопки и вкладки на всю ширину без прокрутки вбок.","На «Прочее» вернулся счётчик отчётов в работе. Публикаций за день: 12, часть — без описания."],"kind":"improve"},{"at":"2026-10-14T22:31+03:00","build":"6cf5ad2","items":["Публикаций за день: 36. Изменены: подпись под кредитором, сроки ответа, шапка, подсказки в карточках, основное приложение, локальная база и работа без сети, уведомление о загрузке базы, «Отчёты», «Оценка». Подробного описания в истории нет."]},{"at":"2026-10-13T17:38+03:00","build":"8959d8c","items":["Публикаций за день: 2. Изменены: основное приложение. Подробного описания в истории нет."]},{"at":"2026-10-12T20:23+03:00","build":"32c1327","items":["Публикаций за день: 32. Изменены: основное приложение, значки и логотипы. Подробного описания в истории нет."]},{"at":"2026-10-11T23:09+03:00","build":"db7c1b4","items":["Первая публикация приложения.","Публикаций за день: 66. Изменены: основное приложение, библиотеки, значки и логотипы. Подробного описания в истории нет."]}]};
+/* Эверест: «Прочее → Обновления» — реестр обновлений приложения (данные: config/changelog.json, встраивает build.py).
+   Только Эверест: файл подключает build.py, в шаблоне/Арбитре его нет.
+   Флаги дизайнера (EV_CFG.changelog), по умолчанию ВЫКЛ до одобрения пользователем:
+     chips      — приглушённый ярлык «Новое» / «Исправлено» / «Улучшено» (поле kind: new|fix|improve), только оттенки акцента;
+     deeplink   — нажатие на запись открывает раздел, о котором она (поле section: ключ вкладки);
+     unread_dot — точка на «Прочее», пока есть непросмотренные записи (просмотр хранится в localStorage). */
+(function(){
+var CFG=window.EV_CFG=window.EV_CFG||{};var F=CFG.changelog=Object.assign({chips:false,deeplink:false,unread_dot:false},CFG.changelog||{});
+var D=window.EV_CHANGELOG||{entries:[]},E=(D.entries||[]).filter(function(e){return e&&e.at&&e.build&&!e.pending}).slice().sort(function(a,b){return Date.parse(b.at)-Date.parse(a.at)});
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+var MON=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+function msk(at){var t=Date.parse(at);if(isNaN(t))return null;var d=new Date(t+3*3600e3);return {y:d.getUTCFullYear(),m:d.getUTCMonth(),d:d.getUTCDate(),hm:('0'+d.getUTCHours()).slice(-2)+':'+('0'+d.getUTCMinutes()).slice(-2)}}
+var KL={new:'Новое',fix:'Исправлено',improve:'Улучшено'};
+var SK='ev_upd_seen';function seen(){try{return localStorage.getItem(SK)||''}catch(e){return ''}}
+function newest(){return E.length?E[0].at:''}
+var nav=document.querySelector('nav'),bar=$('othbar');function OTH(){return $('oth')||$('urb')}  /* nav2.js переносит «Прочее» в шапку и меняет id на urb */if(!nav||!bar)return;
+var b=document.createElement('button');b.dataset.v='upd';b.className='evx';b.title='Обновления';b.textContent='Обновления';nav.appendChild(b);
+var ob=document.createElement('button');ob.dataset.o='upd';ob.title='Реестр обновлений приложения';ob.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/><path d="M12 8v4l3 2"/></svg>Обновления';
+var cfgb=bar.querySelector('button[data-o="cfg"]');bar.insertBefore(ob,cfgb||null);
+var V=document.createElement('div');V.id='vupd';V.style.display='none';V.innerHTML='<div class="md"><h2>Обновления</h2><p class="sm">Что менялось в приложении — сначала новое. Время московское.</p><div id="updl"></div></div>';
+var after=$('vrpt')||$('vval')||$('vrep');(after&&after.parentNode||document.body).insertBefore(V,after?after.nextSibling:null);
+var st=document.createElement('style');st.textContent='#vupd .uday{font-size:15px;margin:18px 0 6px}#vupd .uday:first-child{margin-top:4px}'
++'#vupd .ue{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;padding:8px 0;border-top:1px solid var(--line)}#vupd .uday+.ue{border-top:0}'
++'#vupd .ut{font-size:13px;color:var(--mut,#7a8494)}#vupd .ub{grid-column:2;grid-row:1;font-size:11px;color:var(--mut,#8a93a3);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.8;white-space:nowrap;align-self:start}'
++'#vupd .ui{grid-column:1/-1;margin:2px 0 0;padding-left:18px}#vupd .ui li{margin:2px 0;line-height:1.4}#vupd .uby{grid-column:1/-1;font-size:12px;color:var(--mut,#7a8494)}'
++'#vupd .uchip{display:inline-block;margin-left:8px;padding:0 8px;border-radius:999px;font-size:11px;line-height:18px;color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}'
++'#vupd .uchip.k-new{background:color-mix(in srgb,var(--acc) 20%,transparent)}#vupd .uchip.k-fix{background:color-mix(in srgb,var(--acc) 8%,transparent)}'
++'#vupd .ue.dl{cursor:pointer;border-radius:8px}#vupd .ue.dl:hover{background:color-mix(in srgb,var(--acc) 5%,transparent)}'
++'.udot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-left:5px;vertical-align:top}[data-theme=dark] .udot{background:var(--gold,#D4AF5A)}';
+document.head.appendChild(st);
+function render(){var h='',day='';E.forEach(function(e,i){var t=msk(e.at);if(!t)return;var dk=t.d+' '+MON[t.m]+' '+t.y;if(dk!==day){day=dk;h+='<h3 class="uday">'+esc(dk)+'</h3>'}
+ var dl=F.deeplink&&e.section&&e.section!=='upd'&&nav.querySelector('button[data-v="'+e.section+'"]');
+ h+='<div class="ue'+(dl?' dl':'')+'"'+(dl?' role="button" tabindex="0" data-sec="'+esc(e.section)+'"':'')+'><div class="ut">'+t.hm+' МСК'+(F.chips&&KL[e.kind]?'<span class="uchip k-'+e.kind+'">'+KL[e.kind]+'</span>':'')+'</div><div class="ub" title="сборка">'+esc(e.build)+'</div>'
+ +'<ul class="ui">'+(e.items||[]).map(function(s){return '<li>'+esc(s)+'</li>'}).join('')+'</ul>'+(e.by?'<div class="uby">'+esc(e.by)+'</div>':'')+'</div>'});
+ $('updl').innerHTML=h||'<p class="sm">Пока записей нет.</p>'}
+$('updl')&&V.addEventListener('click',function(ev){var x=ev.target.closest('.ue.dl');if(!x)return;var n=nav.querySelector('button[data-v="'+x.dataset.sec+'"]');if(n)n.click()});
+V.addEventListener('keydown',function(ev){if(ev.key==='Enter'){var x=ev.target.closest('.ue.dl');if(x)x.click()}});
+function dot(){if(!F.unread_dot)return;var un=newest()&&newest()>seen();[OTH(),ob].forEach(function(el){if(!el)return;var d=el.querySelector('.udot');if(un&&!d){d=document.createElement('span');d.className='udot';d.setAttribute('aria-label','есть новые обновления');el.appendChild(d)}else if(!un&&d)d.remove()})}
+var VIEWS=['vreg','vmet','vsrc','vrep','vprc','vfin','vprop','vman','favseg','vval','vrpt'];
+b.addEventListener('click',function(){nav.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b)});VIEWS.forEach(function(i){var e=$(i);if(e)e.style.display='none'});render();V.style.display='';bar.style.display='';bar.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===ob)});var o=OTH();if(o)o.classList.add('on');
+ if(F.unread_dot&&newest()){try{localStorage.setItem(SK,newest())}catch(e){}dot()}});
+function hide(){if(V.style.display==='none')return;V.style.display='none';b.classList.remove('on');ob.classList.remove('on')}
+document.addEventListener('click',function(ev){var x=ev.target.closest('button');if(!x||x===b)return;if(nav.contains(x)||x===OTH())hide()},true);
+setTimeout(dot,0);
+render();dot();
+window.EVUpd={entries:E,flags:F,render:render,dot:dot};
+})();
