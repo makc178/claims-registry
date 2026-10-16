@@ -60,7 +60,7 @@ css+=':root{--ev-star:'+(U.star_size||'24px')+';--ev-star-hit:'+(U.star_hit||'44
 'html body nav>button.r1.q{padding-left:6px!important}html body nav>button.r1 .qb{order:1;position:static!important;flex:none;margin:0!important;width:15px!important;height:15px!important;font-size:11px!important;line-height:15px!important;box-shadow:none!important}'+
 '#nr2{order:2;flex:0 0 100%;display:flex;justify-content:safe center;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-top:6px;padding:0 0 2px}#nr2::-webkit-scrollbar{display:none}'+
 'nav #nr2>button{flex:none!important;height:32px!important;min-width:0!important;margin:0 0 0 -1px!important;padding:0 10px!important;flex-direction:row!important;align-items:center;font-size:13px!important;white-space:nowrap;border:1px solid #ffffff40!important;border-radius:0!important;border-bottom-width:1px!important;box-shadow:none!important;background:var(--ev-r1bg,rgba(255,255,255,.06))!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#d7dfea!important;font-weight:400}'+
-'nav #nr2>button:first-child{border-radius:10px 0 0 10px!important;margin-left:0!important}nav #nr2>button:last-child{border-radius:0 10px 10px 0!important}'+
+/* края второго ряда (16.10, Дизайнер): «Избранное» слева и «Отчёты» справа — одна кнопка-сегмент .nseg, зеркально по модификатору стороны; края считаются по ВИДИМЫМ кнопкам (скрытая «Обновления» не забирает скругление) */'nav #nr2>button.nseg{height:32px!important;padding-left:10px!important;padding-right:10px!important;border-radius:0!important}nav #nr2>button.nseg--l{border-radius:10px 0 0 10px!important;margin-left:0!important}nav #nr2>button.nseg--r{border-radius:0 10px 10px 0!important}nav #nr2>button.nseg--l.nseg--r{border-radius:10px!important}'+
 'nav #nr2>button.on{background:#fff!important;color:#0F1B33!important;font-weight:600}nav #nr2>button .lb{display:inline!important}'+
 'nav #nr2>button .badge{position:static!important;margin:0!important;font-size:10.5px;line-height:15px;padding:0 5px;background:#ffffff26!important;color:inherit!important}nav #nr2>button.on .badge{background:#0F1B3322!important}'+
 '@media(max-width:430px){html body nav>button.r1{flex:1 0 auto!important;width:auto!important;max-width:none!important;padding:0 2px!important;gap:2px!important;font-size:12px!important;letter-spacing:-0.3px}html body nav>button.r1.q{padding-left:2px!important}html body nav>button.r1 .badge{margin-left:0!important;padding:0 2px!important;font-size:9px!important;letter-spacing:-0.4px}}'+
@@ -110,11 +110,14 @@ function nextRun(SC){var D=SC.days,T=String(SC.time||'').match(/^(\d{1,2}):(\d{2
 function pf(){document.documentElement.classList.toggle('pfm',!!window.PFM)}
 function hp(){var h=document.querySelector('header');if(h)document.documentElement.style.setProperty('--hpr',getComputedStyle(h).paddingRight)}
 addEventListener('resize',hp);
-function all(){pf();hp();cls();evNav();fs();cnt()}
+function edges(){var w=$('nr2');if(!w)return;var bs=[].filter.call(w.children,function(b){return b.tagName==='BUTTON'}),vis=bs.filter(function(b){return b.getClientRects().length>0});
+ bs.forEach(function(b){var l=b===vis[0],r=b===vis[vis.length-1];b.classList.toggle('nseg',l||r);b.classList.toggle('nseg--l',l);b.classList.toggle('nseg--r',r)})}
+function all(){pf();hp();cls();evNav();fs();cnt();edges()}
 document.addEventListener('click',function(){setTimeout(pf,0)},true);
 ['render','propRender','setData','favUI'].forEach(function(f){try{var o=(0,eval)(f);if(typeof o!='function')return;window['__n2o_'+f]=o;(0,eval)(f+'=function(){var r=window.__n2o_'+f+'.apply(this,arguments);try{window.__n2all()}catch(e){}return r}')}catch(e){}});
 window.__n2all=all;all();setInterval(cnt,3000);
-new MutationObserver(function(){cls();fs()}).observe(nav,{childList:true});
+new MutationObserver(function(){cls();fs();edges()}).observe(nav,{childList:true});
+(function(){var w=$('nr2');if(w)new MutationObserver(edges).observe(w,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden']});addEventListener('resize',edges)})();
 })();
 (function(){var T=(window.EV_TEXTS||{}).move_notice;if(!T)return;var st=document.createElement('style');st.textContent='.mvn{margin:0 0 12px;padding:10px 14px;border-radius:6px;background:#C0392B;color:#fff;font-size:15px;font-weight:600;line-height:1.4}.mvn a{color:#fff;text-decoration:underline;font-weight:600;margin-left:6px;white-space:nowrap}';document.head.appendChild(st);
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}

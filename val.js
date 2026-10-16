@@ -50,6 +50,35 @@ function rerender(){if(V.style.display!=='none')draw();var vp=$('vprop');if(vp&&
 function vdate(v){return v.valuation_date||v.date||(v.request_id||'').replace(/^(\d{4})(\d\d)(\d\d).*/,'$1-$2-$3')}
 function lotOf(v){var P=g('PROP');var id=v.lot_id||(v.object&&v.object.lot_id);if(!id||!P)return null;return P.lots.find(function(l){return String(l.id)===String(id)})}
 function deb(x){var d=x&&x.debtor;return d&&typeof d==='object'?d.name:d||''}
+
+/* --- фото предмета оценки (16.10): valuation/photos.json + webp в закрытом репо; только в приложении, справочно; в PDF/КП не попадают --- */
+var VPH={"index":"valuation/photos.json","max":6,"thumb_px":56,"open_note":"фото из открытых источников, справочно","analog_label":"аналог","link_text":"источник","alt":"Фото предмета оценки","none_title":"Фото не найдено"};var PHX=null,PHL=null,PHB={},PHI={};
+function phLoad(){if(PHX||PHL||!online())return PHL||Promise.resolve();PHL=g('ghRaw')(VPH.index||'valuation/photos.json').then(function(x){PHX=JSON.parse(x)||{}}).catch(function(){PHX={}}).then(function(){PHL=null;draw();rerender()});return PHL}
+function phOf(id){var e=PHX&&PHX[id];return e&&Array.isArray(e.photos)?e.photos.slice(0,VPH.max||6):[]}
+function phIcon(id){return (PHX&&PHX[id]&&PHX[id].icon)||'house'}
+var ICO={house:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',land:'<path d="M3 19l5-9 4 6 3-4 6 7z"/><circle cx="17" cy="6" r="2"/>',car:'<path d="M3 15l2-5a2 2 0 0 1 2-1.5h10A2 2 0 0 1 19 10l2 5v3H3z"/><circle cx="7.5" cy="17.5" r="1.6"/><circle cx="16.5" cy="17.5" r="1.6"/>',machine:'<path d="M3 17h11V9H8l-3 4H3z"/><path d="M14 12h4l3 5h-7"/><circle cx="7" cy="18" r="1.7"/><circle cx="17" cy="18" r="1.7"/>'};
+function icoSvg(k){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(ICO[k]||ICO.house)+'</svg>'}
+function phBlob(path){if(PHB[path])return PHB[path];var R=g('REPO'),T=g('TOKEN'),B=g('BRANCH')||'main',cl=g('clean')||function(x){return x};
+ PHB[path]=fetch('https://api.github.com/repos/'+R+'/contents/'+path.split('/').map(encodeURIComponent).join('/')+'?ref='+B,{headers:{Authorization:'Bearer '+cl(T),Accept:'application/vnd.github.raw+json'}}).then(function(r){if(!r.ok)throw new Error(r.status);return r.blob()}).then(function(b){return URL.createObjectURL(b)});PHB[path].catch(function(){delete PHB[path]});return PHB[path]}
+function phFill(root){(root||V).querySelectorAll('img[data-php]:not([src])').forEach(function(im){phBlob(im.dataset.php).then(function(u){im.src=u;im.closest('.vph,.vgal')&&im.closest('.vph,.vgal').classList.add('ld')}).catch(function(){})})}
+function phDate(d){var m=/^(\d{4})-(\d\d)-(\d\d)/.exec(d||'');return m?m[3]+'.'+m[2]+'.'+m[1]:''}
+function phCap(p){var src=esc(p.source||'')+(p.date?' · '+esc(phDate(p.date)):'');return (p.analog?'<span class="vpan">'+esc(VPH.analog_label||'аналог')+'</span> ':'')+(p.page_url?'<a href="'+esc(p.page_url)+'" target="_blank" rel="noopener noreferrer">'+src+'</a>':src)+(p.note||(p.kind==='open')?' · '+esc(p.note||VPH.open_note||''):'')}
+function thumb(id){var ps=phOf(id),k=phIcon(id);if(!ps.length)return '<div class="vph ico" title="'+esc(VPH.none_title||'')+'">'+icoSvg(k)+'</div>';
+ return '<button class="vph" data-vph="'+esc(id)+'" title="'+esc(VPH.alt||'')+'" aria-label="'+esc(VPH.alt||'')+'"><img data-php="'+esc(ps[0].path)+'" alt=""><span class="vphn">'+ps.length+'</span></button>'}
+function gal(id){var ps=phOf(id);if(!ps.length)return '';var i=PHI[id]||0;if(i>=ps.length)i=0;var p=ps[i];
+ return '<div class="vgal" data-vgal="'+esc(id)+'"><div class="vgf"><img data-php="'+esc(p.path)+'" alt="'+esc(VPH.alt||'')+'">'+(ps.length>1?'<button class="vgp" data-vgs="-1" aria-label="Назад">‹</button><button class="vgn" data-vgs="1" aria-label="Вперёд">›</button>':'')+'<span class="vgc">'+(i+1)+'/'+ps.length+'</span></div><div class="vgcap">'+phCap(p)+'</div></div>'}
+var VOPEN={};
+V.addEventListener('click',function(e){var t=e.target.closest('[data-vph]');if(t){var id=t.dataset.vph;VOPEN[id]=!VOPEN[id];draw();return}
+ var s=e.target.closest('[data-vgs]');if(s){var gl=s.closest('[data-vgal]'),id=gl.dataset.vgal,n=phOf(id).length;PHI[id]=((PHI[id]||0)+(+s.dataset.vgs)+n)%n;gl.outerHTML=gal(id);phFill();}});
+var tx0=null;V.addEventListener('touchstart',function(e){var f=e.target.closest('.vgf');tx0=f?[e.touches[0].clientX,f.closest('[data-vgal]').dataset.vgal]:null},{passive:true});
+V.addEventListener('touchend',function(e){if(!tx0)return;var dx=e.changedTouches[0].clientX-tx0[0],id=tx0[1],n=phOf(id).length;tx0=null;if(Math.abs(dx)<40||n<2)return;PHI[id]=((PHI[id]||0)+(dx<0?1:-1)+n)%n;var gl=V.querySelector('[data-vgal="'+id+'"]');if(gl){gl.outerHTML=gal(id);phFill()}},{passive:true});
+st.textContent+='#vall .vrow.vrp{grid-template-columns:56px minmax(0,1fr) auto}#vall .vph{width:56px;height:56px;border-radius:10px;overflow:hidden;padding:0;border:1px solid var(--line);background:rgba(140,150,165,.14);position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center}'+
+'#vall .vph img{width:100%;height:100%;object-fit:cover;display:block}#vall .vph.ico{cursor:default}#vall .vph svg{width:28px;height:28px;fill:none;stroke:var(--mut,#8a93a3);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}'+
+'#vall .vphn{position:absolute;right:3px;bottom:3px;font-size:10px;line-height:1;padding:2px 4px;border-radius:6px;background:rgba(0,0,0,.55);color:#fff}'+
+'#vall .vgal{grid-column:1/-1;margin:0 0 8px}#vall .vgf{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:rgba(140,150,165,.16)}#vall .vgf img{width:100%;height:100%;object-fit:cover;display:block}'+
+'#vall .vgp,#vall .vgn{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:22px;line-height:1;cursor:pointer}#vall .vgp{left:8px}#vall .vgn{right:8px}'+
+'#vall .vgc{position:absolute;right:8px;bottom:8px;font-size:12px;padding:2px 7px;border-radius:8px;background:rgba(0,0,0,.55);color:#fff}#vall .vgcap{font-size:12px;color:var(--mut,#8a93a3);margin-top:5px;line-height:1.35}#vall .vgcap a{color:inherit;text-decoration:underline}'+
+'#vall .vpan{display:inline-block;padding:0 6px;border-radius:6px;background:rgba(140,150,165,.22)}@media(max-width:640px){#vall .vrow.vrp{grid-template-columns:56px minmax(0,1fr)}#vall .vrow.vrp .vact{grid-column:1/-1}}';
 function files(v){return [['report','Отчёт'],['xlsx','Расчёт'],['methodology','Методика']].filter(function(f){return v[f[0]]}).map(function(f){var p=v[f[0]],n=p.split('/').pop();return '<button class="lbtn sec" data-f="'+esc(n)+'" data-p="'+esc(p)+'">'+f[1]+'</button>'}).join('')}
 /* --- «Нужны данные»: Оценщик ставит status:need_data и missing[]; повторная отправка: файлы → valuation/<id>/input/, запрос → requests/<id>.json
    со status:pending и rev+1 (сборщик заберёт его снова; ключ пересылки id#r<rev>), копия в requests/picked/ удаляется --- */
@@ -101,10 +130,11 @@ function draw(){var m=$('valm'),L=$('vall');
   return '<div class="lot pend" data-evrow><div class="row vrow" style="cursor:default"><div><div class="d1">'+esc(q.title||o.title||l.title||o.make_model||p.id)+'</div><div class="sm">'+esc([deb(q)||deb(l),q.lot_id?'лот '+(l.trade_no||q.lot_id):'',q.method||o.method?(q.method||o.method):''].filter(Boolean).join(' · '))+'</div><div class="sm"><b>'+esc(es||p.st)+'</b></div></div><div class="vact">'+reqAct(p)+'</div></div></div>'}).join('');
  L.innerHTML=pend+R.map(function(v){var l=lotOf(v),r=v.range||{};
   var who=[deb(v)||deb(l),v.lot_id?'лот '+((l&&l.trade_no)||v.lot_id):''].filter(Boolean).join(' · ');
-  return '<div class="lot" data-evrow><div class="row vrow" style="cursor:default"><div><div class="d1">'+esc(v.title||(l&&l.title)||v.request_id)+'</div>'+(who?'<div class="sm">'+esc(who)+'</div>':'')+
+  var vid=String(v.request_id||''),op=VOPEN[vid]||(FOC&&String(v.lot_id)===FOC);
+  return '<div class="lot" data-evrow><div class="row vrow vrp" style="cursor:default">'+(op?gal(vid):'')+thumb(vid)+'<div><div class="d1">'+esc(v.title||(l&&l.title)||v.request_id)+'</div>'+(who?'<div class="sm">'+esc(who)+'</div>':'')+
   (FOC&&String(v.lot_id)===FOC?'<h3 class="vhd">'+esc(v.method||METHOD)+'</h3>':'')+'<div class="sm">Дата оценки: '+esc(fdt(vdate(v)))+'</div>'+
   (v.value!=null?'<div class="vsum">'+rub(v.value)+(r.min!=null?' <span class="sm" style="font-weight:400">(диапазон '+rub(r.min)+' – '+rub(r.max)+')</span>':'')+'</div><div class="sm vcap">'+esc(v.method||METHOD)+'</div>':'')+
-  '<div class="vdisc">'+esc(DISC)+'</div></div><div class="vact">'+files(v)+(ED&&v.request_id&&vfiles(v).length?ED.icon('valuation','val:'+v.request_id,v.title||v.request_id):'')+'</div></div></div>'}).join('');}
+  '<div class="vdisc">'+esc(DISC)+'</div></div><div class="vact">'+files(v)+(ED&&v.request_id&&vfiles(v).length?ED.icon('valuation','val:'+v.request_id,v.title||v.request_id):'')+'</div></div></div>'}).join('');phFill();phLoad()}
 V.addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(b){var f=g('dlClick');if(f)f(e)}});
 /* удаление оценки: только файлы результата (отчёт, расчёт, методика) и запись в valuation/index.json; запрос и лот остаются */
 function vfiles(v){return ['report','xlsx','methodology'].map(function(k){return v[k]}).filter(function(p){return typeof p==='string'&&/^valuation\/[\w.\-]+\/[^/]+$/.test(p)})}
