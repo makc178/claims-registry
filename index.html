@@ -131,7 +131,7 @@ const put=async(k,v)=>{const d=await db();return new Promise((res,rej)=>{const t
 return {get:k=>get(k).catch(()=>null),set:(k,v)=>put(k,v).catch(()=>false)}};
 const KEYDB=IDB('claims-key'),CACHE=IDB('claims-cache'),OLDV=IDB('makc178-vault'); // ключ отдельно от 7 МБ данных
 const VAULT={get:k=>k.endsWith('token')?KEYDB.get(k):CACHE.get(k),set:(k,v)=>k.endsWith('token')?KEYDB.set(k,v):CACHE.set(k,v),persist:()=>{try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}};
-let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-21 10:42 UTC · 79d5f62',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1792579345, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "wDnTaRp73nQmHHlDLt8/bQ==", "iv": "PFlolAHxIQEU23xs", "ct": "F7+CbvnM9/xzleCn9sxQXksqIKhya/ubZYDLO+85YR/XqIgUgI42V5GfsgaRP0Zj+ivrUCBJBdija0Q4wg6emndkRQx9P4RuuaQlQwcSa5HW1K8glPCkH8PLkkEOqUCAvNxHuBf6/1C1zEAB8IfD8R5meUA="};let PINOK=!PINBLOB;
+let BOOTED=false,TOKEN=null,LERR=null,LOADING=false;const VER='2026-10-21 15:14 UTC · 79d5f62',VH=(VER.match(/[0-9a-f]{7}$/)||['dev'])[0],PINBLOB={"v": 1, "bv": 1792595642, "kind": "write", "kdf": "PBKDF2-SHA256", "iterations": 600000, "salt": "sxa4d3jCFR3q/Pq6w7qJcA==", "iv": "aveJZJJu7HFqesxZ", "ct": "VtDSbQvHtaM0LsQe9JiP/4aShPqXO2mLiev9eJNTbmlC6nwF36DSsskphGoA/O0Qb5NUDt0Iw7MpeHT2ERRmjqTfGKd7yQXdeodA0dONv2molLbM3pe2rc6OMyoJpZ4mMXvLrkZbpay79g8bjaZsmMENJ3k="};let PINOK=!PINBLOB;
 
 const LS='cr.data',LM='cr.md',LT='cr.token',$=id=>document.getElementById(id);
 let DATA=null,MD=EMD,SRC='',SHOW=100,OPEN=new Set(),SK='score',SD=-1;
