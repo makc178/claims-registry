@@ -212,3 +212,113 @@ function priceRows(l){var o='',fp=num(l.first_price),mp=num(l.min_price);
  var v=vat(l);if(v)o+='<span>'+esc(PF.vat_label||'НДС')+'</span><span class="sm lvat">'+esc(v)+'</span>';return o}
 window.EVLot={est:est,estMark:estMark,isEst:isEst,vat:vat,closed:closed,hidden:hidden,closedTag:closedTag,priceRows:priceRows,cfg:C,flags:F,type:type,group:group,ico:ico,title:title,card:card,disc:disc,base:base,chip:chip,next:next,dhint:dhint,missing:missing,display:disp,clean:tclean,bad:tbad,meta:meta};
 })();
+
+/* Эверест: «График снижения цены» в карточке лота («Реестр» и «Торги») по макету Дизайнера lot_card_v1 (утв. 21.10.2026), выделено из feat/lot-card-1021.
+   Таблица этапов из price_schedule [{start,end,price}] + свой SVG-график (без CDN), текущий этап (period_no/periods_total), current_price, next_price, min_price.
+   price_schedule_status «не извлечён» — пометка вместо графика. Тексты/цвета/размеры — config/price_chart.json (встраивает build.py).
+   Включение — EV_UI.price_chart (src/texts_config.js): on:false — прежний вид. Нет поля в данных — ничего не рисуем. */
+(function(){
+var C={"pass_fields":["price_schedule","price_schedule_status","current_price","current_price_notice_date","current_price_notice_url","period_no","periods_total","next_price","min_price","auction_result"],"tones":{"dark":{"badText":"#F2857A","badBg":"rgba(229,72,77,.16)","warnText":"#E8B04B","warnBg":"rgba(232,176,75,.15)","info":"#7FB2F0","infoBg":"rgba(127,178,240,.14)","ok":"#5FD08A","okBg":"rgba(95,208,138,.14)","neutral":"#A3B0C4","neutralBg":"rgba(255,255,255,.08)","card":"rgba(255,255,255,.045)","cardLine":"rgba(255,255,255,.08)","line":"rgba(255,255,255,.10)","ink":"#E8EDF5","mut":"#A3B0C4","faint":"rgba(255,255,255,.32)","gold":"#D4AF5A","gold2":"#E6C77E","tipBg":"#1C2E52","tipShadow":"0 10px 28px rgba(0,0,0,.4)","chartLine":"#D4AF5A","chartPast":"rgba(255,255,255,.30)","chartFuture":"rgba(212,175,90,.45)","chartGrid":"rgba(255,255,255,.07)","chartToday":"#7FB2F0","chartCut":"#F2857A","rowCur":"rgba(212,175,90,.13)","rowHl":"rgba(127,178,240,.14)"},"light":{"badText":"#b42323","badBg":"#fbe5e5","warnText":"#8a5a00","warnBg":"#fbf0d9","info":"#2d5f9e","infoBg":"#e5eefa","ok":"#2f6e43","okBg":"#e3f3e8","neutral":"#5d6b7c","neutralBg":"#e9edf2","card":"#ffffff","cardLine":"#d5dce5","line":"#d5dce5","ink":"#1e2834","mut":"#5d6b7c","faint":"#8b98ad","gold":"#8a5d10","gold2":"#8a5d10","tipBg":"#ffffff","tipShadow":"0 10px 28px rgba(30,40,52,.18)","chartLine":"#8a5d10","chartPast":"#b4bfcd","chartFuture":"rgba(138,93,16,.45)","chartGrid":"#e6ebf1","chartToday":"#2d5f9e","chartCut":"#b42323","rowCur":"#fbf3e3","rowHl":"#e5eefa"}},"size":{"radius_block":12,"radius_row":10,"price_big":34,"price_big_phone":28,"chart_h":220,"chart_h_phone":180,"chart_pad":{"l":64,"r":16,"t":16,"b":30},"chart_pad_phone":{"l":52,"r":10,"t":14,"b":28},"chart_ticks_min_gap":110,"point_r":4.5,"point_r_hover":7,"bp_phone":480},"schedule":{"title":"График снижения цены","current_label":"Текущая цена","by_notice":"по извещению от {date}","notice_link":"Открыть извещение","by_stage":"по графику этапов","stage_of":"Этап {n} из {total}","before_start":"Этапы ещё не начались","after_end":"Все этапы прошли","until":"до {date}","from_start":"−{pct} от начальной","start_price":"Начальная {price}","cut_price":"Цена отсечения {price}","cols":{"n":"Этап","period":"Период","price":"Цена на этапе","step":"Снижение"},"cut_row":"Цена отсечения","step_fmt":"−{pct}","cur_mark":"сейчас","min_mark":"минимум","today":"Сегодня","cut_axis":"Цена отсечения","estimated":"Даты этапов — оценка по условиям снижения из сообщения","row_title":"Текущая цена {cur} · начальная {start}","missing":"График снижения не извлечён из сообщения ЕФРСБ / карточки площадки — смотрите извещение","status_missing_rx":"не\\s+извлеч","status_estimated_rx":"рассчитан|оцен","tip":"Этап {n} из {total}","chart_aria":"График снижения цены по этапам","status_chip":{"running":"Идут","done":"Состоялись","failed":"Не состоялись"},"status_tone":{"running":"info","done":"ok","failed":"neutral"},"last_check":"Последняя проверка итогов торгов: {dt}","check_rule":"проверяется {days} около {time} МСК","next_check":"следующая {dt}","checks":{"weekdays":[1,4],"days_label":"пн и чт","time":"10:00"},"compact_units":[{"min":1000000000.0,"div":1000000000.0,"suf":"млрд"},{"min":1000000.0,"div":1000000.0,"suf":"млн"},{"min":1000.0,"div":1000.0,"suf":"тыс."}],"min_stages":2,"step_base":"start","_step_base":"start — снижение в % от начальной цены (как в извещении: «−10 %» на каждом этапе); prev — от цены предыдущего этапа","next_price":"Следующая {price} с {date}"}};if(!C)return;
+var S=C.schedule||{},Z=C.size||{};
+function U(){return (window.EV_UI||{}).price_chart||{}}
+function on(){return !!U().on}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function fmt(t,o){return String(t==null?'':t).replace(/\{(\w+)\}/g,function(_,k){return o&&o[k]!=null?o[k]:''})}
+function num(v){if(v==null||v==='')return null;var n=typeof v==='number'?v:parseFloat(String(v).replace(/[\s\u00a0]/g,'').replace(',','.'));return isFinite(n)?n:null}
+function now(){return window.EV_NOW?new Date(window.EV_NOW):new Date()}
+var NF=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});
+function rub(n){n=num(n);return n==null?'—':NF.format(Math.round(n)).replace(/[\u202f ]/g,'\u00a0')+'\u00a0₽'}
+function pct(n){return (Math.round(n*10)/10).toLocaleString('ru-RU')+'\u00a0%'}
+/* даты: ДД.ММ.ГГГГ, время ЧЧ:ММ МСК. ISO с зоной — через Intl (Europe/Moscow), без зоны — как записано (данные пишутся в МСК) */
+var DTF=new Intl.DateTimeFormat('ru-RU',{timeZone:'Europe/Moscow',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+function parts(s){if(s==null||s==='')return null;s=String(s);var z=/(Z|[+-]\d\d:?\d\d)$/.test(s)&&/T\d\d:\d\d/.test(s);
+ if(z){var d=new Date(s);if(isNaN(d))return null;var p={};DTF.formatToParts(d).forEach(function(x){p[x.type]=x.value});return {d:p.day+'.'+p.month+'.'+p.year,t:p.hour+':'+p.minute}}
+ var m=/^(\d{4})-(\d\d)-(\d\d)(?:[T ](\d\d:\d\d))?/.exec(s);if(m)return {d:m[3]+'.'+m[2]+'.'+m[1],t:m[4]||''};
+ m=/^(\d\d)\.(\d\d)\.(\d{4})(?:\s+(\d\d:\d\d))?/.exec(s);return m?{d:m[1]+'.'+m[2]+'.'+m[3],t:m[4]||''}:null}
+function dmy(s){var p=parts(s);return p?p.d:''}
+function dt(s){var p=parts(s);return p?p.d+(p.t?' '+p.t:''):''}
+function ts(s){if(!s)return NaN;s=String(s);if(/(Z|[+-]\d\d:?\d\d)$/.test(s))return Date.parse(s);var m=/^(\d{4})-(\d\d)-(\d\d)(?:[T ](\d\d):(\d\d))?/.exec(s);if(!m)return NaN;
+ return Date.UTC(+m[1],+m[2]-1,+m[3],(+m[4]||0)-3,+m[5]||0)}  /* без зоны = МСК (UTC+3) */
+
+/* ---------- стили (токены из конфига, обе темы) ---------- */
+function css(){if(document.getElementById('pc-css'))return;var T=C.tones||{},v=function(t){return Object.keys(t).map(function(k){return '--lc-'+k+':'+t[k]}).join(';')};
+ var bpP=Z.bp_phone,bpN=Z.bp_narrow,bp2=Z.bp_two_col,s=document.createElement('style');s.id='pc-css';
+ s.textContent=':root,html[data-theme=dark]{'+v(T.dark||{})+'}html[data-theme=light]{'+v(T.light||{})+'}'
+ +'.lcblk{border:1px solid var(--lc-cardLine);background:var(--lc-card);border-radius:'+Z.radius_block+'px;padding:14px 16px;min-width:0}'
+ +'.lcblk h4{margin:0;font-size:15px;font-weight:650;color:var(--lc-ink)}.lchd{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}'
+ +'.lcchip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:650;white-space:nowrap}.lcchip i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}'
+ +'.lcchip.ok{background:var(--lc-okBg);color:var(--lc-ok)}.lcchip.info{background:var(--lc-infoBg);color:var(--lc-info)}.lcchip.warn{background:var(--lc-warnBg);color:var(--lc-warnText)}.lcchip.bad{background:var(--lc-badBg);color:var(--lc-badText)}.lcchip.neutral{background:var(--lc-neutralBg);color:var(--lc-neutral)}'
+ +'.lccur{margin-top:10px;color:var(--lc-mut);font-size:12px}.lcbig{font-size:'+Z.price_big+'px;font-weight:700;color:var(--lc-gold2);font-variant-numeric:tabular-nums;line-height:1.15;white-space:nowrap}'
+ +'.lccur a{color:var(--lc-gold)}.lcfacts{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.lcfacts span{background:var(--lc-neutralBg);color:var(--lc-ink);border-radius:999px;padding:3px 10px;font-size:12px;white-space:nowrap}.lcfacts span b{font-weight:650}'
+ +'.lcch{position:relative;width:100%;height:'+Z.chart_h+'px;margin:6px 0 10px}.lcch svg{display:block;width:100%;height:100%;overflow:visible}.lcch .band{fill:transparent;cursor:pointer}.lcch .band.hl{fill:var(--lc-rowHl)}.lcch .nopt{pointer-events:none}'
+ +'.lcch text{font-size:11px;fill:var(--lc-mut)}.lcctip{display:none;position:absolute;z-index:5;pointer-events:none;background:var(--lc-tipBg);color:var(--lc-ink);border:1px solid var(--lc-line);box-shadow:var(--lc-tipShadow);border-radius:8px;padding:6px 9px;font-size:12px;line-height:1.35;white-space:nowrap}.lcctip b{color:var(--lc-gold2)}'
+ +'.lctab{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;font-variant-numeric:tabular-nums}.lctab th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--lc-mut);text-align:left;padding:6px 8px;border-bottom:1px solid var(--lc-line)}'
+ +'.lctab td{padding:7px 8px;border-bottom:1px solid var(--lc-line);color:var(--lc-ink);white-space:nowrap}.lctab .r{text-align:right}.lctab tr.past td{color:var(--lc-faint)}.lctab tr.cur td{background:var(--lc-rowCur)}.lctab tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--lc-gold)}'
+ +'.lctab tr.hl td{background:var(--lc-rowHl)}.lctab tr[data-lcst]{cursor:pointer;outline:none}.lctab tr[data-lcst]:focus-visible td{background:var(--lc-rowHl)}.lctab tr.cut td{color:var(--lc-badText);border-bottom:0}.lcmk{display:inline-block;margin-left:6px;font-size:11px;font-weight:650;color:var(--lc-gold)}'
+ +'.lcfull{grid-column:1/-1;min-width:0}'+'.lcchk{margin-top:10px;font-size:12px;color:var(--lc-mut)}.lcchk b{color:var(--lc-ink);font-weight:600}.lcchk .ok{color:var(--lc-ok)}'
+ +'@media (max-width:'+bpP+'px){.lcbig{font-size:'+Z.price_big_phone+'px}.lcch{height:'+Z.chart_h_phone+'px}.lctab thead{display:none}.lctab tr{display:grid;grid-template-columns:minmax(0,1fr) auto}.lctab td{border-bottom:0;padding:3px 8px}.lctab tr[data-lcst],.lctab tr.cut{border-bottom:1px solid var(--lc-line)}.lctab td.per{grid-column:1}.lctab td.stp{grid-column:2}}';
+ (document.head||document.documentElement).appendChild(s)}
+
+/* ---------- график снижения цены ---------- */
+var SCH={};
+function sched(l){var P=Array.isArray(l.price_schedule)?l.price_schedule:[];var st=P.map(function(x){return x&&{a:ts(x.start||x.from),b:ts(x.end||x.to),as:x.start||x.from,bs:x.end||x.to,p:num(x.price),step:num(x.step)}}).filter(function(x){return x&&isFinite(x.a)&&isFinite(x.b)&&x.p!=null&&x.b>x.a});
+ if(st.length<(S.min_stages||2))return null;st.sort(function(a,b){return a.a-b.a});
+ st.forEach(function(x,i){if(x.step==null&&i>0&&st[0].p)x.step=(st[i-1].p-x.p)/(S.step_base==='prev'?st[i-1].p:st[0].p)*100});
+ var t=now().getTime(),pn=num(l.period_no),ci;
+ if(pn!=null&&pn>=1&&pn<=st.length)ci=pn-1;else if(pn===0)ci=-1;else{ci=-1;st.forEach(function(x,i){if(x.a<=t&&t<x.b)ci=i});if(ci<0&&t>=st[st.length-1].b)ci=st.length}
+ var cut=num(l.min_price);return {st:st,ci:ci,cut:cut,t:t,start:st[0].p}}
+function compact(n){var u=(S.compact_units||[]).find(function(x){return Math.abs(n)>=x.min});return u?(Math.round(n/u.div*10)/10).toLocaleString('ru-RU')+'\u00a0'+u.suf:NF.format(n)}
+function nextCheck(){var c=S.checks||{},W=c.weekdays||[],hm=String(c.time||'10:00').split(':'),n=now(),msk=new Date(n.getTime()+3*36e5);
+ for(var k=0;k<8;k++){var d=new Date(Date.UTC(msk.getUTCFullYear(),msk.getUTCMonth(),msk.getUTCDate()+k,+hm[0]-3,+hm[1]));if(W.indexOf(new Date(d.getTime()+3*36e5).getUTCDay())>=0&&d>n)return d.toISOString()}return null}
+/* «Реестр»: price/start_price — начальная цена; в колонке «Цена» — current_price (EV_UI.lot_card.schedule), начальная — в подсказке */
+function curPrice(l){if(!on())return null;return num(l.current_price)}
+function priceTitle(l){return fmt(S.row_title,{cur:rub(num(l.current_price)),start:l.start_price!=null?rub(num(l.start_price)):'—'})}
+function schedMissing(l){var r=S.status_missing_rx;return !!(r&&l.price_schedule_status&&new RegExp(r,'i').test(String(l.price_schedule_status)))}
+function schedule(l){if(!on())return '';var miss=schedMissing(l),s=miss?null:sched(l);
+ if(!s){if(!miss)return '';var cp=num(l.current_price);return '<div class="lcblk lcsch" data-lcsch="'+esc(String(l.id))+'" data-lcmiss="1"><div class="lchd"><h4>'+esc(S.title)+'</h4></div>'+(cp!=null?'<div class="lccur">'+esc(S.current_label)+'<div class="lcbig">'+rub(cp)+'</div></div>':'')+'<div class="lcchk">'+esc(S.missing)+'</div></div>'}var id=String(l.id),st=s.st,ci=s.ci,n=st.length;SCH[id]=s;
+ var cur=num(l.current_price);if(cur==null)cur=st[Math.max(0,Math.min(n-1,ci))].p;
+ var R=l.auction_result||{},rs=R.status&&S.status_chip[R.status]?R.status:null;
+ var nd=dmy(l.current_price_notice_date),nu=l.current_price_notice_url||(l.links&&l.links.efrsb)||l.url||'';
+ var tot=num(l.periods_total)>=n?num(l.periods_total):n,stage=ci<0?S.before_start:ci>=n?S.after_end:fmt(S.stage_of,{n:ci+1,total:tot});
+ var facts=[stage];if(ci>=0&&ci<n)facts.push(fmt(S.until,{date:dmy(st[ci].bs)}));if(s.start&&cur<s.start)facts.push(fmt(S.from_start,{pct:pct((s.start-cur)/s.start*100)}));
+ var np=num(l.next_price);if(np==null&&ci>=0&&ci+1<n)np=st[ci+1].p;else if(np==null&&ci<0)np=null;if(np!=null&&ci<n-1)facts.push(fmt(S.next_price,{price:'<b>'+rub(np)+'</b>',date:ci+1<n&&ci>=0?dmy(st[ci+1].as):''}));
+ facts.push(fmt(S.start_price,{price:'<b>'+rub(s.start)+'</b>'}));if(s.cut!=null)facts.push(fmt(S.cut_price,{price:'<b>'+rub(s.cut)+'</b>'}));
+ var rows=st.map(function(x,i){var c=i<ci?'past':i===ci?'cur':'',mk=i===ci?'<span class="lcmk">'+esc(S.cur_mark)+'</span>':i===n-1&&s.cut==null?'<span class="lcmk">'+esc(S.min_mark)+'</span>':'';
+  return '<tr class="'+c+'" data-lcst="'+i+'" data-lclot="'+esc(id)+'" tabindex="0"><td>'+(i+1)+mk+'</td><td class="per">'+dmy(x.as)+' – '+dmy(x.bs)+'</td><td class="r">'+rub(x.p)+'</td><td class="r stp">'+(x.step!=null&&x.step>0?esc(fmt(S.step_fmt,{pct:pct(x.step)})):'—')+'</td></tr>'}).join('');
+ if(s.cut!=null)rows+='<tr class="cut"><td>'+esc(S.cut_row)+'</td><td class="per"></td><td class="r">'+rub(s.cut)+'</td><td class="stp"></td></tr>';
+ var chk=R.checked_at?'<div class="lcchk"><span class="ok">✓</span> <b>'+esc(fmt(S.last_check,{dt:dt(R.checked_at)}))+'</b><br>'+esc(fmt(S.check_rule,{days:(S.checks||{}).days_label,time:(S.checks||{}).time}))+(nextCheck()?' · '+esc(fmt(S.next_check,{dt:dt(nextCheck())})):'')+'</div>':'<div class="lcchk">'+esc(fmt(S.check_rule,{days:(S.checks||{}).days_label,time:(S.checks||{}).time}))+(nextCheck()?' · '+esc(fmt(S.next_check,{dt:dt(nextCheck())})):'')+'</div>';
+ return '<div class="lcblk lcsch" data-lcsch="'+esc(id)+'"><div class="lchd"><h4>'+esc(S.title)+'</h4>'+(rs?'<span class="lcchip '+(S.status_tone[rs]||'neutral')+'"><i></i>'+esc(S.status_chip[rs])+'</span>':'')+'</div>'
+ +'<div class="lccur">'+esc(S.current_label)+'<div class="lcbig">'+rub(cur)+'</div>'+(nd?esc(fmt(S.by_notice,{date:nd})):esc(S.by_stage))+(nu?' · <a href="'+esc(nu)+'" target="_blank" rel="noopener">'+esc(S.notice_link)+'</a>':'')+'</div>'
+ +'<div class="lcfacts">'+facts.map(function(f){return '<span>'+f+'</span>'}).join('')+'</div>'
+ +(l.price_schedule_status&&(!S.status_estimated_rx||new RegExp(S.status_estimated_rx,'i').test(String(l.price_schedule_status)))?'<div class="lcchk">'+esc(S.estimated)+'</div>':'')
+ +'<div class="lcch" data-lcch="'+esc(id)+'" role="img" aria-label="'+esc(S.chart_aria)+'"></div>'
+ +'<table class="lctab"><thead><tr><th>'+esc(S.cols.n)+'</th><th>'+esc(S.cols.period)+'</th><th class="r">'+esc(S.cols.price)+'</th><th class="r">'+esc(S.cols.step)+'</th></tr></thead><tbody>'+rows+'</tbody></table>'+chk+'</div>'}
+function draw(el){var id=el.getAttribute('data-lcch'),s=SCH[id];if(!s)return;var W=el.clientWidth;if(!W)return;if(el._w===W)return;el._w=W;
+ var ph=innerWidth<=Z.bp_phone,H=el.clientHeight,P=ph?Z.chart_pad_phone:Z.chart_pad,st=s.st,n=st.length,x0=st[0].a,x1=st[n-1].b;
+ var ps=st.map(function(x){return x.p});if(s.cut!=null)ps.push(s.cut);var lo=Math.min.apply(null,ps),hi=Math.max.apply(null,ps),pad=(hi-lo)*.08||hi*.05;lo=Math.max(0,lo-pad);hi+=pad;
+ var X=function(t){return P.l+(t-x0)/(x1-x0)*(W-P.l-P.r)},Y=function(p){return P.t+(hi-p)/(hi-lo)*(H-P.t-P.b)};
+ var g='',k;for(k=0;k<=3;k++){var pv=lo+(hi-lo)*k/3,y=Y(pv);g+='<line class="nopt" x1="'+P.l+'" x2="'+(W-P.r)+'" y1="'+y+'" y2="'+y+'" stroke="var(--lc-chartGrid)"/><text class="nopt" x="'+(P.l-6)+'" y="'+(y+4)+'" text-anchor="end">'+esc(compact(pv))+'</text>'}
+ var last=-1e9;st.forEach(function(x){var xx=X(x.a);if(xx-last>=Z.chart_ticks_min_gap&&xx<=W-P.r-40){g+='<text class="nopt" x="'+xx+'" y="'+(H-P.b+18)+'" text-anchor="'+(xx<P.l+30?'start':'middle')+'">'+dmy(x.as)+'</text>';last=xx}});
+ var bands=st.map(function(x,i){return '<rect class="band" data-lcst="'+i+'" data-lclot="'+esc(id)+'" x="'+X(x.a)+'" y="'+P.t+'" width="'+Math.max(1,X(x.b)-X(x.a))+'" height="'+(H-P.t-P.b)+'"/>'}).join('');
+ var segs='',pts='';st.forEach(function(x,i){var c=i<s.ci?'var(--lc-chartPast)':i===s.ci?'var(--lc-chartLine)':'var(--lc-chartFuture)',w=i===s.ci?3:2,da=i>s.ci?' stroke-dasharray="5 4"':'';
+  segs+='<line class="nopt" x1="'+X(x.a)+'" x2="'+X(x.b)+'" y1="'+Y(x.p)+'" y2="'+Y(x.p)+'" stroke="'+c+'" stroke-width="'+w+'"'+da+'/>';
+  if(i+1<n)segs+='<line class="nopt" x1="'+X(x.b)+'" x2="'+X(x.b)+'" y1="'+Y(x.p)+'" y2="'+Y(st[i+1].p)+'" stroke="'+(i+1<=s.ci?'var(--lc-chartPast)':'var(--lc-chartFuture)')+'" stroke-width="1.5"'+(i+1>s.ci?' stroke-dasharray="3 3"':'')+'/>';
+  pts+='<circle class="nopt lcpt" data-i="'+i+'" cx="'+X(x.a)+'" cy="'+Y(x.p)+'" r="'+Z.point_r+'" fill="'+(i===s.ci?'var(--lc-chartLine)':'var(--lc-tipBg)')+'" stroke="'+c+'" stroke-width="2"/>'});
+ if(s.cut!=null){var yc=Y(s.cut);g+='<line class="nopt" x1="'+P.l+'" x2="'+(W-P.r)+'" y1="'+yc+'" y2="'+yc+'" stroke="var(--lc-chartCut)" stroke-dasharray="6 4"/><text class="nopt" x="'+(W-P.r)+'" y="'+(yc-5)+'" text-anchor="end" style="fill:var(--lc-chartCut)">'+esc(S.cut_axis)+'</text>'}
+ if(s.t>=x0&&s.t<=x1){var xt=X(s.t);g+='<line class="nopt" x1="'+xt+'" x2="'+xt+'" y1="'+P.t+'" y2="'+(H-P.b)+'" stroke="var(--lc-chartToday)" stroke-width="1.5"/><text class="nopt" x="'+(xt+4)+'" y="'+(P.t+10)+'" style="fill:var(--lc-chartToday)">'+esc(S.today)+'</text>'}
+ el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">'+g+bands+segs+pts+'</svg><div class="lcctip"></div>'}
+function drawAll(){document.querySelectorAll('[data-lcch]').forEach(draw)}
+function hl(id,i,onn,src){var box=document.querySelector('[data-lcsch="'+(window.CSS&&CSS.escape?CSS.escape(id):id)+'"]');if(!box)return;var s=SCH[id];
+ box.querySelectorAll('.hl').forEach(function(e){e.classList.remove('hl')});box.querySelectorAll('.lcpt').forEach(function(c){c.setAttribute('r',Z.point_r)});var tip=box.querySelector('.lcctip');if(tip)tip.style.display='none';if(!onn||!s)return;
+ var r=box.querySelector('tr[data-lcst="'+i+'"]'),b=box.querySelector('.band[data-lcst="'+i+'"]'),c=box.querySelector('.lcpt[data-i="'+i+'"]');if(r)r.classList.add('hl');if(b)b.classList.add('hl');if(c)c.setAttribute('r',Z.point_r_hover);
+ if(tip&&c){var x=s.st[i],ch=box.querySelector('.lcch');tip.innerHTML=esc(fmt(S.tip,{n:i+1,total:s.st.length}))+'<br><b>'+rub(x.p)+'</b><br>'+dmy(x.as)+' – '+dmy(x.bs);tip.style.display='block';
+  var cx=+c.getAttribute('cx'),cy=+c.getAttribute('cy'),tw=tip.offsetWidth,W=ch.clientWidth;tip.style.left=Math.max(0,Math.min(W-tw,cx-tw/2))+'px';tip.style.top=Math.max(0,cy-tip.offsetHeight-12)+'px'}}
+function onOver(e){var t=e.target.closest&&e.target.closest('[data-lcst]');if(t)hl(t.getAttribute('data-lclot'),+t.getAttribute('data-lcst'),true)}
+function onOut(e){var t=e.target.closest&&e.target.closest('[data-lcst]');if(t&&!(e.relatedTarget&&t.contains(e.relatedTarget)))hl(t.getAttribute('data-lclot'),0,false)}
+document.addEventListener('mouseover',onOver);document.addEventListener('focusin',onOver);document.addEventListener('mouseout',onOut);document.addEventListener('focusout',onOut);
+var mo=null;function watch(){if(mo||!document.body)return;mo=new MutationObserver(function(){requestAnimationFrame(drawAll)});mo.observe(document.body,{childList:true,subtree:true});addEventListener('resize',function(){document.querySelectorAll('[data-lcch]').forEach(function(e){e._w=0});drawAll()})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){css();watch()});else{css();watch()}
+css();
+
+window.EVPC={on:on,pass:C.pass_fields||[],schedule:schedule,curPrice:curPrice,priceTitle:priceTitle,schedMissing:schedMissing,drawAll:drawAll,model:sched};
+})();

@@ -51,6 +51,9 @@ window.EV_UI={
  sel_bg:'rgba(212,175,90,.22)', sel_border:'rgba(212,175,90,.5)', sel_text:'#D4AF5A',
  /* «Торги» и «Торги ?»: сортировка по заголовкам таблицы и чип «Сортировка» на телефоне. cols — сортируемые колонки (k — ключ сортировки, как в списке «Сортировка» фильтров); first_dir: -1 — первое нажатие по убыванию; default — пока пользователь ничего не выбрал */
  prop_sort:{cols:[{k:'current_price',label:'Текущая цена'},{k:'start_price',label:'Начальная'},{k:'disc',label:'Скидка'},{k:'score',label:'Балл'}], first_dir:-1, default:{k:'score',d:-1}, ls_prefix:'cr.psort.', arrows:{desc:'↓',asc:'↑',none:'↕'}, chip_label:'Сортировка', hint:'Сортировать:'},
+ /* «График снижения цены» в карточке лота («Реестр» и «Торги») по макету lot_card_v1 (21.10.2026): on:false — прежний вид (без блока, в «Реестре» в колонке цены — начальная).
+    Тексты, цвета, размеры — config/price_chart.json; код — src/pricechart.js */
+ price_chart:{on:true},
  vreq_bg:'#D93A2F', vreq_bg_pressed:'#B52E25', vreq_text:'#FFFFFF', vreq_border:'rgba(255,255,255,.2)'
 };
 
