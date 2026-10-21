@@ -18,7 +18,8 @@ window.EV_UI={
   debtor_lines:1, case_lines:1, name_lines:1, platform_lines:2,
   /* до этой ширины (мобильная раскладка списка) кредитор и шильдики — в одну строку, как до 21.10 */
   inline_bp:900, inline_name_max:'55%',
-  order:[['ar'],['mr','f','amb'],['ok','fsspn','']],
+  /* lcstop / lcwarn — шильдики сторон карточки лота (EV_UI.lot_card, config/lot_card.json): красные STOP, затем янтарные WARN */
+  order:[['lcstop'],['lcwarn'],['ar'],['mr','f','amb'],['ok','fsspn','']],
   more_prefix:'+', more_title:'Все отметки лота', pop_max_w:280,
   short:{'ФССП: не проверено':'ФССП ?','найдено по наименованию — сверить':'сверить имя'}
  },
@@ -54,6 +55,10 @@ window.EV_UI={
  /* «График снижения цены» в карточке лота («Реестр» и «Торги») по макету lot_card_v1 (21.10.2026): on:false — прежний вид (без блока, в «Реестре» в колонке цены — начальная).
     Тексты, цвета, размеры — config/price_chart.json; код — src/pricechart.js */
  price_chart:{on:true},
+ /* карточка лота по макету Дизайнера lot_card_v1 (утверждено 21.10.2026): on:false — прежний вид целиком; часть:false — только эта часть. «График снижения цены» — отдельно, EV_UI.price_chart.
+    badges — шильдики сторон (список и карточка), score — сводка баллов + «Справка, без баллов», analysis — «Анализ материалов дела» в «Избранном».
+    Тексты, цвета, пороги — config/lot_card.json; код — src/lotcard.js */
+ lot_card:{on:true, badges:true, score:true, analysis:true},
  vreq_bg:'#D93A2F', vreq_bg_pressed:'#B52E25', vreq_text:'#FFFFFF', vreq_border:'rgba(255,255,255,.2)'
 };
 
