@@ -22,7 +22,7 @@ var msg=document.createElement('div');msg.className='ldmsg';msg.setAttribute('ro
 h.appendChild(bar);h.appendChild(msg);
 function g(n){try{return (0,eval)(n)}catch(e){return undefined}}
 function dt(){var D=g('DATA')||{},v=D.data_updated||D.updated||D.generated||D.data_time||D.data_date;if(!v)return null;var d=new Date(v);return isNaN(d)?null:d}
-function fmt(d){var o={timeZone:'Europe/Moscow'};var dm=d.toLocaleDateString('ru-RU',Object.assign({day:'2-digit',month:'2-digit'},o)),hm=d.toLocaleTimeString('ru-RU',Object.assign({hour:'2-digit',minute:'2-digit',hour12:false},o));return dm+', '+hm}
+function fmt(d){var o={timeZone:'Europe/Moscow'};var dm=d.toLocaleDateString('ru-RU',Object.assign({day:'2-digit',month:'2-digit',year:'numeric'},o)),hm=d.toLocaleTimeString('ru-RU',Object.assign({hour:'2-digit',minute:'2-digit',hour12:false},o));return dm+', '+hm}
 /* расписание обновлений: config/update_schedule.json в закрытом репо (EV_CFG.update_schedule — запасной вариант) */
 var SCH=CFG.update_schedule||null,SCHL=0;
 var SCHP=null;function schLoad(){if(SCH&&SCH._ok)return Promise.resolve();if(SCHL)return SCHP;var f=g('ghRaw');if(!f||!g('TOKEN')||g('EMB'))return Promise.resolve();SCHL=1;SCHP=f('config/update_schedule.json').then(function(x){SCH=JSON.parse(x);SCH._ok=1;sl()}).catch(function(){SCHL=0});return SCHP}
