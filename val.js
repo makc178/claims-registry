@@ -24,7 +24,7 @@ V.innerHTML='<div class="md"><h2>Оценка</h2><p class="sm" id="valm"></p><d
 var vrep=$('vrep');(vrep&&vrep.parentNode||document.body).insertBefore(V,vrep?vrep.nextSibling:null);
 var st=document.createElement('style');st.textContent='#vall .vnd .vndt{background:color-mix(in srgb,#d9822b 18%,transparent);color:#b5651d}[data-theme=dark] #vall .vnd .vndt{color:#f0b37a}#vall .vmis{margin:4px 0 6px;padding-left:20px}#vall .vmis li{margin:2px 0;line-height:1.35;font-size:13px}#vall .vndh{margin-top:6px}#vall .vre{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}#vall .vre textarea{flex:1 1 100%;box-sizing:border-box;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--pan);color:var(--ink);font:inherit}#vall .vfp{cursor:pointer}#vall .vcan{font:inherit;font-size:13px;white-space:nowrap}#vall .vcx{background:rgba(140,150,165,.22);color:var(--mut,#8a93a3)}'+
 '#vall .vrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px;align-items:start}#vall .vact{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}'+
-'#vall .vcap{margin-top:2px}#vall .vhd{margin:0 0 4px;font-size:16px;color:var(--gold,var(--acc))}#vall .vdisc,.pval .vdisc{font-size:12px;color:var(--mut,#8a93a3);margin-top:6px;line-height:1.35}#vall .vsum{font-weight:600}'+
+'#vall .vcap{margin-top:2px}#vall .vhd{margin:0 0 4px;font-size:16px;color:var(--gold,var(--acc))}#vall .vdisc,.pval .vdisc{font-size:12px;color:var(--mut,#8a93a3);margin-top:6px;line-height:1.35}#vall .vsum{font-weight:600}#vall .vtp{margin-top:4px;line-height:1.35}#vall .vtp .vtpv{white-space:nowrap}#vall .vtpx{white-space:nowrap}#vall .vtpn{margin-top:4px}'+
 '@media(max-width:640px){#vall .vrow{grid-template-columns:1fr}#vall .vact{justify-content:flex-start}}'+
 '.pval{grid-column:1/-1;margin-top:10px}.prepw{display:flex;gap:6px;flex-wrap:wrap}.prepw .lbtn{width:auto!important}.pval .lbtn{width:100%;justify-content:center}.pval .vreq{background:transparent!important;border:1.5px solid var(--gold,var(--acc));color:var(--gold,var(--acc))!important}'+
 '.pval .vwip{background:rgba(140,150,165,.22)!important;color:var(--mut,#8a93a3)!important;border:1px solid rgba(140,150,165,.35);cursor:default;box-shadow:none!important;transform:none!important}';
@@ -79,7 +79,20 @@ st.textContent+='#vall .vrow.vrp{grid-template-columns:56px minmax(0,1fr) auto}#
 '#vall .vgp,#vall .vgn{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.45);color:#fff;font-size:22px;line-height:1;cursor:pointer}#vall .vgp{left:8px}#vall .vgn{right:8px}'+
 '#vall .vgc{position:absolute;right:8px;bottom:8px;font-size:12px;padding:2px 7px;border-radius:8px;background:rgba(0,0,0,.55);color:#fff}#vall .vgcap{font-size:12px;color:var(--mut,#8a93a3);margin-top:5px;line-height:1.35}#vall .vgcap a{color:inherit;text-decoration:underline}'+
 '#vall .vpan{display:inline-block;padding:0 6px;border-radius:6px;background:rgba(140,150,165,.22)}@media(max-width:640px){#vall .vrow.vrp{grid-template-columns:56px minmax(0,1fr)}#vall .vrow.vrp .vact{grid-column:1/-1}}';
-function files(v){return [['report','Отчёт'],['xlsx','Расчёт'],['methodology','Методика']].filter(function(f){return v[f[0]]}).map(function(f){var p=v[f[0]],n=p.split('/').pop();return '<button class="lbtn sec" data-f="'+esc(n)+'" data-p="'+esc(p)+'">'+f[1]+'</button>'}).join('')}
+/* имя скачиваемого файла — по названию лота (dlName в template.html, EV_UI.file_names): data-lot — id лота, data-lt — запасное название из оценки, data-k — вид файла */
+function files(v){var lid=v.lot_id||(v.object&&v.object.lot_id)||'',lt=v.title||(v.object&&v.object.title)||'';return [['report','Отчёт'],['xlsx','Расчёт'],['methodology','Методика']].filter(function(f){return v[f[0]]}).map(function(f){var p=v[f[0]],n=p.split('/').pop();return '<button class="lbtn sec" data-f="'+esc(n)+'" data-p="'+esc(p)+'" data-lot="'+esc(lid)+'" data-lt="'+esc(lt)+'" data-k="val_'+f[0]+'" data-dt="'+esc(vdate(v))+'">'+f[1]+'</button>'}).join('')}
+/* --- текущая цена на торгах рядом с оценкой (EV_UI.val_trade_price в src/texts_config.js; данные — лот «Торгов» из property.json, ничего не придумываем) --- */
+function tpNum(x){if(x==null||x==='')return null;var n=typeof x==='number'?x:parseFloat(String(x).replace(/[\s\u00a0]/g,'').replace(',','.'));return isFinite(n)?n:null}
+function tpFmt(t,o){return String(t==null?'':t).replace(/\{(\w+)\}/g,function(_,k){return o[k]!=null?o[k]:''})}
+function tpDate(x){var s=String(x||'');if(/T\d\d:\d\d.*(Z|[+-]\d\d:?\d\d)$/.test(s))return fdt(s);var m=/^(\d{4})-(\d\d)-(\d\d)/.exec(s);if(m)return m[3]+'.'+m[2]+'.'+m[1];m=/^(\d\d)\.(\d\d)\.(\d{4})/.exec(s);return m?m[0]:''}
+function tradePrice(v){var T=(window.EV_UI||{}).val_trade_price||{};if(!T.on)return '';var lid=v.lot_id||(v.object&&v.object.lot_id);if(!lid)return '';var l=lotOf(v);
+ if(!l)return '<div class="sm vtp vtpn">'+esc(T.no_lot||'')+'</div>';
+ var cp=tpNum(l.current_price),until='',stg='',M=null;try{M=window.EVPC&&EVPC.model?EVPC.model(l):null}catch(e){}
+ if(M&&M.ci>=0&&M.ci<M.st.length){var c=M.st[M.ci];if(cp==null)cp=c.p;until=c.bs;if(T.stage)stg=tpFmt(T.stage,{n:M.ci+1,total:M.st.length})}
+ if(!until&&l.period_end)until=l.period_end;
+ if(cp==null)return '<div class="sm vtp vtpn">'+esc(T.none||'')+'</div>';
+ var d=tpDate(until),ex=[d&&T.until?tpFmt(T.until,{date:d}):'',stg].filter(Boolean).join(T.sep||' · ');
+ return '<div class="vtp"><span class="sm">'+esc(T.label||'')+': </span><b class="vtpv">'+rub(cp)+'</b>'+(ex?' <span class="sm vtpx">'+esc(ex)+'</span>':'')+'</div>'}
 /* --- «Нужны данные»: Оценщик ставит status:need_data и missing[]; повторная отправка: файлы → valuation/<id>/input/, запрос → requests/<id>.json
    со status:pending и rev+1 (сборщик заберёт его снова; ключ пересылки id#r<rev>), копия в requests/picked/ удаляется --- */
 function isArb(q){return /^arbitr/i.test(String((q||{}).source||''))}
@@ -134,7 +147,7 @@ function draw(){var m=$('valm'),L=$('vall');
   return '<div class="lot" data-evrow><div class="row vrow vrp" style="cursor:default">'+(op?gal(vid):'')+thumb(vid)+'<div><div class="d1">'+esc(v.title||(l&&l.title)||v.request_id)+'</div>'+(who?'<div class="sm">'+esc(who)+'</div>':'')+
   (FOC&&String(v.lot_id)===FOC?'<h3 class="vhd">'+esc(v.method||METHOD)+'</h3>':'')+'<div class="sm">Дата оценки: '+esc(fdt(vdate(v)))+'</div>'+
   (v.value!=null?'<div class="vsum">'+rub(v.value)+(r.min!=null?' <span class="sm" style="font-weight:400">(диапазон '+rub(r.min)+' – '+rub(r.max)+')</span>':'')+'</div><div class="sm vcap">'+esc(v.method||METHOD)+'</div>':'')+
-  '<div class="vdisc">'+esc(DISC)+'</div></div><div class="vact">'+files(v)+(ED&&v.request_id&&vfiles(v).length?ED.icon('valuation','val:'+v.request_id,v.title||v.request_id):'')+'</div></div></div>'}).join('');phFill();phLoad()}
+  tradePrice(v)+'<div class="vdisc">'+esc(DISC)+'</div></div><div class="vact">'+files(v)+(ED&&v.request_id&&vfiles(v).length?ED.icon('valuation','val:'+v.request_id,v.title||v.request_id):'')+'</div></div></div>'}).join('');phFill();phLoad()}
 V.addEventListener('click',function(e){var b=e.target.closest('button[data-f]');if(b){var f=g('dlClick');if(f)f(e)}});
 /* удаление оценки: только файлы результата (отчёт, расчёт, методика) и запись в valuation/index.json; запрос и лот остаются */
 function vfiles(v){return ['report','xlsx','methodology'].map(function(k){return v[k]}).filter(function(p){return typeof p==='string'&&/^valuation\/[\w.\-]+\/[^/]+$/.test(p)})}
@@ -168,7 +181,7 @@ if(window.EVDel){EVDel.op_valuation=function(b){var id=b.dataset.evkey.slice(4),
 function valList(force){draw();load(force).then(draw)}
 /* --- кнопка в карточке лота --- */
 var RL=0;function reps(id){var R=g('REPIDX')||{};if(!RL&&online()){RL=1;var f=g('repIdx');if(f)f().then(rerender)}
- return Object.keys(R).filter(function(k){var e=R[k];return e&&String(e.lot_id||'')===id}).sort(function(a,b){return String(R[b].date||'').localeCompare(String(R[a].date||''))}).map(function(k){return '<button class="lbtn sec prep" data-f="'+esc(k)+'" data-p="reports/'+esc(k)+'"><svg class="rpic" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 11h7M9 14h7M9 17h4"/></svg>Отчёт анализа'+(R[k].date?' · '+esc(fdt(R[k].date)):'')+'</button>'}).join('')}
+ return Object.keys(R).filter(function(k){var e=R[k];return e&&String(e.lot_id||'')===id}).sort(function(a,b){return String(R[b].date||'').localeCompare(String(R[a].date||''))}).map(function(k){return '<button class="lbtn sec prep" data-f="'+esc(k)+'" data-p="reports/'+esc(k)+'" data-lot="'+esc(id)+'" data-k="'+esc(R[k].type||'')+'" data-dt="'+esc(R[k].date||'')+'"><svg class="rpic" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style="fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 11h7M9 14h7M9 17h4"/></svg>Отчёт анализа'+(R[k].date?' · '+esc(fdt(R[k].date)):'')+'</button>'}).join('')}
 window.valBtn=function(l){load();var id=String(l.id);
  var done=VIDX.filter(function(v){return String(v.lot_id||(v.object&&v.object.lot_id)||'')===id})[0];
  var wip=VPEND.filter(function(p){return String((p.q||{}).lot_id||'')===id&&vstate(p)!=='cancelled'})[0];

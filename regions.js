@@ -255,7 +255,7 @@ function css(){if(document.getElementById('pc-css'))return;var T=C.tones||{},v=f
  +'.lctab{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;font-variant-numeric:tabular-nums}.lctab th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--lc-mut);text-align:left;padding:6px 8px;border-bottom:1px solid var(--lc-line)}'
  +'.lctab td{padding:7px 8px;border-bottom:1px solid var(--lc-line);color:var(--lc-ink);white-space:nowrap}.lctab .r{text-align:right}.lctab tr.past td{color:var(--lc-faint)}.lctab tr.cur td{background:var(--lc-rowCur)}.lctab tr.cur td:first-child{box-shadow:inset 3px 0 0 var(--lc-gold)}'
  +'.lctab tr.hl td{background:var(--lc-rowHl)}.lctab tr[data-lcst]{cursor:pointer;outline:none}.lctab tr[data-lcst]:focus-visible td{background:var(--lc-rowHl)}.lctab tr.cut td{color:var(--lc-badText);border-bottom:0}.lcmk{display:inline-block;margin-left:6px;font-size:11px;font-weight:650;color:var(--lc-gold)}'
- +'.lcfull{grid-column:1/-1;min-width:0}'+'.lcchk{margin-top:10px;font-size:12px;color:var(--lc-mut)}.lcchk b{color:var(--lc-ink);font-weight:600}.lcchk .ok{color:var(--lc-ok)}'
+ +'.lcctip.lcbt,.lcctip.lcpin{pointer-events:auto;white-space:normal;min-width:220px}.lcctip .tcb{margin-top:6px}'+'.lcfull{grid-column:1/-1;min-width:0}'+'.lcchk{margin-top:10px;font-size:12px;color:var(--lc-mut)}.lcchk b{color:var(--lc-ink);font-weight:600}.lcchk .ok{color:var(--lc-ok)}'
  +'@media (max-width:'+bpP+'px){.lcbig{font-size:'+Z.price_big_phone+'px}.lcch{height:'+Z.chart_h_phone+'px}.lctab thead{display:none}.lctab tr{display:grid;grid-template-columns:minmax(0,1fr) auto}.lctab td{border-bottom:0;padding:3px 8px}.lctab tr[data-lcst],.lctab tr.cut{border-bottom:1px solid var(--lc-line)}.lctab td.per{grid-column:1}.lctab td.stp{grid-column:2}}';
  (document.head||document.documentElement).appendChild(s)}
 
@@ -274,8 +274,9 @@ function nextCheck(){var c=S.checks||{},W=c.weekdays||[],hm=String(c.time||'10:0
 function curPrice(l){if(!on())return null;return num(l.current_price)}
 function priceTitle(l){return fmt(S.row_title,{cur:rub(num(l.current_price)),start:l.start_price!=null?rub(num(l.start_price)):'—'})}
 function schedMissing(l){var r=S.status_missing_rx;return !!(r&&l.price_schedule_status&&new RegExp(r,'i').test(String(l.price_schedule_status)))}
-function schedule(l){if(!on())return '';var miss=schedMissing(l),s=miss?null:sched(l);
- if(!s){if(!miss)return '';var cp=num(l.current_price);return '<div class="lcblk lcsch" data-lcsch="'+esc(String(l.id))+'" data-lcmiss="1"><div class="lchd"><h4>'+esc(S.title)+'</h4></div>'+(cp!=null?'<div class="lccur">'+esc(S.current_label)+'<div class="lcbig">'+rub(cp)+'</div></div>':'')+'<div class="lcchk">'+esc(S.missing)+'</div></div>'}var id=String(l.id),st=s.st,ci=s.ci,n=st.length;SCH[id]=s;
+function schedule(l,scope,opt){if(!on())return opt&&opt.bare?null:'';var BARE=!!(opt&&opt.bare);scope=scope==='prop'?'prop':'reg';var TC=window.EVTC&&EVTC.on()?EVTC:null;var miss=schedMissing(l),s=miss?null:sched(l);
+ if(!s){if(!miss)return BARE?null:'';var cp=num(l.current_price),mb=(cp!=null?'<div class="lccur">'+esc(S.current_label)+'<div class="lcbig">'+rub(cp)+'</div></div>':'')+'<div class="lcchk">'+esc(S.missing)+'</div>';
+  if(BARE)return {chip:'',html:'<div class="lcsch fdsch" data-lcsch="'+esc(String(l.id))+'" data-lcmiss="1">'+mb+'</div>'};return '<div class="lcblk lcsch" data-lcsch="'+esc(String(l.id))+'" data-lcmiss="1"><div class="lchd"><h4>'+esc(S.title)+'</h4></div>'+mb+'</div>'}var id=String(l.id),st=s.st,ci=s.ci,n=st.length;s.scope=scope;SCH[id]=s;
  var cur=num(l.current_price);if(cur==null)cur=st[Math.max(0,Math.min(n-1,ci))].p;
  var R=l.auction_result||{},rs=R.status&&S.status_chip[R.status]?R.status:null;
  var nd=dmy(l.current_price_notice_date),nu=l.current_price_notice_url||(l.links&&l.links.efrsb)||l.url||'';
@@ -284,15 +285,18 @@ function schedule(l){if(!on())return '';var miss=schedMissing(l),s=miss?null:sch
  var np=num(l.next_price);if(np==null&&ci>=0&&ci+1<n)np=st[ci+1].p;else if(np==null&&ci<0)np=null;if(np!=null&&ci<n-1)facts.push(fmt(S.next_price,{price:'<b>'+rub(np)+'</b>',date:ci+1<n&&ci>=0?dmy(st[ci+1].as):''}));
  facts.push(fmt(S.start_price,{price:'<b>'+rub(s.start)+'</b>'}));if(s.cut!=null)facts.push(fmt(S.cut_price,{price:'<b>'+rub(s.cut)+'</b>'}));
  var rows=st.map(function(x,i){var c=i<ci?'past':i===ci?'cur':'',mk=i===ci?'<span class="lcmk">'+esc(S.cur_mark)+'</span>':i===n-1&&s.cut==null?'<span class="lcmk">'+esc(S.min_mark)+'</span>':'';
-  return '<tr class="'+c+'" data-lcst="'+i+'" data-lclot="'+esc(id)+'" tabindex="0"><td>'+(i+1)+mk+'</td><td class="per">'+dmy(x.as)+' – '+dmy(x.bs)+'</td><td class="r">'+rub(x.p)+'</td><td class="r stp">'+(x.step!=null&&x.step>0?esc(fmt(S.step_fmt,{pct:pct(x.step)})):'—')+'</td></tr>'}).join('');
- if(s.cut!=null)rows+='<tr class="cut"><td>'+esc(S.cut_row)+'</td><td class="per"></td><td class="r">'+rub(s.cut)+'</td><td class="stp"></td></tr>';
+  return '<tr class="'+c+'" data-lcst="'+i+'" data-lclot="'+esc(id)+'" tabindex="0"><td>'+(i+1)+mk+'</td><td class="per">'+dmy(x.as)+' – '+dmy(x.bs)+'</td><td class="r">'+rub(x.p)+'</td><td class="r stp">'+(x.step!=null&&x.step>0?esc(fmt(S.step_fmt,{pct:pct(x.step)})):'—')+'</td>'+(TC?TC.btn(scope,id,i,ci,n):'')+'</tr>'}).join('');  /* «В календарь» — src/tradecal.js (EV_UI.trade_calendar) */
+ if(s.cut!=null)rows+='<tr class="cut"><td>'+esc(S.cut_row)+'</td><td class="per"></td><td class="r">'+rub(s.cut)+'</td><td class="stp"></td>'+(TC?TC.emptyTd():'')+'</tr>';
  var chk=R.checked_at?'<div class="lcchk"><span class="ok">✓</span> <b>'+esc(fmt(S.last_check,{dt:dt(R.checked_at)}))+'</b><br>'+esc(fmt(S.check_rule,{days:(S.checks||{}).days_label,time:(S.checks||{}).time}))+(nextCheck()?' · '+esc(fmt(S.next_check,{dt:dt(nextCheck())})):'')+'</div>':'<div class="lcchk">'+esc(fmt(S.check_rule,{days:(S.checks||{}).days_label,time:(S.checks||{}).time}))+(nextCheck()?' · '+esc(fmt(S.next_check,{dt:dt(nextCheck())})):'')+'</div>';
- return '<div class="lcblk lcsch" data-lcsch="'+esc(id)+'"><div class="lchd"><h4>'+esc(S.title)+'</h4>'+(rs?'<span class="lcchip '+(S.status_tone[rs]||'neutral')+'"><i></i>'+esc(S.status_chip[rs])+'</span>':'')+'</div>'
- +'<div class="lccur">'+esc(S.current_label)+'<div class="lcbig">'+rub(cur)+'</div>'+(nd?esc(fmt(S.by_notice,{date:nd})):esc(S.by_stage))+(nu?' · <a href="'+esc(nu)+'" target="_blank" rel="noopener">'+esc(S.notice_link)+'</a>':'')+'</div>'
+ var chip=rs?'<span class="lcchip '+(S.status_tone[rs]||'neutral')+'"><i></i>'+esc(S.status_chip[rs])+'</span>':'';
+ var body='<div class="lccur">'+esc(S.current_label)+'<div class="lcbig">'+rub(cur)+'</div>'+(nd?esc(fmt(S.by_notice,{date:nd})):esc(S.by_stage))+(nu?' · <a href="'+esc(nu)+'" target="_blank" rel="noopener">'+esc(S.notice_link)+'</a>':'')+'</div>'
  +'<div class="lcfacts">'+facts.map(function(f){return '<span>'+f+'</span>'}).join('')+'</div>'
  +(l.price_schedule_status&&(!S.status_estimated_rx||new RegExp(S.status_estimated_rx,'i').test(String(l.price_schedule_status)))?'<div class="lcchk">'+esc(S.estimated)+'</div>':'')
  +'<div class="lcch" data-lcch="'+esc(id)+'" role="img" aria-label="'+esc(S.chart_aria)+'"></div>'
- +'<table class="lctab"><thead><tr><th>'+esc(S.cols.n)+'</th><th>'+esc(S.cols.period)+'</th><th class="r">'+esc(S.cols.price)+'</th><th class="r">'+esc(S.cols.step)+'</th></tr></thead><tbody>'+rows+'</tbody></table>'+chk+'</div>'}
+ +'<table class="lctab'+(TC?' tcon':'')+'"><thead><tr><th>'+esc(S.cols.n)+'</th><th>'+esc(S.cols.period)+'</th><th class="r">'+esc(S.cols.price)+'</th><th class="r">'+esc(S.cols.step)+'</th>'+(TC?TC.th():'')+'</tr></thead><tbody>'+rows+'</tbody></table>'+chk;
+ /* bare — для сворачиваемого блока (src/lotfold.js): без рамки и заголовка, чип статуса торгов отдельно */
+ if(BARE)return {chip:chip,html:'<div class="lcsch fdsch" data-lcsch="'+esc(id)+'" data-tcscope="'+scope+'">'+body+'</div>'};
+ return '<div class="lcblk lcsch" data-lcsch="'+esc(id)+'" data-tcscope="'+scope+'"><div class="lchd"><h4>'+esc(S.title)+'</h4>'+chip+'</div>'+body+'</div>'}
 function draw(el){var id=el.getAttribute('data-lcch'),s=SCH[id];if(!s)return;var W=el.clientWidth;if(!W)return;if(el._w===W)return;el._w=W;
  var ph=innerWidth<=Z.bp_phone,H=el.clientHeight,P=ph?Z.chart_pad_phone:Z.chart_pad,st=s.st,n=st.length,x0=st[0].a,x1=st[n-1].b;
  var ps=st.map(function(x){return x.p});if(s.cut!=null)ps.push(s.cut);var lo=Math.min.apply(null,ps),hi=Math.max.apply(null,ps),pad=(hi-lo)*.08||hi*.05;lo=Math.max(0,lo-pad);hi+=pad;
@@ -306,16 +310,28 @@ function draw(el){var id=el.getAttribute('data-lcch'),s=SCH[id];if(!s)return;var
   pts+='<circle class="nopt lcpt" data-i="'+i+'" cx="'+X(x.a)+'" cy="'+Y(x.p)+'" r="'+Z.point_r+'" fill="'+(i===s.ci?'var(--lc-chartLine)':'var(--lc-tipBg)')+'" stroke="'+c+'" stroke-width="2"/>'});
  if(s.cut!=null){var yc=Y(s.cut);g+='<line class="nopt" x1="'+P.l+'" x2="'+(W-P.r)+'" y1="'+yc+'" y2="'+yc+'" stroke="var(--lc-chartCut)" stroke-dasharray="6 4"/><text class="nopt" x="'+(W-P.r)+'" y="'+(yc-5)+'" text-anchor="end" style="fill:var(--lc-chartCut)">'+esc(S.cut_axis)+'</text>'}
  if(s.t>=x0&&s.t<=x1){var xt=X(s.t);g+='<line class="nopt" x1="'+xt+'" x2="'+xt+'" y1="'+P.t+'" y2="'+(H-P.b)+'" stroke="var(--lc-chartToday)" stroke-width="1.5"/><text class="nopt" x="'+(xt+4)+'" y="'+(P.t+10)+'" style="fill:var(--lc-chartToday)">'+esc(S.today)+'</text>'}
- el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">'+g+bands+segs+pts+'</svg><div class="lcctip"></div>'}
+ var mk='';if(window.EVTC&&EVTC.on())EVTC.marks(s.scope||'reg',id).forEach(function(i){var x=st[i];if(x)mk+='<circle class="nopt tcm" data-tcm="'+i+'" cx="'+X(x.a)+'" cy="'+Y(x.p)+'" r="'+(Z.point_r+3)+'"/>'});  /* этапы в «Календаре торгов» (макет v2): точка этапа обведена --gold2 */
+ el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">'+g+bands+segs+pts+mk+'</svg><div class="lcctip"></div>';if(PIN&&PIN.id===id)hl(id,PIN.i,true)}
 function drawAll(){document.querySelectorAll('[data-lcch]').forEach(draw)}
-function hl(id,i,onn,src){var box=document.querySelector('[data-lcsch="'+(window.CSS&&CSS.escape?CSS.escape(id):id)+'"]');if(!box)return;var s=SCH[id];
+function hl(id,i,onn,src){if(onn===false&&PIN&&PIN.id===id)return;var box=document.querySelector('[data-lcsch="'+(window.CSS&&CSS.escape?CSS.escape(id):id)+'"]');if(!box)return;var s=SCH[id];
  box.querySelectorAll('.hl').forEach(function(e){e.classList.remove('hl')});box.querySelectorAll('.lcpt').forEach(function(c){c.setAttribute('r',Z.point_r)});var tip=box.querySelector('.lcctip');if(tip)tip.style.display='none';if(!onn||!s)return;
  var r=box.querySelector('tr[data-lcst="'+i+'"]'),b=box.querySelector('.band[data-lcst="'+i+'"]'),c=box.querySelector('.lcpt[data-i="'+i+'"]');if(r)r.classList.add('hl');if(b)b.classList.add('hl');if(c)c.setAttribute('r',Z.point_r_hover);
- if(tip&&c){var x=s.st[i],ch=box.querySelector('.lcch');tip.innerHTML=esc(fmt(S.tip,{n:i+1,total:s.st.length}))+'<br><b>'+rub(x.p)+'</b><br>'+dmy(x.as)+' – '+dmy(x.bs);tip.style.display='block';
+ if(tip&&c){var x=s.st[i],ch=box.querySelector('.lcch');var TC=window.EVTC&&EVTC.on()?EVTC:null,sc=s.scope||'reg',tb=TC?TC.tipBtn(sc,id,i,s.ci,s.st.length):'';
+  tip.innerHTML=TC?esc(fmt(S.tip,{n:i+1,total:s.st.length}))+' · <b>'+rub(x.p)+'</b><br>'+esc(dt(x.as))+' – '+esc(dt(x.bs))+' МСК'+tb:esc(fmt(S.tip,{n:i+1,total:s.st.length}))+'<br><b>'+rub(x.p)+'</b><br>'+dmy(x.as)+' – '+dmy(x.bs);tip.classList.toggle('lcpin',!!(PIN&&PIN.id===id&&PIN.i===i));tip.classList.toggle('lcbt',!!tb&&(src==='chart'||!!(PIN&&PIN.id===id&&PIN.i===i)));tip.dataset.i=i;tip.dataset.id=id;tip.style.display='block';
   var cx=+c.getAttribute('cx'),cy=+c.getAttribute('cy'),tw=tip.offsetWidth,W=ch.clientWidth;tip.style.left=Math.max(0,Math.min(W-tw,cx-tw/2))+'px';tip.style.top=Math.max(0,cy-tip.offsetHeight-12)+'px'}}
-function onOver(e){var t=e.target.closest&&e.target.closest('[data-lcst]');if(t)hl(t.getAttribute('data-lclot'),+t.getAttribute('data-lcst'),true)}
-function onOut(e){var t=e.target.closest&&e.target.closest('[data-lcst]');if(t&&!(e.relatedTarget&&t.contains(e.relatedTarget)))hl(t.getAttribute('data-lclot'),0,false)}
+/* наведение/фокус — подсветка; с «Календарём торгов» (макет v2) нажатие на полосу закрепляет подсказку с кнопкой «В календарь», скрытие ждёт 180 мс (можно довести мышь до кнопки), Esc / тап вне графика — закрыть */
+var PIN=null,HT=0,HOLD=180;function tcOn(){return !!(window.EVTC&&EVTC.on())}
+function onOver(e){var tp=e.target.closest&&e.target.closest('.lcctip');if(tp){clearTimeout(HT);return}var t=e.target.closest&&e.target.closest('[data-lcst]');if(t){clearTimeout(HT);if(PIN)return;hl(t.getAttribute('data-lclot'),+t.getAttribute('data-lcst'),true,t.closest('.lcch')?'chart':'row')}}
+function onOut(e){var t=e.target.closest&&e.target.closest('[data-lcst],.lcctip');if(!t||(e.relatedTarget&&(t.contains(e.relatedTarget)||(e.relatedTarget.closest&&e.relatedTarget.closest('.lcctip')))))return;if(PIN)return;
+ var box=t.closest('[data-lcsch]'),id=box&&box.getAttribute('data-lcsch');clearTimeout(HT);if(!tcOn()){hl(id||'',0,false);return}HT=setTimeout(function(){if(!PIN&&id)hl(id,0,false)},HOLD)}
 document.addEventListener('mouseover',onOver);document.addEventListener('focusin',onOver);document.addEventListener('mouseout',onOut);document.addEventListener('focusout',onOut);
+document.addEventListener('click',function(e){if(!tcOn())return;var tp=e.target.closest&&e.target.closest('.lcctip');if(tp){if(!e.target.closest('button')&&tp.dataset.id!=null&&!PIN){PIN={id:tp.dataset.id,i:+tp.dataset.i};hl(PIN.id,PIN.i,true)}return}var b=e.target.closest&&e.target.closest('.lcch .band[data-lcst]');
+ if(b){var id=b.getAttribute('data-lclot'),i=+b.getAttribute('data-lcst');PIN={id:id,i:i};hl(id,i,true);return}
+ var r=e.target.closest&&e.target.closest('tr[data-lcst]');if(r&&!e.target.closest('button')){hl(r.getAttribute('data-lclot'),+r.getAttribute('data-lcst'),true);return}
+ if(PIN){var p=PIN;PIN=null;hl(p.id,0,false)}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&PIN){var p=PIN;PIN=null;hl(p.id,0,false);return}
+ if((e.key==='Enter'||e.key===' ')&&tcOn()){var r=e.target.closest&&e.target.closest('tr[data-lcst]');if(r&&e.target===r){var box=r.closest('[data-lcsch]'),sc=(box&&box.getAttribute('data-tcscope'))||'reg',id=r.getAttribute('data-lclot'),i=+r.getAttribute('data-lcst'),s=SCH[id];
+  if(s&&i>s.ci&&i>0){e.preventDefault();EVTC.toggle(sc,id,i+1)}}}});
 var mo=null;function watch(){if(mo||!document.body)return;mo=new MutationObserver(function(){requestAnimationFrame(drawAll)});mo.observe(document.body,{childList:true,subtree:true});addEventListener('resize',function(){document.querySelectorAll('[data-lcch]').forEach(function(e){e._w=0});drawAll()})}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){css();watch()});else{css();watch()}
 css();

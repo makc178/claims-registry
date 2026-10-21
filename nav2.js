@@ -45,7 +45,7 @@ window.EV_UI={
   hints:{refresh:'Обновить данные без ввода PIN', more:'Прочее: источник данных, ключ, настройки'},
   status_sep:' · ', badge_group:true, locale:'ru-RU', tz:'Europe/Moscow',
   /* рабочее поле разделов: те же max-width и боковые отступы, что у шапки (края совпадают) */
-  page_sel:'#favseg,#othbar,#vreg,#vman,#vmet,#vrep,#vval,#vrpt,#vupd,#vprop,#vprc,#vfin,#vsrc', page_inner_sel:'#vreg.wrap,#vprop>.wrap',
+  page_sel:'#favseg,#othbar,#vreg,#vman,#vmet,#vrep,#vval,#vrpt,#vupd,#vtcal,#vprop,#vprc,#vfin,#vsrc', page_inner_sel:'#vreg.wrap,#vprop>.wrap',
   more_info:{src_label:'Источник данных', key_label:'Ключ доступа', key_on:'настроен', key_off:'не подключён', src_none:'—'}
  },
  sum_reg:'Реестры', sum_torgi:'Торги', sum_total:'Всего',
@@ -60,6 +60,37 @@ window.EV_UI={
     badges — шильдики сторон (список и карточка), score — сводка баллов + «Справка, без баллов», analysis — «Анализ материалов дела» в «Избранном».
     Тексты, цвета, пороги — config/lot_card.json; код — src/lotcard.js */
  lot_card:{on:true, badges:true, score:true, analysis:true},
+ /* сворачиваемые блоки карточки лота — макет Дизайнера v2 (lot_card_v2, утверждён 21.10.2026): «График снижения цены», «Активы должника», «Субсидиарка», «Убытки третьих лиц», «Залоги».
+    on:false — прежний вид карточки. Блоки, умолчания, итоги, тексты и имена полей данных (не подтверждены АПТ) — config/lot_fold.json; код — src/lotfold.js (site/lotcal.js) */
+ lot_fold:{on:true},
+ /* «Календарь торгов» — макет v2: «В календарь» у будущих этапов графика, раздел по дням МСК с мини-календарём и настройками,
+    уведомления только в приложении (колокольчик с бейджем и списком + баннер при открытии) за notify.notify_days_before дней в 09:00 МСК. on:false — прежний вид.
+    header_v3 — поправки шапки v3 из макета v2 под колонку колокольчика/календаря (ширина «Обновить/Прочее», отступ колонок, поля вкладки); logo_phone — логотип на ≤480px.
+    Тексты, N, ключи localStorage — config/trade_calendar.json; код — src/tradecal.js (site/lotcal.js) */
+ trade_calendar:{on:true, header_v3:{act_w:112, col_gap:16, tab_pad_x:10}, logo_phone:40},
+ /* имена скачиваемых файлов (команда Максима Юрьевича 21.10.2026): название лота + вид документа + дата. on:false — прежние имена файлов.
+    template: {lot} — название лота (Торги — title; Реестр — reg_title), {kind} — вид из kinds (ключ — вид файла оценки или type отчёта; нет ключа — kinds.report),
+    {date} — date_part с датой ДД.ММ.ГГГГ (нет даты — пусто); расширение исходного файла (.pdf, .xlsx) добавляется в конце. Запрещённые символы bad_chars заменяются на replace;
+    lot_max — макс. длина названия лота, max_len — макс. длина всего имени (с расширением). Лот не найден в базе — имя файла прежнее. */
+ file_names:{on:true, template:'{lot} — {kind}{date}', date_part:' от {date}', lot_max:90, max_len:150, ellipsis:'…',
+  bad_chars:'[\\\\/:*?"<>|\\u0000-\\u001f\\u007f]+', replace:' ', reg_title:'{debtor}, лот {lot_no}',
+  kinds:{val_report:'Оценка — отчёт', val_xlsx:'Оценка — расчёт', val_methodology:'Оценка — методика', report:'Аналитика',
+   full_check:'Полная проверка', property_check:'Проверка имущества', deep:'Углублённый анализ', deep_analysis_request:'Углублённый анализ',
+   court_practice:'Судебная практика', fin_analysis:'Финанализ', valuation:'Оценка'}},
+ /* текущая цена на торгах в карточке оценки (вкладка «Оценка»), рядом с оценкой (команда 21.10.2026). Цена — current_price лота «Торгов»,
+    нет её — цена текущего этапа price_schedule; «до» — конец текущего этапа (или period_end). on:false — без строки */
+ val_trade_price:{on:true, label:'Текущая цена на торгах', until:'до {date}', stage:'этап {n} из {total}', sep:' · ',
+  none:'Текущая цена на торгах не указана в данных', no_lot:'Лот не найден в текущей базе торгов — цена не показана'},
+ /* плашка «Данные не обновились по расписанию · ДД.ММ.ГГГГ, ЧЧ:ММ» (команда Максима Юрьевича 21.10.2026, поведение — Дизайнер): всплывает под шапкой поверх контента
+    один раз за загрузку страницы (при входе по PIN — тот же первый показ, без повтора), прячется через ms (наведение мыши — пауза), крестик/тап — закрыть;
+    после скрытия у «Обновлено» в шапке — янтарная точка с той же подсказкой. «База обновлена» — так же, но через ok_ms и без точки.
+    Условие показа — прежнее (расписание + grace_hours). on:false — прежний вид (постоянная жёлтая плашка, зелёная на EV_CFG.ok_strip_ms). Код — src/load.js */
+ stale_toast:{on:true, ms:6000, ok_ms:6000, once:true, dot:true, icon:'⚠', close:'×', close_label:'Закрыть',
+  stale_text:'Данные не обновились по расписанию · {date}', ok_text:'База обновлена · {date}', dot_title:'Данные не обновились по расписанию · {date}',
+  amber:'#E6A417', dot_px:8, anim_ms:200,
+  /* узкий экран (≤ narrow_px, Дизайнер 21.10.2026): одна строка short_* + крестик, без строки расписания; полный текст — в подсказке точки.
+     {when}: данные за сегодня (МСК) — ЧЧ:ММ; другой день этого года — ДД.ММ; другой год — ДД.ММ.ГГГГ */
+  narrow_px:640, short_stale:'Данные не обновились · {when}', short_ok:'База обновлена · {when}'},
  vreq_bg:'#D93A2F', vreq_bg_pressed:'#B52E25', vreq_text:'#FFFFFF', vreq_border:'rgba(255,255,255,.2)'
 };
 
@@ -288,6 +319,7 @@ document.addEventListener('keydown',function(e){if(!vis()||!e.isTrusted)return;i
    одна строка статуса (#msum, счётчики + даты), рабочее поле разделов — тот же max-width и отступы.
    Все размеры, цвета, подписи, брейкпоинты — EV_UI.header_v3 (src/texts_config.js); здесь только раскладка. */
 (function(){var U=window.EV_UI||{},H=U.header_v3||{};if(!H.on)return;
+if((U.trade_calendar||{}).on&&U.trade_calendar.header_v3)H=Object.assign({},H,U.trade_calendar.header_v3);  /* макет v2: место под колонку колокольчика и «Календаря торгов» — src/texts_config.js → trade_calendar.header_v3 */
 var hd=document.querySelector('header'),nav=hd&&hd.querySelector('nav');if(!hd||!nav)return;
 var $=function(i){return document.getElementById(i)},F=H.font||{},K=H.colors||{},px=function(v){return (+v)+'px'};
 var V={maxw:px(H.max_w),padx:px(H.pad_x),pady:px(H.pad_y),colgap:px(H.col_gap),rowgap:px(H.row_gap),brand:px(H.brand_col),bgap:px(H.brand_gap),logo:px(H.logo),logoc:px(H.logo_compact),

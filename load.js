@@ -43,12 +43,49 @@ function short(s){s=String(s||'');var i=s.indexOf('. ');return (i>20&&i<140?s.sl
 function tick(){var ld=!!g('LOADING')||!!g('PLD'),le=g('LERR'),pe=g('PLERR'),P=g('PROP');
  bar.classList.toggle('on',ld);
  var err=le||(pe&&!(P&&P.lots&&P.lots.length)?'Торги: '+pe:'');
- if(ld){if(!okT&&msg.className.indexOf('stale')<0)msg.className='ldmsg';shownErr=''}
+ if(ld){if(!okT&&!tsT&&msg.className.indexOf('stale')<0)msg.className='ldmsg';shownErr=''}
  else if(err){if(shownErr!==err){shownErr=err;clearTimeout(okT);okT=0;msg.className='ldmsg on err';msg.innerHTML='';var s=document.createElement('span');s.textContent='Не удалось загрузить базу: '+short(err);var b=document.createElement('button');b.type='button';b.textContent='Повторить';b.onclick=function(){msg.className='ldmsg';shownErr='';window.PLERR=null;try{if(le)g('sync')(true);else g('propLoad')(true)}catch(e){}};msg.appendChild(s);msg.appendChild(b)}}
- else if(was&&!ld){shownErr='';msg.className='ldmsg';var _p=schLoad()||Promise.resolve();Promise.race([_p,new Promise(function(r){setTimeout(r,2500)})]).then(okStrip)}
+ else if(was&&!ld){shownErr='';if(!(TC()&&tsT&&msg.classList.contains('stale')))msg.className='ldmsg';var _p=schLoad()||Promise.resolve();Promise.race([_p,new Promise(function(r){setTimeout(r,2500)})]).then(okStrip)}
  else if(!err&&shownErr){shownErr='';msg.className='ldmsg'}
  was=ld}
-function okStrip(){var ds=curDs()||'reg',d=dsData(ds)||dt(),old=isStale(ds);msg.className='ldmsg on ok'+(old?' stale':'');msg.innerHTML='';var l1=document.createElement('div');l1.textContent=(old?'Данные не обновились по расписанию · ':'База обновлена')+(d?(old?'':' · ')+fmt(d):'');var l2=document.createElement('div');l2.className='ldsub';l2.textContent=schText(ds);msg.appendChild(l1);if(l2.textContent)msg.appendChild(l2);clearTimeout(okT);okT=0;if(!old)okT=setTimeout(function(){okT=0;msg.className='ldmsg'},OKMS)}
+/* всплывающая плашка (EV_UI.stale_toast): on:false — прежний okStrip */
+function TC(){var c=(window.EV_UI||{}).stale_toast;return c&&c.on?c:null}
+var tsShown=false,tsT=0,tsLeft=0,tsAt=0,tsDot=false;
+(function(){var st3=document.createElement('style');st3.textContent='header .ldmsg.tst{flex-direction:row!important;gap:10px;justify-content:center;padding:8px 44px 8px 14px;pointer-events:auto;animation:tsin var(--ts-anim,200ms) ease-out}'+
+'header .ldmsg.tst .tsi{color:var(--ts-amber,#E6A417);font-size:16px;line-height:1;flex:none}header .ldmsg.tst .tsb{display:flex;flex-direction:column;gap:2px;min-width:0;overflow-wrap:anywhere}'+
+'header .ldmsg.tst .tsx{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;padding:0;border:0;border-radius:8px;font-size:20px;line-height:32px;opacity:.75}header .ldmsg.tst .tsx:hover{opacity:1;background:rgba(0,0,0,.08)}'+
+'header .ldmsg.tst.tsn{padding:6px 44px 6px 12px;gap:8px}header .ldmsg.tst.tsn .tsb{flex:0 1 auto;overflow:hidden}header .ldmsg.tst.tsn .tst1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
+'@keyframes tsin{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){header .ldmsg.tst{animation:none}}'+
+'.tsdot{display:inline-block;width:var(--ts-dot,8px);height:var(--ts-dot,8px);border-radius:50%;background:var(--ts-amber,#E6A417);margin-left:6px;vertical-align:middle;flex:none;cursor:help}';document.head.appendChild(st3)})();
+function tsHide(){clearTimeout(tsT);tsT=0;if(msg.classList.contains('tst')){msg.className='ldmsg';msg.innerHTML=''}if(tsDot)dotOn()}
+function tsArm(ms){clearTimeout(tsT);tsLeft=ms;tsAt=Date.now();tsT=setTimeout(tsHide,ms)}
+msg.addEventListener('mouseenter',function(){if(tsT){clearTimeout(tsT);tsT=0;tsLeft=Math.max(800,tsLeft-(Date.now()-tsAt));msg.dataset.paused='1'}});
+msg.addEventListener('mouseleave',function(){if(msg.dataset.paused){delete msg.dataset.paused;if(msg.classList.contains('tst'))tsArm(tsLeft)}});
+msg.addEventListener('click',function(e){if(msg.classList.contains('tst')&&!(e.target.closest&&e.target.closest('a')))tsHide()});
+function when(d){if(!d)return '—';var o={timeZone:'Europe/Moscow'},day=function(x){return x.toLocaleDateString('ru-RU',Object.assign({day:'2-digit',month:'2-digit',year:'numeric'},o))},a=day(d),n=day(new Date());
+ if(a===n)return d.toLocaleTimeString('ru-RU',Object.assign({hour:'2-digit',minute:'2-digit',hour12:false},o));return a}
+function narrow(C){var w=+C.narrow_px;return !!(w&&window.matchMedia&&matchMedia('(max-width:'+w+'px)').matches)}
+function tfmt(t,d){return String(t||'').replace('{date}',d?fmt(d):'—')}
+var dotTxt='';
+function dotOn(){var C=TC();if(!C||C.dot===false||!dotTxt)return;var R=document.documentElement.style;if(C.amber)R.setProperty('--ts-amber',C.amber);if(C.dot_px)R.setProperty('--ts-dot',C.dot_px+'px');
+ var tgt=null,ms=document.getElementById('msum');if(ms&&ms.offsetParent){[].some.call(ms.querySelectorAll('.h3i,span'),function(x){if(x.className==='tsdot')return false;var lt=(((window.EV_UI||{}).update_schedule||{}).label_last||'Обновлено');if(x.querySelectorAll(':scope>:not(.tsdot)').length<=1&&x.textContent.indexOf(lt)===0){tgt=x;return true}})}
+ if(!tgt){var sc=document.getElementById('schl');if(sc&&sc.offsetParent)tgt=sc}
+ var old=document.querySelectorAll('.tsdot');[].forEach.call(old,function(o){if(!tgt||o.parentNode!==tgt)o.remove()});
+ if(tgt&&!tgt.querySelector('.tsdot')){var dd=document.createElement('span');dd.className='tsdot';dd.setAttribute('role','img');dd.title=dotTxt;dd.setAttribute('aria-label',dotTxt);tgt.appendChild(dd)}}
+function dotOff(){tsDot=false;dotTxt='';[].forEach.call(document.querySelectorAll('.tsdot'),function(o){o.remove()})}
+function toastStrip(C){var ds=curDs()||'reg',d=dsData(ds)||dt(),old=isStale(ds);
+ if(!old)dotOff();
+ if(old&&C.once!==false&&tsShown){if(tsT&&msg.classList.contains('stale'))return;msg.className='ldmsg';if(tsDot)dotOn();return}
+ var R=document.documentElement.style;if(C.amber)R.setProperty('--ts-amber',C.amber);R.setProperty('--ts-anim',(C.anim_ms==null?200:C.anim_ms)+'ms');
+ msg.className='ldmsg on ok tst'+(old?' stale':'');msg.innerHTML='';
+ if(old){var ic=document.createElement('span');ic.className='tsi';ic.setAttribute('aria-hidden','true');ic.textContent=C.icon||'⚠';msg.appendChild(ic)}
+ var nw=narrow(C),bx=document.createElement('div');bx.className='tsb';var l1=document.createElement('div');l1.className='tst1';l1.textContent=nw?String((old?C.short_stale:C.short_ok)||'').replace('{when}',when(d)):tfmt(old?C.stale_text:C.ok_text,d);if(nw){l1.title=tfmt(old?C.stale_text:C.ok_text,d);msg.classList.add('tsn')}bx.appendChild(l1);
+ var l2=document.createElement('div');l2.className='ldsub';l2.textContent=nw?'':schText(ds);if(l2.textContent)bx.appendChild(l2);msg.appendChild(bx);
+ var x=document.createElement('button');x.type='button';x.className='tsx';x.textContent=C.close||'×';x.setAttribute('aria-label',C.close_label||'Закрыть');x.title=C.close_label||'Закрыть';msg.appendChild(x);
+ delete msg.dataset.paused;
+ if(old){tsShown=true;tsDot=true;dotTxt=tfmt(C.dot_title||C.stale_text,d)}
+ clearTimeout(okT);okT=0;tsArm(+(old?C.ms:(C.ok_ms!=null?C.ok_ms:C.ms))||6000)}
+function okStrip(){var C=TC();if(C)return toastStrip(C);var ds=curDs()||'reg',d=dsData(ds)||dt(),old=isStale(ds);msg.className='ldmsg on ok'+(old?' stale':'');msg.innerHTML='';var l1=document.createElement('div');l1.textContent=(old?'Данные не обновились по расписанию · ':'База обновлена')+(d?(old?'':' · ')+fmt(d):'');var l2=document.createElement('div');l2.className='ldsub';l2.textContent=schText(ds);msg.appendChild(l1);if(l2.textContent)msg.appendChild(l2);clearTimeout(okT);okT=0;if(!old)okT=setTimeout(function(){okT=0;msg.className='ldmsg'},OKMS)}
 /* кнопка «Обновить» (Дизайнер): 44px, значок 20px + подпись, вращается значок; ✓ на 1 с; при ошибке — встряска и «Не удалось» */
 (function(){var b=document.getElementById('rfb');if(!b)return;var st2=document.createElement('style');
 st2.textContent='html body #rfb{width:auto!important;height:44px!important;min-width:44px;top:calc(env(safe-area-inset-top) + 8px)!important;right:10px!important;padding:0 16px!important;border-radius:12px!important;font:600 15px/1 system-ui,-apple-system,sans-serif!important;display:inline-flex;align-items:center;gap:8px;animation:none!important;opacity:1!important;background:#1C2E52!important;border:1px solid rgba(212,175,90,.75)!important;color:#F3D98B!important;white-space:nowrap}'+
@@ -71,5 +108,5 @@ setInterval(function(){var busy=b.classList.contains('spin')||!!g('LOADING')||!!
   var ic=b.querySelector('.ri'),an=ic.getAnimations?ic.getAnimations()[0]:null;
   if(an&&an.currentTime!=null){var left=800-(an.currentTime%800);setTimeout(fin,left)}else fin()}
  bw=busy},120)})();
-setInterval(tick,150);tick();setInterval(function(){schLoad();sl()},1000);document.addEventListener('click',function(){setTimeout(sl,50)});
+setInterval(tick,150);tick();setInterval(function(){schLoad();sl();if(tsDot&&!tsT&&TC())dotOn()},1000);document.addEventListener('click',function(){setTimeout(sl,50)});
 })();
