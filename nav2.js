@@ -12,6 +12,16 @@ window.EV_UI={
  under_refresh:'#oth',
  /* шапка-сетка (Дизайнер 15.10): слева дата и строка лотов, справа колонка «Обновить»/«Прочее» одной ширины; on:false — прежняя шапка */
  header_grid:{on:true, pad:16, col_gap:12, btn_min:112, btn_w:141, busy_keep_label:true, m_bp:430, m_icon_btn:36, m_logo_px:28, m_title_px:17, m_tab_px:13, m_tab_px_min:12, m_tab_h:36, m_tab2_h:32, m_tab_min_px_at:374, spinner_px:14, busy_opacity:0.6, btn_h:36, btn_gap:8, btn_radius:10, btn_px:14, date_px:12, date_color:'rgba(255,255,255,.62)', lots_px:13, lots_color:'rgba(255,255,255,.92)', thm_px:36, row_gap:10},
+ /* шильдики в строке лота (правило Дизайнера 21.10.2026): одна строка без переноса, видно не больше max_visible в порядке важности, остальные в «+N» (наведение/тап — все), высота строки одинаковая с шильдиками и без; полный список — в карточке лота. on:false — прежний вид */
+ card_badges:{on:true, max_visible:2, height:20, gap:4, font:11, tag_max_w:150,
+  /* строк текста в ячейках строки лота (полный текст — в подсказке и в карточке): должник, дело/лот/регион, кредитор, площадка */
+  debtor_lines:1, case_lines:1, name_lines:1, platform_lines:2,
+  /* до этой ширины (мобильная раскладка списка) кредитор и шильдики — в одну строку, как до 21.10 */
+  inline_bp:900, inline_name_max:'55%',
+  order:[['ar'],['mr','f','amb'],['ok','fsspn','']],
+  more_prefix:'+', more_title:'Все отметки лота', pop_max_w:280,
+  short:{'ФССП: не проверено':'ФССП ?','найдено по наименованию — сверить':'сверить имя'}
+ },
  /* шапка v3 по макету Дизайнера (everest_analitik_design/header_v1/spec.md, утверждено 17.10.2026): одна сетка .in, вкладки 4×2 одной сеткой, одна строка статуса. on:false — прежняя шапка-сетка (header_grid). Код: src/hdr3.js */
  header_v3:{on:true,
   max_w:1200, pad_x:24, pad_y:14, col_gap:24, row_gap:10, brand_col:272, brand_gap:12, logo:56, logo_compact:52,
