@@ -34,12 +34,17 @@ window.EV_UI={
  lot_card_layout:{on:true, max_w:760, pad:24, pad_narrow:16, label_pct:38, col_gap:16, row_gap:8, stack_bp:600, lang:'ru', one_col:true, period_sep:' – ',
   nowrap:['ИНН кредитора','Дело','Сумма требования','Начальная цена','Разница','Торги'],
   /* таблицы ФССП/залогов (.mini, фиксированная раскладка; Дизайнер 21.10.2026): колонка даты — date_ch знаков («00.00.0000») + pad_px, суммы — amount_ch + pad_px, без переноса; остальные колонки — перенос по словам; до stack_bp px строки — «подпись / значение» */
-  mini:{date_ch:10, amount_ch:13, pad_px:12, stack_bp:600}},
+  mini:{date_ch:10, amount_ch:13, pad_px:12, stack_bp:600,
+   /* QA Дизайнера 21.10.2026: колонка «№ ИП» (ФССП) — number_ch знаков без переноса («00000/26/00000-ИП» = 17); «№ уведомления» реестра ФНП — notice_ch (19); 0 — без фиксированной ширины.
+      до two_col_bp px (включительно) — две колонки, как у новых блоков: слева первая колонка, под ней остальное «подпись: значение» (two_col_label_sep), справа дата и сумма; колонки two_col_hide (класс) скрыты — «Залогодатель» всегда сам должник; 0 — прежний вид «подпись / значение» */
+   number_ch:17, notice_ch:19, two_col_bp:480, two_col_label_sep:': ', two_col_hide:['mpo']}},
  man_reasons:{on:true, lines:2, tooltip:true, tap_expand:true, expand_hint:'Нажмите, чтобы показать полностью', sep:'; '},
  /* полные названия кредитора и должника в строке списка (команда Максима Юрьевича 21.10.2026): без обрезки, перенос по словам.
     creditor_min/debtor_min — минимальная ширина колонок имён, px (самое длинное слово «ответственностью»/«предприниматель» помещается без разрыва); money_min — мин. ширина колонок «Требование»/«Цена» вместо 96 px (0 — как было); filters_drawer_bp — до этой ширины панель фильтров «Реестра» убирается в выдвижную «Фильтры» (как до 900 px), чтобы колонкам имён хватило места. on:false — как в сборке 156706d */
   /* man_row — «Реестр ?»: «Статус» и «Причины» второй строкой строки лота (от 901 px), чтобы колонки не сжимались до нуля (21.10.2026); false — прежняя сетка из 10 колонок */
- list_names:{on:true, creditor_min:136, debtor_min:142, money_min:84, filters_drawer_bp:1100, man_row:true},
+ list_names:{on:true, creditor_min:136, debtor_min:142, money_min:84, filters_drawer_bp:1100, man_row:true,
+  /* phone_sum — сводка строки до bp px (карточки списка): ячейки cells с min-width:0 и переносом по словам; ниже stack_bp px — одной колонкой (0/нет — lot_card_layout.mini.stack_bp). on:false — прежний вид */
+  phone_sum:{on:true, bp:900, cells:['c-sum','c-p','c-r','c-dt']}},
  /* фильтр «Вид торгов» в «Реестре» и «Торгах» (команда Максима Юрьевича 21.10.2026). Вид берётся из явного поля данных АПТ: Реестр — auction_type («Тип торгов» таблицы), Торги — trade_type.
     Публичное предложение — если значение содержит одну из строк public_match (без учёта регистра, «Закрытое публичное предложение» тоже); иначе — «Аукцион и другие»; пустое поле — вид неизвестен, такой лот виден только в «Все». on:false — фильтра нет */
  auction_filter:{on:true, label:'Вид торгов', all:'Все', public:'Публичное предложение', other:'Аукцион и другие', reg_field:'auction_type', prop_field:'trade_type', public_match:['публичное предложение']},
@@ -103,7 +108,13 @@ window.EV_UI={
   amber:'#E6A417', dot_px:8, anim_ms:200,
   /* узкий экран (≤ narrow_px, Дизайнер 21.10.2026): одна строка short_* + крестик, без строки расписания; полный текст — в подсказке точки.
      {when}: данные за сегодня (МСК) — ЧЧ:ММ; другой день этого года — ДД.ММ; другой год — ДД.ММ.ГГГГ */
-  narrow_px:640, short_stale:'Данные не обновились · {when}', short_ok:'База обновлена · {when}'},
+  narrow_px:640, short_stale:'Данные не обновились · {when}', short_ok:'База обновлена · {when}',
+  /* sync_end_event — тост запускается по окончании sync() (событие), а не только опросом tick раз в 150 мс (QA Дизайнера 21.10.2026); '' — только опрос */
+  sync_end_event:'ev:sync-end'},
+ /* дата и время в тосте и строке «Обновлено …» (src/load.js fmt): «ДД.ММ.ГГГГ ЧЧ:ММ МСК» без запятой (QA Дизайнера 21.10.2026, п. 8); on:false — «ДД.ММ.ГГГГ, ЧЧ:ММ» */
+ dt_msk:{on:true, tz:'Europe/Moscow', fmt:'{day}.{month}.{year} {hour}:{minute} МСК'},
+ /* версия в подвале — время сборки в МСК: «версия 21.10.2026 20:39 МСК · a951602» (QA п. 9); on:false — «2026-10-21 17:39 UTC · a951602» */
+ footer_ver:{on:true, tz:'Europe/Moscow', fmt:'{day}.{month}.{year} {hour}:{minute} МСК'},
  vreq_bg:'#D93A2F', vreq_bg_pressed:'#B52E25', vreq_text:'#FFFFFF', vreq_border:'rgba(255,255,255,.2)'
 };
 
@@ -195,7 +206,8 @@ function st3(n,tg,lu,nx,SC){var HV=U.header_v3||{},Q=function(s){return String(s
  return '<span class="ml"><i class="h3d" aria-hidden="true"></i>'+it.map(function(x){return '<span class="h3i">'+Q(x[0])+(x[1]?' <b>'+Q(x[1])+'</b>':'')+'</span>'}).join('<i class="h3s">'+Q(HV.status_sep==null?' · ':HV.status_sep)+'</i>')+'</span>'}
 /* метки времени (МСК) и следующее плановое обновление по cron из EV_UI.update_schedule */
 function lastUpd(D,P){var c=[D&&D.data_updated,P&&P.generated].map(function(x){var d=x?new Date(x):null;return d&&!isNaN(d)?d:null}).filter(Boolean);if(!c.length&&D&&D.data_date){var d=new Date(D.data_date);if(!isNaN(d))c.push(d)}return c.length?new Date(Math.max.apply(null,c)):null}
-function fmsk(d){var HV=U.header_v3||{};if(HV.on&&HV.tz&&window.Intl)try{return new Intl.DateTimeFormat(HV.locale||'ru-RU',{timeZone:HV.tz,day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(d)}catch(e){}
+function fmsk(d){var HV=U.header_v3||{},DM=U.dt_msk;if(DM&&DM.on&&window.Intl)try{var P={};new Intl.DateTimeFormat('ru-RU',{timeZone:DM.tz||'Europe/Moscow',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(d).forEach(function(x){P[x.type]=x.value});return String(DM.fmt).replace(/\{(\w+)\}/g,function(_,k){return P[k]||''})}catch(e){}  /* EV_UI.dt_msk: «ДД.ММ.ГГГГ ЧЧ:ММ МСК» (QA п. 8) */
+ if(HV.on&&HV.tz&&window.Intl)try{return new Intl.DateTimeFormat(HV.locale||'ru-RU',{timeZone:HV.tz,day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(d)}catch(e){}
  var o=((U.update_schedule||{}).tz_offset_hours);o=o==null?3:+o;var z=new Date(d.getTime()+o*3600e3),p=function(x){return ('0'+x).slice(-2)};return p(z.getUTCDate())+'.'+p(z.getUTCMonth()+1)+'.'+z.getUTCFullYear()+', '+p(z.getUTCHours())+':'+p(z.getUTCMinutes())}
 function nextRun(SC){var D=SC.days,T=String(SC.time||'').match(/^(\d{1,2}):(\d{2})$/);if(!D||!D.length||!T)return null;var off=SC.tz_offset_hours==null?3:+SC.tz_offset_hours,z=new Date(Date.now()+off*3600e3);
  for(var i=0;i<70;i++){var d=new Date(Date.UTC(z.getUTCFullYear(),z.getUTCMonth(),z.getUTCDate()+i,+T[1],+T[2]));if(D.indexOf(d.getUTCDate())>=0&&d.getTime()-off*3600e3>Date.now())return new Date(d.getTime()-off*3600e3)}return null}

@@ -22,7 +22,10 @@ var msg=document.createElement('div');msg.className='ldmsg';msg.setAttribute('ro
 h.appendChild(bar);h.appendChild(msg);
 function g(n){try{return (0,eval)(n)}catch(e){return undefined}}
 function dt(){var D=g('DATA')||{},v=D.data_updated||D.updated||D.generated||D.data_time||D.data_date;if(!v)return null;var d=new Date(v);return isNaN(d)?null:d}
-function fmt(d){var o={timeZone:'Europe/Moscow'};var dm=d.toLocaleDateString('ru-RU',Object.assign({day:'2-digit',month:'2-digit',year:'numeric'},o)),hm=d.toLocaleTimeString('ru-RU',Object.assign({hour:'2-digit',minute:'2-digit',hour12:false},o));return dm+', '+hm}
+/* «ДД.ММ.ГГГГ ЧЧ:ММ МСК» без запятой (QA Дизайнера 21.10.2026, п. 8): formatToParts, шаблон — EV_UI.dt_msk.fmt; без конфига — прежний «ДД.ММ.ГГГГ, ЧЧ:ММ» */
+function DTC(){var c=(window.EV_UI||{}).dt_msk;return c&&c.on?c:null}
+function fmt(d){var o={timeZone:'Europe/Moscow'},K=DTC();if(K&&Intl.DateTimeFormat.prototype.formatToParts){var P={};new Intl.DateTimeFormat('ru-RU',{timeZone:K.tz||'Europe/Moscow',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(d).forEach(function(x){P[x.type]=x.value});return String(K.fmt||'{day}.{month}.{year} {hour}:{minute} МСК').replace(/\{(\w+)\}/g,function(_,k){return P[k]||''})}
+ var dm=d.toLocaleDateString('ru-RU',Object.assign({day:'2-digit',month:'2-digit',year:'numeric'},o)),hm=d.toLocaleTimeString('ru-RU',Object.assign({hour:'2-digit',minute:'2-digit',hour12:false},o));return dm+', '+hm}
 /* расписание обновлений: config/update_schedule.json в закрытом репо (EV_CFG.update_schedule — запасной вариант) */
 var SCH=CFG.update_schedule||null,SCHL=0;
 var SCHP=null;function schLoad(){if(SCH&&SCH._ok)return Promise.resolve();if(SCHL)return SCHP;var f=g('ghRaw');if(!f||!g('TOKEN')||g('EMB'))return Promise.resolve();SCHL=1;SCHP=f('config/update_schedule.json').then(function(x){SCH=JSON.parse(x);SCH._ok=1;sl()}).catch(function(){SCHL=0});return SCHP}
@@ -108,5 +111,10 @@ setInterval(function(){var busy=b.classList.contains('spin')||!!g('LOADING')||!!
   var ic=b.querySelector('.ri'),an=ic.getAnimations?ic.getAnimations()[0]:null;
   if(an&&an.currentTime!=null){var left=800-(an.currentTime%800);setTimeout(fin,left)}else fin()}
  bw=busy},120)})();
+/* тост по окончании sync() (QA Дизайнера 21.10.2026, риск): событие EV_UI.stale_toast.sync_end_event из finally sync(); загрузка короче такта опроса tick больше не теряет тост. Если ещё грузятся «Торги» (PLD) или ошибка — решает tick, как раньше */
+(function(){function reg(){var c=(window.EV_UI||{}).stale_toast,ev=c&&c.sync_end_event;  /* и при on:false: прежний okStrip терял ту же гонку */
+if(!ev)return;var hd=0;function on(){if(g('LOADING')||g('LERR'))return;var pd=g('PLD');if(pd){Promise.resolve(pd).then(on,on);return}var pe=g('PLERR'),P=g('PROP');if(pe&&!(P&&P.lots&&P.lots.length))return;  /* торги ещё грузятся (PLD — промис propLoad): ждём их, а не такт tick — короткая загрузка торгов тоже теряла тост */
+hd=window.EV_SYNC_END||Date.now();was=false;shownErr='';if(!(tsT&&msg.classList.contains('stale')))msg.className='ldmsg';var _p=schLoad()||Promise.resolve();Promise.race([_p,new Promise(function(r){setTimeout(r,2500)})]).then(okStrip)}document.addEventListener(ev,on);if(window.EV_SYNC_END&&window.EV_SYNC_END!==hd)on()}  /* sync() мог закончиться до появления EV_UI (nav2.js, defer): тогда событие не отправлялось — догоняем по метке window.EV_SYNC_END */
+ if(document.readyState==='complete')reg();else document.addEventListener('DOMContentLoaded',reg)})();  /* EV_UI (nav2.js, defer) появляется после load.js */
 setInterval(tick,150);tick();setInterval(function(){schLoad();sl();if(tsDot&&!tsT&&TC())dotOn()},1000);document.addEventListener('click',function(){setTimeout(sl,50)});
 })();
