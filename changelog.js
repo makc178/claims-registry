@@ -1,4 +1,4 @@
-window.EV_CHANGELOG={"retention_days":7,"entries":[{"items":["po_check 2026-11-09"],"by":"Анализ прав требований","build":"bc64867","at":"2026-11-09T10:35+03:00"}]};
+window.EV_CHANGELOG={"retention_days":7,"entries":[]};
 /* Эверест: «Прочее → Обновления» — реестр обновлений приложения (данные: config/changelog.json, встраивает build.py).
    Только Эверест: файл подключает build.py, в шаблоне/Арбитре его нет.
    Флаги дизайнера (EV_CFG.changelog), по умолчанию ВЫКЛ до одобрения пользователем:
